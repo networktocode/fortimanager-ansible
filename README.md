@@ -1,5 +1,5 @@
-
-# Ansible Modules for FortiManager JSON-RPC API
+# FortiManager Ansible
+Ansible Modules to manage Fortinet FortiManager
 
 * [Introduction](#introduction)
 * [Module Summary](#modules)
@@ -138,6 +138,3 @@ See [Module Documentation](Module_Docs/fortimgr_module_docs.md)
 
 # Examples
 See [Examples](examples.md)
-
-# Contributing
-See [Contributing](contributing.md)
