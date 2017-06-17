@@ -1,0 +1,58 @@
+---
+
+- name: FORTIMANAGER FACTS UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: GET BASIC FACTS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+
+    - name: GET FORTIGATE FACTS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates:
+          - "lab1"
+
+    - name: GET ALL FORTIGATE FACTS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates: "all"
+
+    - name: GET FORTIGATE FACTS and SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates:
+          - name: "lab1"
+            vdom: "root"
+        config_filter:
+          - "policy"
+          - "route"
+
+    - name: GET ALL FORTIGATE FACTS AND SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates: "all"
+        config_filter:
+          - "address"
+          - "service"
+
+    - name: GET ALL FORTIGATE FACTS AND ALL CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates: "all"
+        config_filter: "all"

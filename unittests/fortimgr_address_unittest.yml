@@ -1,0 +1,299 @@
+---
+
+- name: FORTIMANAGER ADDRESS UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS IPMASK - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS RANGE - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr2"
+        address_type: "iprange"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 2
+        start_ip: "10.1.1.3"
+        end_ip: "10.1.1.7"
+        comment: "iprange unit test"
+
+    - name: CREATE ADDRESS RANGE AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr2"
+        address_type: "iprange"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 2
+        start_ip: "10.1.1.3"
+        end_ip: "10.1.1.7"
+        comment: "iprange unit test"
+
+    - name: CREATE ADDRESS WILDCARD - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr3"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        subnet:
+          - "10.0.0.0"
+          - "0.255.0.255"
+        comment: "wildcard unit test"
+
+    - name: CREATE ADDRESS WILDCARD AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr3"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        subnet:
+          - "10.0.0.0"
+          - "0.255.0.255"
+        comment: "wildcard unit test"
+
+    - name: CREATE ADDRESS FQDN - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr4"
+        address_type: "fqdn"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 4
+        fqdn: "www.lab.com"
+        comment: "fqdn unit test"
+
+    - name: CREATE ADDRESS FQDN AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr4"
+        address_type: "fqdn"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 4
+        fqdn: "www.lab.com"
+        comment: "fqdn unit test"
+
+    - name: CREATE ADDRESS WILDCARD FQDN - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr5"
+        address_type: "wildcard-fqdn"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 5
+        wildcard_fqdn: "*lab.com"
+        comment: "wildcard fqdn unit test"
+
+    - name: CREATE ADDRESS WILDCARD FQDN AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr5"
+        address_type: "wildcard-fqdn"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 5
+        wildcard_fqdn: "*lab.com"
+        comment: "wildcard fqdn unit test"
+
+    - name: MODIFY ADDRESS PORT - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        associated_intfc: "port2"
+        comment: "wildcard fqdn unit test"
+
+    - name: MODIFY ADDRESS TYPE - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        address_type: "iprange"
+        start_ip: "10.2.2.3"
+        end_ip: "10.2.2.5"
+        comment: "ipmask is now an iprange"
+
+    - name: MODIFY ADDRESS RANGE - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr2"
+        start_ip: "10.1.1.4"
+        end_ip: "10.1.1.9"
+
+    - name: DELETE ADDRESS IPMASK1 - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        state: "absent"
+
+    - name: DELETE ADDRESS IPMASK1 AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        state: "absent"
+
+    - name: DELETE ADDRESS RANGE - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr2"
+        state: "absent"
+
+    - name: DELETE ADDRESS WILDCARD WITH CONFIG PARAMS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr3"
+        address_type: "wildcard"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 3
+        subnet:
+          - "10.0.0.0"
+          - "0.0.255.255"
+        comment: "wildcard unit test"
+        state: "absent"
+
+    - name: DELETE ADDRESS FQDN - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr4"
+        state: "absent"
+
+    - name: DELETE ADDRESS WILDCARD FQDN - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr5"
+        state: "absent"
+
+    - name: CREATE ADDRESS IPMASK NO ADOM - FAIL
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        address_name: "addr6"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NO NAME - FAIL
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+
+- name: CLEANUP FORTIMANAGER ADDRESSES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "{{ item }}"
+        state: "absent"
+      with_itmes:
+        - "addr1"
+        - "addr2"
+        - "addr3"
+        - "addr4"
+        - "addr5"
+        - "addr6"
