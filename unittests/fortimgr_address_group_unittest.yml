@@ -1,0 +1,204 @@
+---
+
+- name: CREATE FORTIMANAGER ADDRESSES FOR UNIT TESTES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS OBJECTS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "{{ item }}"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      with_items:
+        - "addr1"
+        - "addr2"
+        - "addr3"
+        - "addr4"
+        - "addr5"
+        - "addr6"
+
+- name: FORTIMANAGER ADDRESS GROUP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS GROUP - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        allow_routing: "enable"
+        members:
+          - "addr1"
+          - "addr2"
+        comment: "addrgroup unit test"
+
+    - name: CREATE ADDRESS GROUP AGAIN - NO CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        allow_routing: "enable"
+        members:
+          - "addr1"
+          - "addr2"
+        comment: "addrgroup unit test"
+
+    - name: MODIFY ADDRESS GROUP ROUTING - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        allow_routing: "disable"
+
+    - name: MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr3"
+          - "addr4"
+
+    - name: MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING AGAIN - NO CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr3"
+          - "addr4"
+
+    - name: MODIFY ADDRESS GROUP DELETE SOME MEMBERS - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr2"
+          - "addr3"
+        state: "param_absent"
+
+    - name: MODIFY ADDRESS GROUP DELETE SOME MEMBERS AGAIN - NO CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr2"
+          - "addr3"
+        state: "param_absent"
+
+    - name: DELETE ADDRESS GROUP - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr2"
+          - "addr3"
+        state: "absent"
+
+    - name: DELETE ADDRESS GROUP AGAIN - NO CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr2"
+          - "addr3"
+        state: "absent"
+
+    - name: CREATE ADDRESS GROUP NO ADOM - FAIL
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        address_group_name: "addrgrp2"
+        members:
+          - "addr2"
+          - "addr3"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS GROUP NO NAME - FAIL
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        members:
+          - "addr2"
+          - "addr3"
+      ignore_errors: true
+
+
+- name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "addr1"
+        - "addr2"
+        - "addr3"
+        - "addr4"
+        - "addr5"
+        - "addr6"
+
+- name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP ADDRESS GROUPS - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "addrgrp1"
+        - "addrgrp2"
+        - "addrgrp3"
+

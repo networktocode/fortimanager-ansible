@@ -1,0 +1,266 @@
+---
+
+- name: FORTIMANAGER ADDRESS MAP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS MAP IPMASK - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        color: 1
+        subnet: "{{ item.subnet }}"
+        comment: "ipmask unit test"
+      with_items:
+        - fg: "lab1"
+          subnet:
+            - "10.10.10.10"
+            - "255.255.255.255"
+        - fg: "lab2"
+          subnet:
+            - "10.10.20.10"
+            - "255.255.255.255"
+
+    - name: CREATE ADDRESS MAP IPMASK AGAIN - NO CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        color: 1
+        subnet: "{{ item.subnet }}"
+        comment: "ipmask unit test"
+      with_items:
+        - fg: "lab1"
+          subnet:
+            - "10.10.10.10"
+            - "255.255.255.255"
+        - fg: "lab2"
+          subnet:
+            - "10.10.20.10"
+            - "255.255.255.255"
+
+    - name: CREATE ADDRESS MAP IPRANGE - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr2"
+        address_type: "iprange"
+        allow_routing: "disable"
+        color: 2
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        comment: "iprange unit test"
+      with_items:
+        - fg: "lab1"
+          start: "10.10.10.11"
+          end: "10.10.10.14"
+        - fg: "lab2"
+          start: "10.10.20.11"
+          end: "10.10.20.14"
+
+    - name: CREATE ADDRESS MAP IPRANGE AGAIN - NO CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr2"
+        address_type: "iprange"
+        allow_routing: "disable"
+        color: 2
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        comment: "iprange unit test"
+      with_items:
+        - fg: "lab1"
+          start: "10.10.10.11"
+          end: "10.10.10.14"
+        - fg: "lab2"
+          start: "10.10.20.11"
+          end: "10.10.20.14"
+
+    - name: CREATE ADDRESS MAP WILDCARD - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr3"
+        address_type: "wildcard"
+        subnet: "{{ item.subnet }}"
+        comment: "wildcard unit test"
+      with_items:
+        - fg: "lab1"
+          subnet:
+            - "10.0.10.0"
+            - "0.255.0.255"
+        - fg: "lab2"
+          subnet:
+            - "10.0.20.0"
+            - "0.255.0.255"
+
+    - name: CREATE ADDRESS MAP WILDCARD - NO CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr3"
+        address_type: "wildcard"
+        subnet: "{{ item.subnet }}"
+        comment: "wildcard unit test"
+      with_items:
+        - fg: "lab1"
+          subnet:
+            - "10.0.10.0"
+            - "0.255.0.255"
+        - fg: "lab2"
+          subnet:
+            - "10.0.20.0"
+            - "0.255.0.255"
+
+    - name: DELETE MAPPING FROM ADDRESS MAP - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        comment: "ipmask unit test"
+        state: "absent"
+
+    - name: DELETE MAPPING FROM ADDRESS MAP AGAIN - NO CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        comment: "ipmask unit test"
+        state: "absent"
+
+    - name: ADD MAPPING FOR ADDRESS MAP - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        subnet:
+          - "10.10.20.10"
+          - "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: DELETE ALL MAPPINGS FROM ADDRESS MAP - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item }}"
+        vdom: "root"
+        address_name: "addr1"
+        state: "absent"
+      with_items:
+        - "lab1"
+        - "lab2"
+
+    - name: CREATE ADDRESS MAP IPMASK NO ADOM - FAIL
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigate: "lab1"
+        address_name: "addr6"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS MAP IPMASK NO FORTIGATE - FAIL
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr6"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NO NAME - FAIL
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+
+- name: CLEANUP FORTIMANAGER ADDRESSES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "addr1"
+        - "addr2"
+        - "addr3"
+        - "addr4"
+        - "addr5"
+        - "addr6"
