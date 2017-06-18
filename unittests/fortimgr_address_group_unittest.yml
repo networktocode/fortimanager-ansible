@@ -1,6 +1,6 @@
 ---
 
-- name: CREATE FORTIMANAGER ADDRESSES FOR UNIT TESTES
+- name: CREATE FORTIMANAGER ADDRESSES FOR UNIT TESTS
   hosts: fortimanager
   connection: local
   gather_facts: false

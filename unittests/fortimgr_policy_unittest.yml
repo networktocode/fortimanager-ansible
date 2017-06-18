@@ -1,0 +1,444 @@
+---
+- name: CREATE SESSION ID FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: policy, cleanup
+  
+  tasks:
+    - name: FORTIMANAGER LOCK - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        lock: true
+      register: session
+
+    - name: SET SESSION ID
+      set_fact:
+        session_id: "{{ session.session_id }}"
+
+- name: CREATE FORTIMANAGER OBJECTS FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS OBJECTS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "{{ item.name }}"
+        address_type: "ipmask"
+        subnet:
+          - "{{ item.ip }}"
+          - "255.255.255.255"
+      with_items:
+        - name: "srcaddr1"
+          ip: "10.1.1.1"
+        - name: "srcaddr2"
+          ip: "10.1.1.2"
+        - name: "srcaddr3"
+          ip: "10.1.1.3"
+        - name: "srcaddr4"
+          ip: "10.1.1.4"
+        - name: "srcaddr5"
+          ip: "10.1.1.5"
+        - name: "srcaddr6"
+          ip: "10.1.1.6"
+
+    - name: CREATE SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_name: "{{ item.name }}"
+        protocol: TCP
+        port_range:
+          - "{ item.port }}"
+      with_items:
+        - name: "svc1"
+          port: 1
+        - name: "svc2"
+          port: 2
+        - name: "svc3"
+          port: 3
+
+    - name: CREATE IP POOL - CHANGE
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        pool_name: "{{ item.name }}"
+        type: "overload"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item. end }}"
+      with_items:
+        - name: "pool1"
+          start: "200.1.1.1"
+          end: "200.1.1.1"
+        - name: "pool2"
+          start: "200.1.1.2"
+          end: "200.1.1.2"
+        - name: "pool3"
+          start: "200.1.1.3"
+          end: "200.1.1.3"
+
+    - name: CREATE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_name: "{{ item.name }}"
+        type: "static-nat"
+        external_ip:
+          - "{{ item.ext }}"
+        mapped_ip:
+          - "{{ item.map }}"
+      with_items:
+        - name: "vip1"
+          ext: "100.10.10.10"
+          map: "10.10.10.10"
+        - name: "vip2"
+          ext: "100.10.10.11"
+          map: "10.10.10.11"
+        - name: "vip3"
+          ext: "100.10.10.12"
+          map: "10.10.10.12"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+
+- name: FORTIMANAGER POLICY UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: policy
+
+  tasks:
+    - name: CREATE DENY POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "unittest_explicit_deny"
+        action: "deny"
+        log_traffic: "disable"
+        destination_address:
+          - "all"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "ALL"
+        source_address:
+          - "all"
+        source_intfc:
+          - "any"
+
+    - name: CREATE POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip1"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "svc1"
+        source_address:
+          - "srcaddr1"
+        source_intfc:
+          - "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+      register: "policy1"
+
+    - name: SET POLICY ID
+      set_fact:
+        first_policy_id: "{{ policy1.config.params[0].data.policyid }}"
+
+    - name: CREATE POLICY AGAIN - NO CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ first_policy_id }}"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip1"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "svc1"
+        source_address:
+          - "srcaddr1"
+        source_intfc:
+          - "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+
+    - name: MODIFY POLICY ADD - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ first_policy_id }}"
+        global_label: "unit test"
+        action: "accept"
+        destination_address:
+          - "vip2"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "svc1"
+          - "svc2"
+        source_address:
+          - "srcaddr1"
+          - "srcaddr2"
+          - "srcaddr3"
+        source_intfc:
+          - "any"
+        nat: disable
+        ip_pool: "disable"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: MODIFY POLICY REMOVE - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ first_policy_id }}"
+        global_label: "unit test"
+        action: "deny"
+        destination_address:
+          - "vip1"
+        schedule:
+          - "always"
+        service:
+          - "svc1"
+        source_address:
+          - "srcaddr1"
+          - "srcaddr2"
+        state: "param_absent"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: CREATE POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip3"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "svc1"
+        source_address:
+          - "srcaddr5"
+          - "srcaddr6"
+        source_intfc:
+          - "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "after"
+        reference_policy_id: "{{ first_policy_id }}"
+      register: "policy2"
+
+    - name: SET POLICY ID
+      set_fact:
+        second_policy_id: "{{ policy2.config.params[0].data.policyid }}"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: MODIFY POLICY DISABLE - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ second_policy_id }}"
+        status: "disable"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: MODIFY POLICY DISABLE AGAIN - NO CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ second_policy_id }}"
+        status: "disable"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: MODIFY POLICY ENABLE - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ second_policy_id }}"
+        status: "enable"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+
+- name: CLEANUP FORTIMANAGER ADDRESSES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+
+  tasks:
+    - name: CLEANUP POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "{{ first_policy_id }}"
+        - "{{ second_policy_id }}"
+
+    - name: CLEANUP POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "unittest_explicit_deny"
+        state: "absent"
+
+    - name: CLEANUP ADDRESSES - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "srcaddr1"
+        - "srcaddr2"
+        - "srcaddr3"
+        - "srcaddr4"
+        - "srcaddr5"
+        - "srcaddr6"
+
+    - name: CLEANUP SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "svc1"
+        - "svc2"
+        - "svc3"
+
+    - name: CLEANUP IP POOL - CHANGE
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        pool_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "pool1"
+        - "pool2"
+        - "pool3"
+
+    - name: CLEANUP VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "vip1"
+        - "vip2"
+        - "vip3"
+
+    - name: FORTIMANAGER SAVE AND UNLOCK - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+        unlock: true
+      tags: unlock
