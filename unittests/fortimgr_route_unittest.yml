@@ -1,0 +1,97 @@
+---
+
+- name: FORTIMANAGER ADDRESS UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ROUTE - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+
+    - name: CREATE ROUTE AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+
+    - name: ADD ROUTE TO DIFFERENT GATEWAY - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "10.1.1.2"
+        intfc: "port1"
+
+    - name: ADD ROUTE THROUGH DIFFERENT INTERFACE - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "10.1.1.2"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: DELETE ROUTE - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "{{ item }}"
+        intfc: "port1"
+        state: "absent"
+      with_items:
+        - "10.1.1.1"
+        - "10.1.1.2"
+
+    - name: DELETE ROUTE AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        state: "absent"

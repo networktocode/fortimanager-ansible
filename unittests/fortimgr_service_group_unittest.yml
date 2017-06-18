@@ -1,0 +1,176 @@
+---
+- name: CREATE FORTIMANAGER SERVICES FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "{{ item.name }}"
+        protocol: "TCP"
+        port_range:
+          - "{{ item.port }}"
+      with_items:
+        - name: "svc1"
+          port: 1
+        - name: "svc2"
+          port: 2
+        - name: "svc3"
+          port: 3
+        - name: "svc4"
+          port: 4
+
+
+- name: FORTIMANAGER SERVICE GROUP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE SERVICE GROUP - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+          - "svc2"
+        comment: "service group unit test"
+
+    - name: CREATE SERVICE GROUP AGAIN - NO CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+          - "svc2"
+        comment: "service group unit test"
+
+    - name: MODIFY SERVICE GROUP ADD MEMBER WITH EXISTING MEMBERS - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+          - "svc2"
+          - "svc3"
+        comment: "service group unit test"
+
+    - name: MODIFY SERVICE GROUP ADD MEMBER WITHOUT EXISTING MEMBERS - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc4"
+        comment: "service group unit test"
+
+    - name: MODIFY SERVICE GROUP ADD MEMBER REMOVE MEMBER - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+          - "svc2"
+        state: "param_absent"
+        comment: "service group unit test"
+
+    - name: MODIFY SERVICE GROUP ADD MEMBER REMOVE MEMBER AGAIN - NO CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+          - "svc2"
+        state: "param_absent"
+        comment: "service group unit test"
+
+    - name: CREATE SERVICE GROUP - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp2"
+        members:
+          - "svc1"
+          - "svc2"
+        comment: "service group unit test"
+
+    - name: DELETE SERVICE GROUP WITH PARAMS - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc3"
+          - "svc4"
+        comment: "service group unit test"
+        state: "absent"
+      tags: cleanup
+
+    - name: DELETE SERVICE GROUP AGAIN - NO CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        state: "absent"
+
+    - name: DELETE SERVICE GROUPS - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "svcgrp2"
+      tags: cleanup
+
+
+- name: CLEANUP FORTIMANAGER SERVICES FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP SERVICES - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "{{ item.name }}"
+        state: "absent"
+      with_items:
+        - name: "svc1"
+        - name: "svc2"
+        - name: "svc3"
+        - name: "svc4"
