@@ -74,7 +74,7 @@ options:
   username:
     description:
       - The username used to authenticate with the FortiManager.
-    required: true
+    required: false
     type: str
   validate_certs:
     description:
@@ -84,11 +84,11 @@ options:
     type: bool
   lock:
     description:
-      - Locks or Unlocks the ADOM in the FortiManager.
+      - Locks the ADOM in the FortiManager.
       - True ensures the ADOM is locked.
     required: false
     type: bool
-    default: True
+    default: False
   save_config:
     description:
       - Saves the config before unlocking a session.
@@ -99,8 +99,8 @@ options:
     type: bool
   unlock:
     description:
-      - Locks or Unlocks the ADOM in the FortiManager.
-      - True ensures the ADOM is unlocked.
+      - Unlocks the ADOM in the FortiManager.
+      - True ensures the ADOM is unlocked and closes the current session with the FortiManager.
     required: false
     type: bool
     default: False
@@ -113,21 +113,28 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-- name: Save the lab ADOM
-  fortimgr_lock:
+    lock: True
+  register: session
+- name: Set Session ID
+  set_fact:
+    session_id: "{{ session.session_id }}"
+- name: Make Change
+  fortimgr_address:
     host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    adom: "lab"
     save_config: True
+    adom: "lab"
+    address_name: "Server01"
+    type: "ipmask"
+    subnet:
+      - "10.1.1.1"
+      - "255.255.255.255"
 - name: Save and Unlock the ADOM
   fortimgr_lock:
     host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    session_id: "{{ session_id }}"
     adom: "lab"
-    unlock: True
     save_config: True
+    unlock: True
 '''
 
 RETURN = '''
@@ -1221,7 +1228,7 @@ def main():
         provider=dict(required=False, type="dict"),
         save=dict(default=False, type="bool"),
         session_id=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(default=False, type="bool"),
         unlock=dict(default=False, type="bool")
     )
 
@@ -1258,31 +1265,32 @@ def main():
     # use established session id or validate successful login
     session = FortiManager(host, username, password, use_ssl, validate_certs, adom)
     if session_id:
-        session.session_id = session_id
+        session.session = session_id
     else:
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:
             module.fail_json(msg="Unable to login")
 
-    if lock and save:
+    results = {"locked": False, "saved": False, "unlocked": False, "changed": True}
+    
+    if lock:
         session.config_lock(module)
-        session.config_save(module)
-        results = {"locked": True, "saved": True, "unlocked": False, "session_id": session.session}
-    elif unlock and save:
-        session.config_save(module)
-        session.config_unlock(module)
-        results = {"locked": False, "saved": True, "unlocked": True}
-    elif save:
-        session.config_save(module)
-        results = {"locked": False, "saved": True, "unlocked": False}
-    elif lock:
-        session.config_lock(module)
-        results = {"locked": True, "saved": False, "unlocked": False, "session_id": session.session}
-    else:
-        session.config_unlock(module)
-        results = {"locked": False, "saved": True, "unlocked": False}
+        results.update(dict(locked=True, session_id=session.session))
+    
+    if save:
+        save_status = session.save()
+        if save_status["result"][0]["status"]["code"] != 0:
+            module.fail_json(msg="Unable to Save Session Config", session_id=session.session)
 
+        results["saved"] = True
+    
     if unlock:
+        unlock_status = session.unlock()
+        if unlock_status["result"][0]["status"]["code"] != 0:
+            module.fail_json(msg="Unable to Unlock Session", session_id=session.session)
+
+        results["unlocked"] = True
+
         # logout, build in check for future logging capabilities
         session_logout = session.logout()
         # if not session_logout.json()["result"][0]["status"]["code"] == 0:

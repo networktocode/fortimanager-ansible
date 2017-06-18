@@ -1,0 +1,107 @@
+---
+
+- name: FORTIMANAGER GENERATE INSTALL DATA
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: CREATE ADDRESS IPMASK - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: CREATE POLICY THAT USES ADDRESS - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        package: "lab"
+        action: "accept"
+        destination_address:
+          - "addr1"
+        destination_intfc:
+          - "any"
+        policy_name: "InstallTest"
+        schedule:
+          - "always"
+        service:
+          - "ALL"
+        source_address:
+          - "all"
+        source_intfc:
+          - "any"
+
+- name: FORTIMANAGER POLICY INSTALL UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: PREVIEW POLICY PACKAGE - CHANGE
+      fortimgr_install:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        state: "preview"
+        dst_file:
+        fortigate_name: "New_Jersey"
+        package: "lab"
+        vdom: "root"
+      ignore_errors: true
+
+    - name: INSTAL POLICY PACKAGE - CHANGE
+      fortimgr_install:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        state: "preview"
+        adom_revision_comments: "Install Unit Test"
+        adom_revision_name: "InstallTest"
+        check_install: false
+        dst_file: "./preview.txt"
+        fortigate_name: "New_Jersey"
+        fortigate_revision_comments: "Install Unit Test"
+        install_flags:
+          - "generate_rev"
+        package: "lab"
+        vdom: "root"
+      ignore_errors: true
+
+
+- name: FORTIMANAGER CLEANUP INSTALL DATA
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+
+  tasks:
+    - name: CLEANUP POLICY THAT USES ADDRESS - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "InstallTest"
+        state: "absent"
+
+    - name: CLEANUP ADDRESS IPMASK - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr1"
+        state: "absent"

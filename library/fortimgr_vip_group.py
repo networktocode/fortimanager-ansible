@@ -90,7 +90,7 @@ options:
   username:
     description:
       - The username used to authenticate with the FortiManager.
-    required: true
+    required: false
     type: str
   validate_certs:
     description:
@@ -113,7 +113,7 @@ options:
       - The list of interfaces/zones associated with the VIP Group
     required: false
     type: list
-  member:
+  members:
     description:
       - The list of VIP objects that should be associated to the VIP Group.
     required: false
@@ -135,7 +135,7 @@ EXAMPLES = '''
     vip_group_name: "App01_VIP_Group"
     interface:
       - "port1"
-    member:
+    members:
       - "App01_VIP01"
       - "App01_VIP02"
       - "App01_VIP03"
@@ -146,7 +146,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     vip_group_name: "App01_VIP_Group"
-    member:
+    members:
       - "App01_VIP02"
     state: "param_absent"
 - name: Delete VIP Group
@@ -1271,7 +1271,7 @@ def main():
         color=dict(required=False, type="str"),
         comment=dict(required=False, type="str"),
         interface=dict(required=False, type="list"),
-        member=dict(required=False, type="list"),
+        members=dict(required=False, type="list"),
         vip_group_name=dict(required=True, type="str")
     )
 
@@ -1303,7 +1303,7 @@ def main():
         "color": module.params["color"],
         "comments": module.params["comment"],
         "interface": module.params["interface"],
-        "member": module.params["member"],
+        "member": module.params["members"],
         "name": module.params["vip_group_name"]
     }
 
@@ -1321,7 +1321,7 @@ def main():
         if not session_login.json()["result"][0]["status"]["code"] == 0:
             module.fail_json(msg="Unable to login")
     else:
-        session.session_id = session_id
+        session.session = session_id
 
     # get existing configuration from fortimanager and make necessary changes
     existing = session.get_item(proposed["name"])
