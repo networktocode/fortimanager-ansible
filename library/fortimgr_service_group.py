@@ -90,7 +90,7 @@ options:
   username:
     description:
       - The username used to authenticate with the FortiManager.
-    required: true
+    required: false
     type: str
   validate_certs:
     description:
@@ -1317,8 +1317,8 @@ def main():
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:
             module.fail_json(msg="Unable to login")
-        else:
-            session.session_id = session_id
+    else:
+        session.session = session_id
 
     # get existing configuration from fortimanager and make necessary changes
     existing = session.get_item(proposed["name"])

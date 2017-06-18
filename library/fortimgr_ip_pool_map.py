@@ -90,7 +90,7 @@ options:
   username:
     description:
       - The username used to authenticate with the FortiManager.
-    required: true
+    required: false
     type: str
   validate_certs:
     description:
@@ -1401,7 +1401,7 @@ def main():
         "fortigate": module.params["fortigate"],
         "permit-any-host": module.params["permit_any_host"],
         "source-endip": module.params["source_end_ip"],
-        "source-start-ip": module.params["source_start_ip"],
+        "source-startip": module.params["source_start_ip"],
         "startip": module.params["start_ip"],
         "type": module.params["type"],
         "vdom": module.params["vdom"]
@@ -1434,7 +1434,7 @@ def main():
         if not session_login.json()["result"][0]["status"]["code"] == 0:
             module.fail_json(msg="Unable to login")
     else:
-        session.session_id = session_id
+        session.session = session_id
 
     # get existing configuration from fortimanager and make necessary changes
     existing = session.get_item_fields(proposed["name"], ["name", "dynamic_mapping"])

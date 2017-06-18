@@ -1,0 +1,259 @@
+---
+
+- name: FORTIMANAGER IP POOL MAP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: CREATE IP POOL MAP OVERLOAD - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool1"
+        type: "overload"
+        permit_any_host: "enable"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        comment: "pool unit test"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.10.1"
+          end: "100.10.10.1"
+        - fg: "lab2"
+          start: "200.10.10.1"
+          end: "200.10.10.1"          
+
+    - name: CREATE IP POOL MAP OVERLOAD AGAIN - NO CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool1"
+        type: "overload"
+        permit_any_host: "enable"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        comment: "pool unit test"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.10.1"
+          end: "100.10.10.1"
+        - fg: "lab2"
+          start: "200.10.10.1"
+          end: "200.10.10.1" 
+
+    - name: MODIFY IP POOL MAP OVERLOAD INCREASE RANGE - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool1"
+        end_ip: "{{ item.end }}"
+      with_items:
+        - fg: "lab1"
+          end: "100.10.10.2"
+        - fg: "lab2"
+          end: "200.10.10.2"  
+
+    - name: CREATE IP POOL ONE-TO-ONE - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool2"
+        type: "one-to-one"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.20.1"
+          end: "100.10.20.1"
+        - fg: "lab2"
+          start: "200.10.20.1"
+          end: "200.10.20.1"
+
+    - name: CREATE IP POOL ONE-TO-ONE AGAIN - NO CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool2"
+        type: "one-to-one"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.20.1"
+          end: "100.10.20.1"
+        - fg: "lab2"
+          start: "200.10.20.1"
+          end: "200.10.20.1"
+
+    - name: CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool3"
+        type: "fixed-port-range"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        permit_any_host: "disable"
+        source_start_ip: "{{ item.src_start }}"
+        source_end_ip: "{{ item.src_end }}"
+        comment: "pool unit test"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.30.1"
+          end: "100.10.30.10"
+          src_start: "10.10.30.1"
+          src_end: "10.10.30.10"
+        - fg: "lab2"
+          start: "200.10.30.1"
+          end: "200.10.30.10"
+          src_start: "10.20.30.1"
+          src_end: "10.20.30.10"
+
+    - name: CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE AGAIN - NO CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool3"
+        type: "fixed-port-range"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        permit_any_host: "disable"
+        source_start_ip: "{{ item.src_start }}"
+        source_end_ip: "{{ item.src_end }}"
+        comment: "pool unit test"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.30.1"
+          end: "100.10.30.10"
+          src_start: "10.10.30.1"
+          src_end: "10.10.30.10"
+        - fg: "lab2"
+          start: "200.10.30.1"
+          end: "200.10.30.10"
+          src_start: "10.20.30.1"
+          src_end: "10.20.30.10"
+
+    - name: MODIFY IP POOL FIXED-PORT-RANGE RESTRICT SOURCE INCREASE SOURCE RANGE - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        pool_name: "pool3"
+        source_end_ip: "{{ item.src_end }}"
+      with_items:
+        - fg: "lab1"
+          src_end: "10.10.30.15"
+        - fg: "lab2"
+          src_end: "10.20.30.15"
+
+    - name: DELETE IP POOL MAP - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        pool_name: "pool1"
+        type: "overload"
+        permit_any_host: "enable"
+        start_ip: "200.10.10.1"
+        end_ip: "200.10.10.1"
+        comment: "pool unit test"
+        state: "absent"
+
+    - name: DELETE IP POOL MAP AGAIN - NO CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        pool_name: "pool1"
+        type: "overload"
+        permit_any_host: "enable"
+        start_ip: "200.10.10.1"
+        end_ip: "200.10.10.1"
+        comment: "pool unit test"
+        state: "absent"
+
+    - name: RECREATE IP POOL MAP OVERLOAD - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        pool_name: "pool1"
+        type: "overload"
+        permit_any_host: "enable"
+        start_ip: "200.10.10.1"
+        end_ip: "200.10.10.1"
+
+    - name: DELETE ALL IP POOL MAPS - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item }}"
+        vdom: "root"
+        pool_name: "pool1"
+        state: "absent"
+      with_items:
+        - "lab1"
+        - "lab2"
+
+- name: CLEANUP FORTIMANAGER IP POOLS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+
+  tasks:
+    - name: CLEANUP IP POOL ENTRIES
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "pool1"
+        - "pool2"
+        - "pool3"

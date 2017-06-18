@@ -1,0 +1,285 @@
+---
+
+- name: FORTIMANAGER LOCK UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: FORTIMANAGER LOCK - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        lock: true
+      register: session
+
+    - name: SET SESSION ID
+      set_fact:
+        session_id: "{{ session.session_id }}"
+
+    - name: CREATE ADDRESS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "addr1"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+
+    - name: CREATE ADDRESS MAP - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr2"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.2"
+          - "255.255.255.255"
+
+    - name: CREATE ADDRESS GROUP - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        members:
+          - "addr1"
+
+    - name: CREATE SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_name: "svc1"
+        protocol: TCP
+        port_range:
+          - 80
+
+    - name: CREATE SERVICE GROUP - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        members:
+          - "svc1"
+
+    - name: CREATE IP POOL - CHANGE
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        pool_name: "pool1"
+        type: "overload"
+        start_ip: "10.10.10.10"
+        end_ip: "10.10.10.10"
+
+    - name: CREATE IP POOL MAP - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        pool_name: "pool2"
+        type: "overload"
+        start_ip: "10.10.10.11"
+        end_ip: "10.10.10.11"
+
+    - name: CREATE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_name: "vip1"
+        type: "static-nat"
+        external_ip:
+          - "100.10.10.12"
+        mapped_ip:
+          - "10.10.10.12"
+
+    - name: CREATE VIP MAP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        vip_name: "vip2"
+        type: "static-nat"
+        external_ip:
+          - "100.10.10.13"
+        mapped_ip:
+          - "10.10.10.13"
+
+    - name: CREATE VIP GROUP - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        members:
+          - "vip1"
+
+    - name: CREATE POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "policy1"
+        action: "accept"
+        destination_address:
+          - "all"
+        destination_intfc:
+          - "any"
+        schedule:
+          - "always"
+        service:
+          - "ALL"
+        source_address:
+          - "all"
+        source_intfc:
+          - "any"
+
+    - name: FORTIMANAGER SAVE - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+
+    - name: DELETE ADDRESS GROUP - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_group_name: "addrgrp1"
+        state: "absent"
+
+    - name: DELETE ADDRESS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "addr1"
+        state: "absent"
+
+    - name: DELETE ADDRESS MAP - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr2"
+        state: "absent"
+
+    - name: DELETE ADDRESS - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "addr2"
+        state: "absent"
+
+    - name: DELETE SERVICE GROUP - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_group_name: "svcgrp1"
+        state: "absent"
+
+    - name: DELETE SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        service_name: "svc1"
+        state: "absent"
+
+    - name: DELETE IP POOL - CHANGE
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        pool_name: "pool1"
+        state: "absent"
+
+    - name: DELETE IP POOL MAP - CHANGE
+      fortimgr_ip_pool_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        pool_name: "pool2"
+        state: "absent"
+
+    - name: DELETE IP POOL - CHANGE
+      fortimgr_ip_pool:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        pool_name: "pool2"
+        state: "absent"
+
+    - name: DELETE VIP GROUP - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        state: "absent"
+
+    - name: DELETE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_name: "vip1"
+        state: "absent"
+
+    - name: DELETE VIP MAP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        vip_name: "vip2"
+        state: "absent"
+
+    - name: DELETE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        vip_name: "vip2"
+        state: "absent"
+
+    - name: DELETE POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "policy1"
+        state: "absent"
+
+    - name: FORTIMANAGER SAVE AND UNLOCK - CHANGE
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save: true
+        unlock: true
+      tags: unlock

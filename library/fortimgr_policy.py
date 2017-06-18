@@ -90,7 +90,7 @@ options:
   username:
     description:
       - The username used to authenticate with the FortiManager.
-    required: true
+    required: false
     type: str
   validate_certs:
     description:
@@ -232,11 +232,12 @@ options:
 
 EXAMPLES = '''
 - name: Add Policy
-  fortimgr_address_group:
+  fortimgr_policy:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "prod"
+    package: "prod"
     action: "accept"
     destination_address:
       - "Internet"
@@ -254,34 +255,37 @@ EXAMPLES = '''
     source_address:
       - "Corp_Users"
     source_intfc:
-      - "port1'
+      - "port1"
     status: "enable"
 - name: Modify Policy
-  fortimgr_address_group:
+  fortimgr_policy:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "prod"
+    package: "prod"
     policy_name: "Permit_Outbound_Web"
     service:
       - "File_Transfer_Services"
 - name: Move Policy
-  fortimgr_address_group:
+  fortimgr_policy:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     use_ssl: False
     adom: "lab"
+    package: "prod"
     policy_name: "Permit_Outbound_Web"
     direction: "after"
     reference_policy_id: "1"
 - name: Delete Policy
-  fortimgr_address_group:
+  fortimgr_policy:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     use_ssl: False
     adom: "lab"
+    package: "prod"
     policy_name: "Permit_Outbound_Web"
     state: "absent"
 '''
@@ -1934,7 +1938,7 @@ def main():
         if not session_login.json()["result"][0]["status"]["code"] == 0:
             module.fail_json(msg="Unable to login")
     else:
-        session.session_id = session_id
+        session.session = session_id
 
     # add policy id if only name is provided in the module arguments
     if "policyid" not in proposed:
