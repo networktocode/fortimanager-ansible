@@ -1,0 +1,143 @@
+---
+
+- name: FORTIMANAGER SERVICE UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE SERVICE TCP - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        protocol: "TCP"
+        port_range:
+          - "80"
+          - "443"
+        comment: "service unit test"
+
+    - name: CREATE SERVICE TCP AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        protocol: "TCP"
+        port_range:
+          - "80"
+          - "443"
+        comment: "service unit test"
+
+    - name: MODIFY SERVICE TCP ADD PORT - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        protocol: "TCP"
+        port_range:
+          - "8443"
+        comment: "service unit test"
+
+    - name: MODIFY SERVICE TCP DELETE PORT - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        protocol: "TCP"
+        port_range:
+          - "80"
+        comment: "service unit test"
+        state: "param_absent"
+
+    - name: CREATE SERVICE UDP - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc2"
+        protocol: "UDP"
+        port_range:
+          - "161"
+        comment: "service unit test"
+
+    - name: CREATE SERVICE UDP AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc2"
+        protocol: "UDP"
+        port_range:
+          - "161"
+        comment: "service unit test"
+
+    - name: CREATE SERVICE ICMP - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc3"
+        protocol: "ICMP"
+        icmp_code: 1
+        icmp_type: 1
+        comment: "service unit test"
+
+    - name: CREATE SERVICE ICMP AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc3"
+        protocol: "ICMP"
+        icmp_code: 1
+        icmp_type: 1
+        comment: "service unit test"
+
+    - name: CREATE SERVICE IP - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc4"
+        protocol: "IP"
+        protocol_number: 51
+        comment: "service unit test"
+
+    - name: CREATE SERVICE IP AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc4"
+        protocol: "IP"
+        protocol_number: 51
+        comment: "service unit test"
+
+    - name: DELETE SERVICES - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "svc1"
+        - "svc2"
+        - "svc3"
+        - "svc4"
+      tags: cleanup

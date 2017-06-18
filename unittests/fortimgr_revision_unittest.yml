@@ -1,0 +1,53 @@
+---
+
+- name: FORTIMANAGER ADDRESS UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE REVISION - CHANGE
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        created_by: "ansible"
+        description: "revision unittest 1"
+        revision_name: "unittest1"
+
+    - name: CREATE ANOTHER REVISION - CHANGE
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        created_by: "ansible"
+        description: "revision unittest 2"
+        revision_name: "unittest2"
+
+    - name: RESTORE REVISION - CHANGE
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        state: "restore"
+        created_by: "ansible"
+        description: "restore unittest 1"
+        revision_name: "unittest1"
+        restore_name: "unittest_restore"
+
+    - name: DELETE REVISION - CHANGE
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        created_by: "ansible"
+        description: "revision unittest 1"
+        revision_name: "unittest1"
+      with_items:
+        - "unittest1"
+        - "unittest2"
+        - "unittest_restore"

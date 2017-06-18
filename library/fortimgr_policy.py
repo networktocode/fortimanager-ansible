@@ -1456,7 +1456,9 @@ class FMPolicy(FortiManager):
 
     def config_move(self, module, policy_id, results):
         """
-        This method is used to handle the logic for the Ansible module for moving a Policy.
+        This method is used to handle the logic for the Ansible module for moving a Policy. Our testing shows the
+        global-label is lost when moving a policy sometimes, so checks are done before and after to ensure it persists
+        via re-applying the global-label to the config.
 
         :param module: The Ansible Module instance started by the task.
         :param policy_id: Type int.
@@ -1467,6 +1469,10 @@ class FMPolicy(FortiManager):
                  FortiManager API. This dict will map to the "config" key returned by the Ansible Module.
         """
         if module.params["direction"]:
+            if module.params["session_id"]:
+                self.save()
+            global_label = self.get_item_fields(policy_id, ["global-label"]).get("global-label", "")
+
             direction = module.params["direction"]
             if module.params["reference_policy_name"]:
                 reference_id = str(self.get_item_name(module.params["reference_policy_name"]))
@@ -1500,6 +1506,16 @@ class FMPolicy(FortiManager):
             # configure if not in check mode
             if not module.check_mode:
                 response = self.move_config(policy_id, direction, reference_id)
+                if module.params["session_id"]:
+                    self.save()
+
+                # re-apply global label after move if it was lost on move
+                post_global_label = self.get_item_fields(policy_id, ["global-label"]).get("global-label", "")
+                if post_global_label != global_label:
+                    self.update_config([{"policyid": policy_id, "global-label": global_label}])
+                    if module.params["session_id"]:
+                        self.save()
+
                 if response.json()["result"][0]["status"]["code"] == 0 and module.params["lock"]:
                     save_status = self.save()
                     if save_status["result"][0]["status"]["code"] == 0:
@@ -1870,7 +1886,7 @@ def main():
         status=dict(choices=["enable", "disable"], required=False, type="str")
     )
 
-    module = AnsibleModule(argument_spec, supports_check_mode=True, required_one_of=[["policy_id", "policy_name"]])
+    module = AnsibleModule(argument_spec, supports_check_mode=True)
     provider = module.params["provider"] or {}
 
     # prevent secret params in provider from logging
@@ -1941,11 +1957,15 @@ def main():
         session.session = session_id
 
     # add policy id if only name is provided in the module arguments
-    if "policyid" not in proposed:
+    if "name" in proposed and "policyid" not in proposed:
         proposed["policyid"] = session.get_item_name(proposed["name"])
 
     # get existing configuration from fortimanager and make necessary changes
-    existing = session.get_item(proposed["policyid"])
+    if "policyid" in proposed:
+        existing = session.get_item(proposed["policyid"])
+    else:
+        existing = {}
+
     # fail if name and policy id are both supplied and do not match existing.
     if "name" in proposed and existing and proposed["name"] != existing["name"]:
         module.fail_json(msg="When both policy_id and policy_name are supplied, they must match the existing"
