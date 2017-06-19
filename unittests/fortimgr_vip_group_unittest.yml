@@ -1,0 +1,155 @@
+---
+
+- name: CREATE FORTIMANAGER VIPS FOR UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "{{ item.name }}"
+        type: "static-nat"
+        external_ip: 
+          - "{{ item.ext }}"
+        mapped_ip:
+          - "{{ item.map }}"
+      with_items:
+        - name: "vip1"
+          ext: "100.10.10.10"
+          map: "10.10.10.10"
+        - name: "vip2"
+          ext: "100.10.10.11"
+          map: "10.10.10.11"
+        - name: "vip3"
+          ext: "100.10.10.12"
+          map: "10.10.10.12"
+        - name: "vip4"
+          ext: "100.10.10.13"
+          map: "10.10.10.13"
+
+- name: FORTIMANAGER VIP GROUP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE VIP GROUP - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        interface:
+          - "port1"
+        members:
+          - "vip1"
+          - "vip2"
+        comment: "vip group unit test"
+
+    - name: CREATE VIP GROUP AGAIN - NO CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        interface:
+          - "port1"
+        members:
+          - "vip1"
+          - "vip2"
+        comment: "vip group unit test"
+
+    - name: MODIFY VIP GROUP CHANGE INTERFACE - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        interface:
+          - "port2"
+        comment: "vip group unit test"
+
+    - name: MODIFY VIP GROUP ADD MEMBER - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        members:
+          - "vip3"
+        comment: "vip group unit test"
+
+    - name: MODIFY VIP GROUP DELETE MEMBER - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        members:
+          - "vip1"
+          - "vip2"
+        state: "param_absent"
+        comment: "vip group unit test"
+
+    - name: MODIFY VIP GROUP DELETE MEMBER AGAIN - NO CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        members:
+          - "vip1"
+          - "vip2"
+        state: "param_absent"
+        comment: "vip group unit test"
+
+    - name: DELETE VIP GROUP - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        state: "absent"
+
+    - name: DELETE VIP GROUP - CHANGE
+      fortimgr_vip_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vipgrp1"
+        state: "absent"
+
+
+- name: CLEANUP FORTIMANAGER VIPs
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP VIPS - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "vip1"
+        - "vip2"
+        - "vip3"
+        - "vip4"

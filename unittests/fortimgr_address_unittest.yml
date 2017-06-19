@@ -290,7 +290,7 @@
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
-      with_itmes:
+      with_items:
         - "addr1"
         - "addr2"
         - "addr3"

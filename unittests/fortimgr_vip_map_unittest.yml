@@ -1,0 +1,145 @@
+---
+
+- name: FORTIMANAGER VIP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE VIP MAP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "enable"
+        external_ip:
+          - "{{ item.ext }}"
+        mapped_ip:
+          - "{{ item.map }}"
+        external_intfc: "port1"
+        comment: "vip group unit test"
+      with_items:
+        - fg: "lab1"
+          ext: "100.1.1.1"
+          map: "10.1.1.1"
+        - fg: "lab2"
+          ext: "100.1.20.1"
+          map: "10.1.20.1"
+
+    - name: CREATE VIP MAP AGAIN - NO CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "enable"
+        external_ip:
+          - "{{ item.ext }}"
+        mapped_ip:
+          - "{{ item.map }}"
+        external_intfc: "port1"
+        comment: "vip group unit test"
+      with_items:
+        - fg: "lab1"
+          ext: "100.1.1.1"
+          map: "10.1.1.1"
+        - fg: "lab2"
+          ext: "100.1.20.1"
+          map: "10.1.20.1" 
+ 
+    - name: MODIFY VIP MAP CHANGE EXTERNAL IP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "disable"
+        external_ip:
+          - "100.1.1.2"
+        comment: "vip group unit test"
+
+    - name: DELETE VIP MAP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        vip_name: "vip1"
+        state: "absent"
+
+    - name: DELETE VIP MAP AGAIN - NO CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        vip_name: "vip1"
+        state: "absent"
+
+    - name: CREATE VIP MAP - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "enable"
+        external_ip:
+          - "100.1.20.1"
+        mapped_ip:
+          - "10.1.20.1"
+        external_intfc: "port1"
+        comment: "vip group unit test"
+
+    - name: DELETE ALL VIP MAPS - CHANGE
+      fortimgr_vip_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item }}"
+        vdom: "root"
+        vip_name: "vip1"
+        state: "absent"
+      with_items:
+        - "lab1"
+        - "lab2"
+
+
+- name: CLEANUP FORTIMANAGER VIPS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP VIPS - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "vip1"

@@ -1254,6 +1254,79 @@ class FMVIPGroup(FortiManager):
                  **kwargs):
         super(FMVIPGroup, self).__init__(host, user, passw, use_ssl, verify, adom, package, api_endpoint, **kwargs)
 
+    @staticmethod
+    def get_diff_add(proposed, existing):
+        """
+        This method is used to get the difference between two configurations when the "proposed" configuration is a dict
+        of configuration items that should exist in the configuration for the object in the FortiManager. Either the
+        get_item or get_item_fields methods should be used to obtain the "existing" variable; if either of those methods
+        return an empty dict, then you should use the add_config method to add the new object.
+
+        :param proposed: Type dict.
+                         The configuration that should not exist for the object on the FortiManager.
+        :param existing: Type dict.
+                         The current configuration for the object that potentially needs configuration removed.
+        :return: A dict corresponding to the "data" portion of an "update" request. This can be used to call the
+                 update_config method.
+        """
+        config = {}
+        replace = ["interface"]
+        for field in proposed.keys():
+            if field in existing and proposed[field] != existing[field]:
+                # replace list items that can only have a length of one
+                if field in replace:
+                    config[field] = proposed[field]
+                elif type(existing[field]) is list:
+                    diff = list(set(proposed[field]).union(existing[field]))
+                    if diff != existing[field]:
+                        config[field] = diff
+                elif type(existing[field]) is dict:
+                    config[field] = dict(set(proposed[field].items()).union(existing[field].items()))
+                elif type(existing[field]) is str or type(existing[field]) is unicode:
+                    config[field] = proposed[field]
+            elif field not in existing:
+                config[field] = proposed[field]
+
+        if config:
+            config["name"] = proposed["name"]
+
+        return config
+
+    @staticmethod
+    def get_diff_remove(proposed, existing):
+        """
+        This method is used to get the difference between two configurations when the "proposed" configuration is a dict
+        of configuration items that should not exist in the configuration for the object in the FortiManager. Either the
+        get_item or get_item_fields methods should be used to obtain the "existing" variable; if either of those methods
+        return an empty dict, then the object does not exist and there is no configuration to remove.
+
+        :param proposed: Type dict.
+                         The configuration that should not exist for the object on the FortiManager.
+        :param existing: Type dict.
+                         The current configuration for the object that potentially needs configuration removed.
+        :return: A dict corresponding to the "data" portion of an "update" request. This can be used to call the
+                 update_config method.
+        """
+        config = {}
+        ignore = ["interface"]
+        for field in proposed.keys():
+            # ignore lists that must have a length of one
+            if field in ignore:
+                pass
+            if field in existing and type(existing[field]) is list:
+                diff = list(set(existing[field]).difference(proposed[field]))
+                if diff != existing[field]:
+                    config[field] = diff
+            elif field in existing and type(existing[field]) is dict:
+                diff = dict(set(proposed.items()).difference(existing.items()))
+                if diff != existing[field]:
+                    config[field] = diff
+
+        if config:
+            config["name"] = proposed["name"]
+
+        return config
+        
 
 def main():
     argument_spec = dict(
