@@ -1,0 +1,70 @@
+---
+
+- name: FORTIMANAGER VIP UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "enable"
+        external_ip:
+          - "100.10.10.10"
+        mapped_ip: 
+          - "10.10.10.10"
+        external_intfc: "port1"
+        comment: "vip unit test"
+
+    - name: CREATE VIP AGAIN - NO CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "enable"
+        external_ip:
+          - "100.10.10.10"
+        mapped_ip:
+          - "10.10.10.10"
+        external_intfc: "port1"
+        comment: "vip unit test"
+ 
+    - name: MODIFY VIP CHANGE EXTERNAL IP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "vip1"
+        type: "static-nat"
+        arp_reply: "disable"
+        external_ip:
+          - "100.10.10.11"
+        comment: "vip unit test"
+
+    - name: DELETE VIP - CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "vip1"
+        state: "absent"
+
+    - name: DELETE VIP AGAIN - NO CHANGE
+      fortimgr_vip:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "vip1"
+        state: "absent"
