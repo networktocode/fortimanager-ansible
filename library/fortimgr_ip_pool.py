@@ -161,6 +161,9 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     pool_name: "App01_Pool"
+    type: "overload"
+    start_ip: "100.1.1.1"
+    end_ip: "100.1.1.1"
     comment: "App01 Pool"
 - name: Modify IP Pool
   fortimgr_ip_pool:
@@ -168,10 +171,10 @@ EXAMPLES = '''
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-    pool_name: "App01_Pool"
     validate_certs: True
     port: 8443
-    state: "absent"
+    pool_name: "App01_Pool"
+    end_ip: "100.1.1.2"
 - name: Delete IP Pool Object
   fortimgr_ip_pool:
     host: "{{ inventory_hostname }}"

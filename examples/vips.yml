@@ -1,0 +1,112 @@
+- name: Ensure VIP Addresses Are in Desired State
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure VIP Static-NAT Exists
+      fortimgr_vip:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "lab_vip_01"
+        type: "static-nat"
+        external_ip:
+          - "10.1.1.1"
+        mapped_ip:
+          - "100.1.1.1"
+        external_intfc:
+          - "lab"
+        comment: "Lab VIP"
+
+    - name: Ensure VIP Static-NAT Exists
+      fortimgr_vip:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_name: "lab_vip_02"
+        type: "static-nat"
+        external_ip:
+          - "10.1.1.2"
+        mapped_ip:
+          - "100.1.1.2"
+        external_intfc:
+          - "lab"
+        comment: "Lab VIP"
+
+    - name: Ensure VIP Group Exists
+      fortimgr_vip_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vip_grp_01"
+        members:
+          - "lab_vip_01"
+          - "lab_vip_02"
+
+    - name: Ensure VIP Group Member Does Not Exist
+      fortimgr_vip_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "vip_grp_01"
+        members:
+          - "lab_vip01"
+        state: "param_absent"
+
+    - name: Ensure VIP Mappings Exist
+      fortimgr_vip_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vip_name: "lab_vip_03"
+        type: "static-nat"
+        external_ip: "{{ item.ext }}"
+        mapped_ip: "{{ item.map }}"
+        external_intfc:
+          - "lab"
+      with_items:
+        - fg: "lab1"
+          ext:
+            - "10.1.1.3"
+          map:
+            - "10.1.1.3"
+        - fg: "lab2"
+          ext:
+            - "10.1.2.3"
+          map:
+            - "10.1.2.3"
+
+    - name: Ensure VIP Mapping Does Not Exist
+      fortimgr_vip_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vip_name: "lab_vip_03"
+        state: "absent"
+
+    - name: Ensure VIP Group Does Not Exist
+      fortimgr_vip_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip_group_name: "addr_grp_01"
+        state: "absent"
+
+    - name: Ensure VIP Does Not Exist
+      fortimgr_vip:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        vip__name: "vip_lab_01"
+        state: "absent"

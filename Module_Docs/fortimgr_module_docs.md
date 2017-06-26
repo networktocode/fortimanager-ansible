@@ -41,7 +41,7 @@ Manages IP Pool resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the IP Pool.  |
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete the object if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will create the configuration if needed.  |
 | type  |   no  |  | <ul> <li>overload</li>  <li>one-to-one</li>  <li>fixed-port-range</li>  <li>port-block-allocation</li> </ul> |  The type of NAT the IP Pool will perform  |
@@ -102,7 +102,7 @@ Manages FW Policy resources and attributes
 | reference_policy_name  |   no  |  | |  The policy name to use as a reference point for policy placement.  |
 | source_address  |   no  |  | |  A list of source addresses used for policy matching.  |
 | global_label  |   no  |  | |  A section label for policy grouping.  |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | pool_name  |   no  |  | |  The name of the IP Pool when enabled.  |
 | direction  |   no  |  | <ul> <li>before</li>  <li>after</li> </ul> |  The direction the policy should be placed in reference to the reference_policy  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
@@ -141,7 +141,7 @@ Manages VIP resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the VIP.  |
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete the object if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will create the configuration if needed.  |
 | type  |   no  |  | <ul> <li>static-nat</li>  <li>fqdn</li>  <li>dns-translation</li> </ul> |  The type of service the VIP will offer.  |
@@ -195,7 +195,7 @@ Manages IP Pool mapped resources and attributes
 | end_ip  |   no  |  | |  The last address in the range of external addresses used to NAT internal addresses to.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | type  |   no  |  | <ul> <li>overload</li>  <li>one-to-one</li>  <li>fixed-port-range</li>  <li>port-block-allocation</li> </ul> |  The type of NAT the IP Pool will perform  |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | pool_name  |   yes  |  | |  The name of the IP Pool.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | source_end_ip  |   no  |  | |  The last address in the range of internal addresses which will be NAT'ed to an address in the external range.  |
@@ -229,7 +229,7 @@ Manages ADOM revisions
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | lock_revision  |   no  |  | <ul> <li>0</li>  <li>1</li> </ul> |  The lock status of the revision.  0 permits the revision to be automatically deleted per FortiManager settings.  1 prevents the revision from being automatically deleted per FortiManager settings.  |
 | description  |   no  |  | |  A description to add to the revision.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
@@ -279,7 +279,7 @@ Manages Address mapped resources and attributes
 | address_name  |   yes  |  | |  The name of the Address object.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | address_type  |   no  |  | <ul> <li>ipmask</li>  <li>iprange</li>  <li>fqdn</li>  <li>wildcard</li>  <li>wildcard-fqdn</li> </ul> |  The type of address the Address object is.  |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | start_ip  |   no  |  | |  The first IP associated with an Address when the type is iprange.  |
@@ -310,7 +310,7 @@ Manages the VIP Group resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the VIP.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | color  |   no  |  | |  A tag that can be used to group objects.  |
@@ -362,7 +362,7 @@ Manages Address resources and attributes
 | address_name  |   yes  |  | |  The name of the Address object.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | address_type  |   no  |  | <ul> <li>ipmask</li>  <li>iprange</li>  <li>fqdn</li>  <li>wildcard</li>  <li>wildcard-fqdn</li> </ul> |  The type of address the Address object is.  |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | start_ip  |   no  |  | |  The first IP associated with an Address when the type is iprange.  |
@@ -392,7 +392,7 @@ Manages ADOM locking and unlocking
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | lock  |   no  |  True  | |  Locks or Unlocks the ADOM in the FortiManager.  True ensures the ADOM is locked.  |
 | save_config  |   no  |  False  | |  Saves the config before unlocking a session.  True saves the configuration.  False does not save the configuration and all changes in the session will be lost if unlocked.  |
@@ -426,7 +426,7 @@ Manages Address Group resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | allow_routing  |   no  |  | |  Determines if the address can be used in static routing configuration.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | color  |   no  |  | |  A tag that can be used to group objects  |
@@ -464,7 +464,7 @@ Manages Service Group resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the Service Group  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | color  |   no  |  | |  A tag that can be used to group objects  |
@@ -502,7 +502,7 @@ Manages Service resources and attributes
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | icmp_code  |   no  |  | |  The ICMP code for when protocol is set to ICMP.  |
 | password  |   no  |  | |  The password associated with the username account.  |
 | protocol  |   no  |  | |  Used to specify the service's protocol type.  |
@@ -545,7 +545,7 @@ Manages ADOM package installs
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | adom_revision_name  |   no  |  | |  The name to give the ADOM revision if creating a revision.  |
 | fortigate_revision_comments  |   no  |  | |  Comments to add to the FortiGate revision.  |
 | adom  |   yes  |  | |  The ADOM that should have package installed should belong to.  |
@@ -597,7 +597,7 @@ Manages VIP mapped resources and attributes
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete the mapping from the object if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will create configuration for the mapping correlating to the fortigate specified if needed.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | type  |   no  |  | |  The source interface which will be used to filter when the NAT takes place.  |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | source_filter  |   no  |  | |  The source IP addresses which will be used to filter when the NAT takes place.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
@@ -631,7 +631,7 @@ Manages Route configurations for FortiGate devices
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the route.  |
 | weight  |   no  |  | |  The weight to assign to the route.  |
 | adom  |   no  |  | |  The ADOM the configuration should belong to.  |
@@ -673,7 +673,7 @@ Gathers facts from the FortiManager
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   yes  |  | |  The username used to authenticate with the FortiManager.  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | config_filter  |   no  |  | <ul> <li>all</li>  <li>route</li>  <li>address</li>  <li>address_group</li>  <li>service</li>  <li>service_group</li>  <li>ip_pool</li>  <li>vip</li>  <li>vip_group</li>  <li>policy</li> </ul> |  The list of configuration items to retrieve from the list of FortiGates managed by the FortiManager.  |
 | fortigates  |   no  |  | |  A list of FortiGates to retrieve device information for; "all" can be used to retrieve all devices managed by the FortiManger.  If config_filter is defined, this list will be used to determine what devices to retrieve configuration from.  If config_filter is defined, this list should be a list of dictionaries with "name" and "vdom" keys defining the mapping for fortigate and vdom.  |
 | adom  |   no  |  | |  The ADOM that should have package installed should belong to.  |

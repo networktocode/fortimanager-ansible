@@ -1,0 +1,50 @@
+- name: Demonstrate Locking
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+   - name: Get Facts
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+   - name: Get FortiGate Facts
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+       fortigates:
+         - "lab"
+         - "prod"
+         - "dmz"
+   - name: Get Some Configs
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+       fortigates:
+         - name: "lab"
+           vdom: "root"
+         - name: "prod"
+           vdom: "root"
+         - name: "dmz"
+           vdom: "web"
+         - name: "dmz"
+           vdom: "dmz"
+       config_filter:
+         - "routes"
+         - "policy"
+   - name: Get All Configs
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+       fortigates:
+         - "all"
+       config_filter:
+         - "all"

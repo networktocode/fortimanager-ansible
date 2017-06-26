@@ -147,7 +147,7 @@ options:
 
 EXAMPLES = '''
 - name: Add Route
-  fortimgr_install:
+  fortimgr_route:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -161,6 +161,7 @@ EXAMPLES = '''
     gateway: "10.1.1.1"
     intfc: "port1"
 - name: Remove Route
+  fortimgr_route:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
