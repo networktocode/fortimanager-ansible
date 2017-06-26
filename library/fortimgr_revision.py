@@ -150,7 +150,7 @@ EXAMPLES = '''
     created_by: "user"
     description: "ADOM Revert"
     revision_name: "Good Revision"
-    restore_name" "Rollback"
+    restore_name: "Rollback"
     state: "restore"
 '''
 

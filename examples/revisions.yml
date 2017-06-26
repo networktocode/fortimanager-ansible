@@ -1,0 +1,34 @@
+- name: Demonstrate Revisions
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Create New Revision
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        created_by: "user"
+        description: "ADOM Revision"
+        revision_name: "Lab Revision"
+    - name: Delete Revision
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        revision_name: "Lab Revision"
+        state: "absent"
+    - name: Restore Revision
+      fortimgr_revision:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        created_by: "user"
+        description: "ADOM Revert"
+        revision_name: "Good Revision"
+        restore_name: "Rollback"
+        state: "restore"

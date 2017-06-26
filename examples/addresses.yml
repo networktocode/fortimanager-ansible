@@ -1,0 +1,112 @@
+- name: Ensure Address Objects Are in Desired State
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Address Subnet Exists
+      fortimgr_address:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "lab_svr_01"
+        type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+        comment: "Lab Server"
+
+    - name: Ensure Address Range Exists
+      fortimgr_address:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "lab_svr_02"
+        type: "iprange"
+        start_ip: "10.1.2.20"
+        end_ip: "10.1.2.25"
+        associated_intfc:
+          - "lab"
+
+    - name: Ensure Address Exists for Mapping
+      fortimgr_address:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "lab_svr_03"
+        associated_intfc:
+          - "lab"
+
+    - name: Ensure Address Mappings Exist
+      fortimgr_address_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        address_name: "lab_web_svrs"
+        type: "ipmask"
+        start_ip: "10.1.2.20"
+        subnet: "{{ item.subnet }}"
+      with_items:
+        - fg: "lab1"
+          subnet:
+            - "10.3.3.0"
+            - "255.255.255.0"
+        - fg: "lab2"
+          subnet:
+            - "10.4.4.0"
+            - "255.255.255.0"
+
+    - name: Ensure Address Group Exists
+      fortimgr_address_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addr_grp_01"
+        members:
+          - "lab_svr_01"
+          - "lab_svr_02"
+
+    - name: Ensure Address Group Member Does Not Exist
+      fortimgr_address_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addr_grp_01"
+        members:
+          - "lab_svr01"
+        state: "param_absent"
+
+    - name: Ensure Address Group Does Not Exist
+      fortimgr_address_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addr_grp_01"
+        state: "absent"
+
+    - name: Ensure Address Mapping Does Not Exist"
+      fortimgr_address_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        address_name: "lab_web_svrs"
+      state: "absent"
+
+    - name: Ensure Address Does Not Exist
+      fortimgr_address_group:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "addr_grp_01"
+        state: "absent"

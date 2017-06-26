@@ -1,0 +1,109 @@
+- name: Ensure IP Pools Are in Desired State
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure IP Pool Overload Exists
+      fortimgr_ip_pool:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "lab_pool_01"
+        type: "overload"
+        start_ip: "100.20.10.10"
+        end_ip: "100.20.10.10"
+        comment: "Lab Pool"
+
+    - name: Ensure IP Pool One-to-One Exists
+      fortimgr_ip_pool:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "lab_pool_02"
+        type: "one-to-one"
+        start_ip: "100.20.10.20"
+        end_ip: "100.20.10.20"
+
+    - name: Ensure IP Pool Fixed Port Range Exists
+      fortimgr_ip_pool:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "lab_pool_03"
+        type: "fixed-port-range"
+        start_ip: "100.20.10.30"
+        end_ip: "100.20.10.35"
+        source_start_ip: "10.0.0.0"
+        source_end_ip: "10.255.255.255"
+
+    - name: Ensure IP Pool Fixed Port Range Exists Per Latest Need
+      fortimgr_ip_pool:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "lab_pool_03"
+        end_ip: "100.20.10.38"
+
+    - name: Ensure IP Pool Mapping Exists
+      fortimgr_ip_pool_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        pool_name: "lab_pool_04"
+        type: "overload"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        comment: "Lab Pool"
+      with_items:
+        - fg: "lab1"
+          start: "100.10.10.40"
+          end: "100.10.10.40"
+        - fg: "lab2"
+          start: "100.10.20.40"
+          end: "100.10.20.40"
+
+    - name: Ensure New IP Pool Mapping Exists
+      fortimgr_ip_pool_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab3"
+        pool_name: "lab_pool_04"
+        type: "overload"
+        start_ip: "100.10.30.40"
+        end_ip: "100.10.30.40"
+        comment: "Lab Pool"
+
+    - name: Ensure IP Pool Mapping Does Not Exist
+      fortimgr_ip_pool_map:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        pool_name: "lab_pool_04"
+        state: "absent"
+
+    - name: Ensure IP Pool Does Not Exist
+      fortimgr_ip_pool:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        pool_name: "lab_pool_04"
+        state: "absent"
+
+
+
+
+
+
+

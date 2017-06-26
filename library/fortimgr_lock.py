@@ -121,7 +121,7 @@ EXAMPLES = '''
 - name: Make Change
   fortimgr_address:
     host: "{{ inventory_hostname }}"
-    save_config: True
+    session_id: "{{ session_id }}"
     adom: "lab"
     address_name: "Server01"
     type: "ipmask"

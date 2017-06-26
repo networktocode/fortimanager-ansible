@@ -125,7 +125,7 @@ EXAMPLES = '''
     adom: "lab"
     fortigates:
       - name: "lab"
-        vdom: "root
+        vdom: "root"
       - name: "prod"
         vdom: "root"
       - name: "dmz"
@@ -1335,7 +1335,7 @@ def main():
             devices = session.get_devices_fields(device_fields)
         # catch string input that ansible module converts to a list
         elif len(fortigates) == 1 and type(fortigates[0]) is str:
-            devices = session.get_device_fields(fortigates, device_fields)
+            devices = session.get_device_fields(fortigates[0], device_fields)
         # capture data for list of devices
         elif type(fortigates[0]) is str:
             device_filter = ["hostname", "in", ""]
@@ -1357,110 +1357,60 @@ def main():
                     device_filter[2] += device["name"]
             devices = session.get_devices_fields(device_fields, device_filter)
     else:
-        devices = {}
+        devices = []
 
     configs = {}
 
     # build list of all devices and vdom mappings if all is used for devices
-    if config_filter and "all" in fortigates:
-        fortigates = []
+    if config_filter and devices:
         for device in devices:
             for vdom in device["vdom"]:
-                fortigates.append(dict(name=device["hostname"], vdom=vdom["name"]))
-
-        if "all" in config_filter:
-            # iterate through each fortigate and append a dictionary of configuration items
-            for device in fortigates:
-                config_dict = {"static_routes": session.get_device_config(device["name"], device["vdom"], "router/static"),
-                               "addresses": session.get_device_config(device["name"], device["vdom"], "firewall/address"),
-                               "address_groups": session.get_device_config(device["name"], device["vdom"],
-                                                                           "firewall/addrgrp"),
-                               "services": session.get_device_config(device["name"], device["vdom"],
-                                                                     "firewall/service/custom"),
-                               "service_groups": session.get_device_config(device["name"], device["vdom"],
-                                                                           "firewall/service/group"),
-                               "ip_pools": session.get_device_config(device["name"], device["vdom"], "firewall/ippool"),
-                               "vips": session.get_device_config(device["name"], device["vdom"], "firewall/vip"),
-                               "vip_groups": session.get_device_config(device["name"], device["vdom"], "firewall/vipgrp"),
-                               "policies": session.get_device_config(device["name"], device["vdom"], "firewall/policy")}
-
-                configs.update({device["name"]: config_dict})
-        else:
-            for device in fortigates:
-                config_dict = {}
-                if "route" in config_filter:
-                    config_dict["static_routes"] = session.get_device_config(device["name"], device["vdom"],
-                                                                             "router/static")
+                if "all" in config_filter:
+                    # iterate through each fortigate and append a dictionary of configuration items
+                    config_dict = {"static_routes": session.get_device_config(device["hostname"], vdom["name"], "router/static"),
+                                   "addresses": session.get_device_config(device["hostname"], vdom["name"], "firewall/address"),
+                                   "address_groups": session.get_device_config(device["hostname"], vdom["name"],
+                                                                               "firewall/addrgrp"),
+                                   "services": session.get_device_config(device["hostname"], vdom["name"],
+                                                                         "firewall/service/custom"),
+                                   "service_groups": session.get_device_config(device["hostname"], vdom["name"],
+                                                                               "firewall/service/group"),
+                                   "ip_pools": session.get_device_config(device["hostname"], vdom["name"], "firewall/ippool"),
+                                   "vips": session.get_device_config(device["hostname"], vdom["name"], "firewall/vip"),
+                                   "vip_groups": session.get_device_config(device["hostname"], vdom["name"], "firewall/vipgrp"),
+                                   "policies": session.get_device_config(device["hostname"], vdom["name"], "firewall/policy")}
     
-                if "address" in config_filter:
-                    config_dict["addresses"] = session.get_device_config(device["name"], device["vdom"],
-                                                                         "firewall/address")
+                    configs.update({"{}_{}".format(device["hostname"], vdom["name"]): config_dict})
+                else:
+                    config_dict = {}
+                    if "route" in config_filter:
+                        config_dict["static_routes"] = session.get_device_config(device["hostname"], vdom["name"], "router/static")
+        
+                    if "address" in config_filter:
+                        config_dict["addresses"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/address")
+        
+                    if "address_group" in config_filter:
+                        config_dict["address_groups"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/addrgrp")
+        
+                    if "service" in config_filter:
+                        config_dict["services"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/service/custom")
+        
+                    if "service_group" in config_filter:
+                        config_dict["service_groups"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/service/group")
+        
+                    if "ip_pool" in config_filter:
+                        config_dict["ip_pools"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/ippool")
+        
+                    if "vip" in config_filter:
+                        config_dict["vips"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/vip")
+        
+                    if "vip_group" in config_filter:
+                        config_dict["vip_groups"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/vipgrp")
+        
+                    if "policy" in config_filter:
+                        config_dict["policies"] = session.get_device_config(device["hostname"], vdom["name"], "firewall/policy")
     
-                if "address_group" in config_filter:
-                    config_dict["address_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                              "firewall/addrgrp")
-    
-                if "service" in config_filter:
-                    config_dict["services"] = session.get_device_config(device["name"], device["vdom"],
-                                                                        "firewall/service/custom")
-    
-                if "service_group" in config_filter:
-                    config_dict["service_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                              "firewall/service/group")
-    
-                if "ip_pool" in config_filter:
-                    config_dict["ip_pools"] = session.get_device_config(device["name"], device["vdom"], "firewall/ippool")
-    
-                if "vip" in config_filter:
-                    config_dict["vips"] = session.get_device_config(device["name"], device["vdom"], "firewall/vip")
-    
-                if "vip_group" in config_filter:
-                    config_dict["vip_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                          "firewall/vipgrp")
-    
-                if "policy" in config_filter:
-                    config_dict["policies"] = session.get_device_config(device["name"], device["vdom"], "firewall/policy")
-
-            configs.update({device["name"]: config_dict})
-
-    elif config_filter:
-        # iterate through each fortigate and append a dictionary of requested configuration items
-        for device in fortigates:
-            config_dict = {}
-            if "route" in config_filter:
-                config_dict["static_routes"] = session.get_device_config(device["name"], device["vdom"],
-                                                                         "router/static")
-
-            if "address" in config_filter:
-                config_dict["addresses"] = session.get_device_config(device["name"], device["vdom"],
-                                                                     "firewall/address")
-
-            if "address_group" in config_filter:
-                config_dict["address_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                          "firewall/addrgrp")
-
-            if "service" in config_filter:
-                config_dict["services"] = session.get_device_config(device["name"], device["vdom"],
-                                                                    "firewall/service/custom")
-
-            if "service_group" in config_filter:
-                config_dict["service_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                          "firewall/service/group")
-
-            if "ip_pool" in config_filter:
-                config_dict["ip_pools"] = session.get_device_config(device["name"], device["vdom"], "firewall/ippool")
-
-            if "vip" in config_filter:
-                config_dict["vips"] = session.get_device_config(device["name"], device["vdom"], "firewall/vip")
-
-            if "vip_group" in config_filter:
-                config_dict["vip_groups"] = session.get_device_config(device["name"], device["vdom"],
-                                                                      "firewall/vipgrp")
-
-            if "policy" in config_filter:
-                config_dict["policies"] = session.get_device_config(device["name"], device["vdom"], "firewall/policy")
-
-        configs.update({device["name"]: config_dict})
+                    configs.update({"{}_{}".format(device["hostname"], vdom["name"]): config_dict})
 
     results = dict(fortimanager=fortimanager, devices=devices, configs=configs)
 

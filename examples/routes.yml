@@ -1,0 +1,34 @@
+- name: Ensure Fortigate Routes Are in Desired State
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Route Exists on Fortgate
+      fortimgr_route:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab_fg"
+        vdom: "lab"
+        destination:
+          - "10.10.140.0"
+          - "255.255.255.0"
+        gateway: "10.1.100.1"
+        intfc: "corp"
+
+    - name: Ensure Route Does Not Exist on Fortgate
+      fortimgr_route:
+        hosts: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab_fg"
+        vdom: "lab"
+        destination:
+          - "10.10.140.0"
+          - "255.255.255.0"
+        gateway: "10.1.100.1"
+        intfc: "corp"
+        state: "absent"

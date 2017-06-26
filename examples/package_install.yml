@@ -1,0 +1,38 @@
+- name: Demonstrate Locking
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Preview Install
+      fortimgr_install:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        state: "preview"
+        adom: "lab"
+        fortigate_name: "Lab_FortiGate"
+        package: "lab"
+        vdom: "lab"
+        dst_file: "./preview.txt"
+    
+    - name: Install and Generate Revision
+      fortimgr_install:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        state: "present"
+        adom: "lab"
+        adom_revision_comments: "Update Policy for Lab"
+        adom_revision_name: "Lab_Update_20"
+        check_install: True
+        fortigate_name: "{{ item }}"
+        fortigate_revision_comments: "Update Lab Policy"
+        install_flags:
+          - "generate_rev"
+        package: "lab"
+        vdom: "lab"
+      with_items:
+        - "lab1"
+        - "lab2"
+        

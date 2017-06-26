@@ -1,0 +1,55 @@
+- name: Demonstrate Locking
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Lock the lab ADOM
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        lock: True
+      register: session
+
+    - name: Set Session ID
+      set_fact:
+        session_id: "{{ session.session_id }}"
+
+    - name: Make Change
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "Server01"
+        type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+
+    - name: Save the ADOM Config
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save_config: True
+    
+    - name: Make Change
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        address_name: "Server02"
+        type: "ipmask"
+        subnet:
+          - "10.1.1.2"
+          - "255.255.255.255"
+
+    - name: Save and Unlock the ADOM
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        save_config: True
+        unlock: True

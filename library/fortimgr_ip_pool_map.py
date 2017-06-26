@@ -165,42 +165,58 @@ options:
 '''
 
 EXAMPLES = '''
-- name: Add IP Pool Object
+- name: Add IP Pool Map
   fortimgr_ip_pool_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-    fortigate: "lab_fortigate"
+    fortigate: "{{ item.fg }}"
     pool_name: "App01_Pool"
+    type: "overload"
+    start_ip: "{{ item.start }}"
+    end_ip: "{{ item.end }}"
     comment: "App01 Pool"
-- name: Modify IP Pool
+  with_items:
+    - fg: "lab01_fortigate"
+      start: "100.10.10.10"
+      end: "100.10.10.10"
+    - fg: "lab02_fortigate"
+      start: "100.10.12.10"
+      end: "100.10.12.10"
+- name: Modify IP Pool Map
   fortimgr_ip_pool_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-    fortigate: "lab_fortigate"
+    fortigate: "{{ item.fg }}"
     pool_name: "App01_Pool"
     validate_certs: True
     port: 8443
-    state: "absent"
+    end_ip: "{{ item.end }}"
+  with_items:
+    - fg: "lab01_fortigate"
+      end: "100.10.10.11"
+    - fg: "lab02_fortigate"
+      end: "100.10.12.11"
 - name: Add Mapping to IP Pool
   fortimgr_ip_pool_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-    fortigate: "new_lab_fortigate"
-    vdom: "lab"
+    fortigate: "lab03_fortigate"
     pool_name: "App01_Pool"
+    start_ip: "100.10.14.10"
+    end_ip: "100.10.14.11"
 - name: Remove Mapping from IP Pool
   fortimgr_ip_pool_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
     adom: "lab"
-    fortigate: "lab_fortigate"
+    fortigate: "lab01_fortigate"
     pool_name: "App01_Pool"
 '''
 
