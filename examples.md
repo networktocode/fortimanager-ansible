@@ -26,8 +26,7 @@ netscaler_lb01
         password: "{{ password }}"
         adom: "dmz"
         address_name: "{{ item.name }}"
-        associated_intfc:
-          - "{{ item.intfc }}"
+        associated_intfc: "{{ item.intfc }}"
       with_items:
         - name: "web01"
           intfc: "web"

@@ -47,7 +47,7 @@
         address_name: "lab_web_svrs"
         address_type: "ipmask"
         network_address: "{{ item.net }}"
-        mask: "{{ item.mask }}"
+        network_mask: "{{ item.mask }}"
       with_items:
         - fg: "lab1"
           net: "10.3.3.0"
