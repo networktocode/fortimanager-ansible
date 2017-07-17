@@ -39,7 +39,7 @@
         password: "{{ password }}"
         adom: "lab"
         service_name: "svc1"
-        protocol: "TCP"
+        protocol: "tcp"
         port_range:
           - "8443"
         comment: "service unit test"

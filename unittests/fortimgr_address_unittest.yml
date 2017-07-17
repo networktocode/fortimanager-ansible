@@ -6,9 +6,23 @@
   gather_facts: false
   
   tasks:
-    - name: CREATE ADDRESS IPMASK - CHANGE
+    - name: CREATE ADDRESS IPMASK LIST NOTATION - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        provider: "{{ fortimanager_provider }}"
+        address_name: "addr1"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+        port: "443"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK LIST NOTATION AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -22,29 +36,86 @@
           - "255.255.255.255"
         comment: "ipmask unit test"
 
-    - name: CREATE ADDRESS IPMASK AGAIN - NO CHANGE
+    - name: CREATE ADDRESS IPMASK CIDR NOTATION - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        address_name: "addr1"
-        address_type: "ipmask"
-        allow_routing: "enable"
-        associated_intfc: "port1"
-        color: 1
-        subnet:
-          - "10.1.1.1"
-          - "255.255.255.255"
-        comment: "ipmask unit test"
-
-    - name: CREATE ADDRESS RANGE - CHANGE
-      fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         address_name: "addr2"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet: "10.1.2.1/32"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK CIDR NOTATION AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr2"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet: "10.1.2.1/32"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK CIDR NOTATION BAD MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr3"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet: "10.1.2.1/33"
+        comment: "ipmask unit test"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NET AND MASK NOTATION - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr4"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        network_address: "10.1.3.1"
+        network_mask: "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK NET AND MASK NOTATION AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr4"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        network_address: "10.1.3.1"
+        network_mask: "255.255.255.255"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS RANGE - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr5"
         address_type: "iprange"
         allow_routing: "enable"
         associated_intfc: "port1"
@@ -55,11 +126,11 @@
 
     - name: CREATE ADDRESS RANGE AGAIN - NO CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr2"
+        address_name: "addr5"
         address_type: "iprange"
         allow_routing: "enable"
         associated_intfc: "port1"
@@ -68,45 +139,118 @@
         end_ip: "10.1.1.7"
         comment: "iprange unit test"
 
-    - name: CREATE ADDRESS WILDCARD - CHANGE
+    - name: CREATE ADDRESS WILDCARD LIST NOTATION - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr3"
+        address_name: "addr6"
         address_type: "wildcard"
         allow_routing: "disable"
         associated_intfc: "port1"
         color: 3
-        subnet:
+        wildcard:
           - "10.0.0.0"
           - "0.255.0.255"
         comment: "wildcard unit test"
 
-    - name: CREATE ADDRESS WILDCARD AGAIN - NO CHANGE
+    - name: CREATE ADDRESS WILDCARD AGAIN LIST NOTATION - NO CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr3"
+        address_name: "addr6"
         address_type: "wildcard"
         allow_routing: "disable"
         associated_intfc: "port1"
         color: 3
-        subnet:
+        wildcard:
           - "10.0.0.0"
           - "0.255.0.255"
+        comment: "wildcard unit test"
+
+    - name: CREATE ADDRESS WILDCARD CIDR NOTATION - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        wildcard: "10.0.0.0/8"
+        comment: "wildcard unit test"
+
+    - name: CREATE ADDRESS WILDCARD AGAIN CIDR NOTATION - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        wildcard: "10.0.0.0/8"
+        comment: "wildcard unit test"
+
+    - name: MODIFY ADDRESS WILDCARD CIDR NOTATION BAD MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        wildcard: "10.0.0.0/33"
+        comment: "wildcard unit test"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD AND MASK NOTATION - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr8"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        wildcard_address: "10.0.0.0"
+        wildcard_mask: "0.255.255.255"
+        comment: "wildcard unit test"
+
+    - name: CREATE ADDRESS WILDCARD AGAIN WILDCARD AND MASK NOTATION - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr8"
+        address_type: "wildcard"
+        allow_routing: "disable"
+        associated_intfc: "port1"
+        color: 3
+        wildcard_address: "10.0.0.0"
+        wildcard_mask: "0.255.255.255"
         comment: "wildcard unit test"
 
     - name: CREATE ADDRESS FQDN - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr4"
+        address_name: "addr9"
         address_type: "fqdn"
         allow_routing: "disable"
         associated_intfc: "port1"
@@ -116,11 +260,11 @@
 
     - name: CREATE ADDRESS FQDN AGAIN - NO CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr4"
+        address_name: "addr9"
         address_type: "fqdn"
         allow_routing: "disable"
         associated_intfc: "port1"
@@ -130,11 +274,11 @@
 
     - name: CREATE ADDRESS WILDCARD FQDN - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr5"
+        address_name: "addr10"
         address_type: "wildcard-fqdn"
         allow_routing: "disable"
         associated_intfc: "port1"
@@ -144,11 +288,11 @@
 
     - name: CREATE ADDRESS WILDCARD FQDN AGAIN - NO CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr5"
+        address_name: "addr10"
         address_type: "wildcard-fqdn"
         allow_routing: "disable"
         associated_intfc: "port1"
@@ -158,7 +302,7 @@
 
     - name: MODIFY ADDRESS PORT - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -168,7 +312,7 @@
 
     - name: MODIFY ADDRESS TYPE - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -180,17 +324,17 @@
 
     - name: MODIFY ADDRESS RANGE - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr2"
+        address_name: "addr5"
         start_ip: "10.1.1.4"
         end_ip: "10.1.1.9"
 
     - name: DELETE ADDRESS IPMASK1 - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -199,7 +343,7 @@
 
     - name: DELETE ADDRESS IPMASK1 AGAIN - NO CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -208,20 +352,20 @@
 
     - name: DELETE ADDRESS RANGE - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr2"
+        address_name: "addr5"
         state: "absent"
 
     - name: DELETE ADDRESS WILDCARD WITH CONFIG PARAMS - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr3"
+        address_name: "addr6"
         address_type: "wildcard"
         allow_routing: "enable"
         associated_intfc: "port1"
@@ -234,25 +378,25 @@
 
     - name: DELETE ADDRESS FQDN - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr4"
+        address_name: "addr9"
         state: "absent"
 
     - name: DELETE ADDRESS WILDCARD FQDN - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr5"
+        address_name: "addr10"
         state: "absent"
 
     - name: CREATE ADDRESS IPMASK NO ADOM - FAIL
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         address_name: "addr6"
@@ -264,7 +408,7 @@
 
     - name: CREATE ADDRESS IPMASK NO NAME - FAIL
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -273,7 +417,6 @@
           - "10.1.1.1"
           - "255.255.255.255"
       ignore_errors: true
-
 
 - name: CLEANUP FORTIMANAGER ADDRESSES
   hosts: fortimanager
@@ -284,7 +427,7 @@
   tasks:
     - name: CLEANUP ADDRESS OBJECTS - CHANGE
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -297,3 +440,7 @@
         - "addr4"
         - "addr5"
         - "addr6"
+        - "addr7"
+        - "addr8"
+        - "addr9"
+        - "addr10"

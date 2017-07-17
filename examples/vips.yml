@@ -1,3 +1,4 @@
+---
 - name: Ensure VIP Addresses Are in Desired State
   hosts: fortimanager
   connection: local
@@ -6,39 +7,33 @@
   tasks:
     - name: Ensure VIP Static-NAT Exists
       fortimgr_vip:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         vip_name: "lab_vip_01"
         type: "static-nat"
-        external_ip:
-          - "10.1.1.1"
-        mapped_ip:
-          - "100.1.1.1"
-        external_intfc:
-          - "lab"
+        external_ip: "10.1.1.1"
+        mapped_ip: "100.1.1.1"
+        external_intfc: "lab"
         comment: "Lab VIP"
 
     - name: Ensure VIP Static-NAT Exists
       fortimgr_vip:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         vip_name: "lab_vip_02"
         type: "static-nat"
-        external_ip:
-          - "10.1.1.2"
-        mapped_ip:
-          - "100.1.1.2"
-        external_intfc:
-          - "lab"
+        external_ip: "10.1.1.2"
+        mapped_ip: "100.1.1.2"
+        external_intfc: "lab"
         comment: "Lab VIP"
 
     - name: Ensure VIP Group Exists
       fortimgr_vip_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -49,7 +44,7 @@
 
     - name: Ensure VIP Group Member Does Not Exist
       fortimgr_vip_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -60,7 +55,7 @@
 
     - name: Ensure VIP Mappings Exist
       fortimgr_vip_map:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -69,8 +64,7 @@
         type: "static-nat"
         external_ip: "{{ item.ext }}"
         mapped_ip: "{{ item.map }}"
-        external_intfc:
-          - "lab"
+        external_intfc: "lab"
       with_items:
         - fg: "lab1"
           ext:
@@ -85,7 +79,7 @@
 
     - name: Ensure VIP Mapping Does Not Exist
       fortimgr_vip_map:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -95,7 +89,7 @@
 
     - name: Ensure VIP Group Does Not Exist
       fortimgr_vip_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -104,9 +98,9 @@
 
     - name: Ensure VIP Does Not Exist
       fortimgr_vip:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        vip__name: "vip_lab_01"
+        vip_name: "vip_lab_01"
         state: "absent"

@@ -123,7 +123,7 @@
         vip_group_name: "vipgrp1"
         state: "absent"
 
-    - name: DELETE VIP GROUP - CHANGE
+    - name: DELETE VIP GROUP AGAIN - NO CHANGE
       fortimgr_vip_group:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"

@@ -6,7 +6,7 @@
   gather_facts: false
   
   tasks:
-    - name: CREATE ROUTE - CHANGE
+    - name: CREATE ROUTE LIST NOTATION - CHANGE
       fortimgr_route:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -20,7 +20,7 @@
         intfc: "port1"
         vdom: "root"
 
-    - name: CREATE ROUTE AGAIN - NO CHANGE
+    - name: CREATE ROUTE AGAIN LIST NOTATION - NO CHANGE
       fortimgr_route:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -31,6 +31,56 @@
         destination:
           - "10.10.10.0"
           - "255.255.255.0"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+
+    - name: CREATE ROUTE CIDR NOTATION - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination: "10.20.10.0/24"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+
+    - name: CREATE ROUTE CIDR NOTATION AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination: "10.20.10.0/24"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+
+    - name: CREATE ROUTE NET AND MASK NOTATION - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination_network: "10.30.10.0"
+        destination_netmask: "255.255.255.0"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+
+    - name: CREATE ROUTE NET AND MASK NOTATION AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination_network: "10.30.10.0"
+        destination_netmask: "255.255.255.0"
         gateway: "10.1.1.1"
         intfc: "port1"
 
@@ -95,3 +145,20 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         state: "absent"
+
+    - name: DELETE ROUTE - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination: "{{ item }}"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        state: "absent"
+      with_items:
+        - "10.20.10.0/24"
+        - "10.30.10.0/24"
+      tags: cleanup
