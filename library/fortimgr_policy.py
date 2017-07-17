@@ -239,23 +239,17 @@ EXAMPLES = '''
     adom: "prod"
     package: "prod"
     action: "accept"
-    destination_address:
-      - "Internet"
-    destination_intfc:
-      - "port2"
+    destination_address: "Internet"
+    destination_intfc: "port2"
     ip_pool: "enable"
     logtraffic: "all"
     policy_name: "Permit_Outbound_Web"
     nat: "enable"
     pool_name: "Internet_PATs"
-    schedule:
-      - "always"
-    service:
-      - "Web_Svcs"
-    source_address:
-      - "Corp_Users"
-    source_intfc:
-      - "port1"
+    schedule: "always"
+    service: "Web_Svcs"
+    source_address: "Corp_Users"
+    source_intfc: "port1"
     status: "enable"
 - name: Modify Policy
   fortimgr_policy:
@@ -265,8 +259,7 @@ EXAMPLES = '''
     adom: "prod"
     package: "prod"
     policy_name: "Permit_Outbound_Web"
-    service:
-      - "File_Transfer_Services"
+    service: "File_Transfer_Services"
 - name: Move Policy
   fortimgr_policy:
     host: "{{ inventory_hostname }}"
@@ -382,12 +375,15 @@ class FortiManager(object):
         self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package, self.api_endpoint)
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom)
         self.headers = {"Content-Type": "application/json"}
-        self.port = kwargs.get("port", "")
+        if "port" not in kwargs:
+            self.port = ""
+        else:
+            self.port = ":{}".format(kwargs["port"])
 
         if use_ssl:
-            self.url = "https:{port}//{fw}/jsonrpc".format(port=self.port, fw=self.host)
+            self.url = "https://{fw}{port}/jsonrpc".format(fw=self.host, port=self.port)
         else:
-            self.url = "http:{port}//{fw}/jsonrpc".format(port=self.port, fw=self.host)
+            self.url = "http://{fw}{port}/jsonrpc".format(fw=self.host, port=self.port)
 
     def add_config(self, new_config):
         """
@@ -402,6 +398,124 @@ class FortiManager(object):
         response = self.make_request(body)
 
         return response
+
+    @staticmethod
+    def cidr_to_network(network):
+        """
+        Method is used to convert a network address in CIDR notation to a list with address and mask.
+  
+        :param network: Type str.
+                        The network address in CIDR notation.
+  
+        :return: A list with address and mask in that order.
+        """
+        cidr_mapping = {
+                "0": "0.0.0.0",
+                "1": "128.0.0.0",
+                "2": "192.0.0.0",
+                "3": "224.0.0.0",
+                "4": "240.0.0.0",
+                "5": "248.0.0.0",
+                "6": "252.0.0.0",
+                "7": "254.0.0.0",
+                "8": "255.0.0.0",
+                "9": "255.128.0.0",
+                "10": "255.192.0.0",
+                "11": "255.224.0.0",
+                "12": "255.240.0.0",
+                "13": "255.248.0.0",
+                "14": "255.252.0.0",
+                "15": "255.254.0.0",
+                "16": "255.255.0.0",
+                "17": "255.255.128.0",
+                "18": "255.255.192.0",
+                "19": "255.255.224.0",
+                "20": "255.255.240.0",
+                "21": "255.255.248.0",
+                "22": "255.255.252.0",
+                "23": "255.255.254.0",
+                "24": "255.255.255.0",
+                "25": "255.255.255.128",
+                "26": "255.255.255.192",
+                "27": "255.255.255.224",
+                "28": "255.255.255.240",
+                "29": "255.255.255.248",
+                "30": "255.255.255.252",
+                "31": "255.255.255.254",
+                "32": "255.255.255.255"
+            }
+  
+        if "/" in network:
+            network_address = network.split("/")
+            mask = network_address.pop()
+            
+            if mask and int(mask) in range(0, 33):
+                network_address.append(cidr_mapping[mask])
+            else:
+                network_address = []
+        else:
+            network_address = []
+  
+        return network_address
+
+    @staticmethod
+    def cidr_to_wildcard(wildcard):
+        """
+        Method is used to convert a wildcard address in CIDR notation to a list with address and mask.
+  
+        :param wildcard: Type str.
+                        The wildcard address in CIDR notation.
+  
+        :return: A list with address and mask in that order.
+        """
+        cidr_mapping = {
+            "0": "255.255.255.255",
+            "1": "127.255.255.255",
+            "2": "63.255.255.255",
+            "3": "31.255.255.255",
+            "4": "15.255.255.255",
+            "5": "7.255.255.255",
+            "6": "3.255.255.255",
+            "7": "1.255.255.255",
+            "8": "0.255.255.255",
+            "9": "0.127.255.255",
+            "10": "0.63.255.255",
+            "11": "0.31.255.255",
+            "12": "0.15.255.255",
+            "13": "0.7.255.255",
+            "14": "0.3.255.255",
+            "15": "0.1.255.255",
+            "16": "0.0.255.255",
+            "17": "0.0.127.255",
+            "18": "0.0.63.255",
+            "19": "0.0.31.255",
+            "20": "0.0.15.255",
+            "21": "0.0.7.255",
+            "22": "0.0.3.255",
+            "23": "0.0.1.255",
+            "24": "0.0.0.255",
+            "25": "0.0.0.127",
+            "26": "0.0.0.63",
+            "27": "0.0.0.31",
+            "28": "0.0.0.15",
+            "29": "0.0.0.7",
+            "30": "0.0.0.3",
+            "31": "0.0.0.1",
+            "32": "0.0.0.0"
+            }
+  
+        if "/" in wildcard:
+            wildcard_address = wildcard.split("/")
+            mask = wildcard_address.pop()
+
+            if mask and int(mask) in range(0, 33):
+                wildcard_address.append(cidr_mapping[mask])
+            else:
+                wildcard_address = []
+        else:
+            wildcard_address = []
+  
+        return wildcard_address
 
     def config_absent(self, module, proposed, existing):
         """
@@ -1849,8 +1963,8 @@ class FMPolicy(FortiManager):
 
 def main():
     argument_spec = dict(
-        adom=dict(required=True, type="str"),
-        host=dict(required=True, type="str"),
+        adom=dict(required=False, type="str"),
+        host=dict(required=False, type="str"),
         lock=dict(default=True, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         provider=dict(required=False, type="dict"),
@@ -1872,7 +1986,7 @@ def main():
         log_traffic_start=dict(choices=["enable", "disable"], required=False, type="str"),
         nat=dict(choices=["enable", "disable"], required=False, type="str"),
         nat_ip=dict(required=False, type="list"),
-        package=dict(required=True, type="str"),
+        package=dict(required=False, type="str"),
         permit_any_host=dict(choices=["enable", "disable"], required=False, type="str"),
         policy_id=dict(required=False, type="int"),
         policy_name=dict(required=False, type="str"),
@@ -1911,6 +2025,11 @@ def main():
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
 
+    argument_check = dict(adom=adom, host=host, package=package)
+    for key, val in argument_check.items():
+        if not val:
+            module.fail_json(msg="{} is required".format(key))
+
     # check that required arguments are passed for policy move before making any changes.
     if module.params["reference_policy_id"] and not module.params["direction"]:
         module.fail_json(msg="passing the direction argument is required when passing reference_policy_id")
@@ -1948,7 +2067,7 @@ def main():
         kwargs["port"] = port
 
     # validate successful login or use established session id
-    session = FMPolicy(host, username, password, use_ssl, validate_certs, adom, package)
+    session = FMPolicy(host, username, password, use_ssl, validate_certs, adom, package, **kwargs)
     if not session_id:
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:

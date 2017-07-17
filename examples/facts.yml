@@ -1,3 +1,4 @@
+---
 - name: Demonstrate Locking
   hosts: fortimanager
   connection: local
@@ -10,6 +11,15 @@
        username: "{{ username }}"
        password: "{{ password }}"
        adom: "lab"
+
+   - name: Get FortiGate Facts
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+       fortigates: "lab"
+
    - name: Get FortiGate Facts
      fortimgr_facts:
        host: "{{ inventory_hostname }}"
@@ -20,6 +30,16 @@
          - "lab"
          - "prod"
          - "dmz"
+
+   - name: Get All Configs
+     fortimgr_facts:
+       host: "{{ inventory_hostname }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
+       adom: "lab"
+       fortigates: "all"
+       config_filter: "all"
+
    - name: Get Some Configs
      fortimgr_facts:
        host: "{{ inventory_hostname }}"
@@ -38,13 +58,4 @@
        config_filter:
          - "routes"
          - "policy"
-   - name: Get All Configs
-     fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
-       adom: "lab"
-       fortigates:
-         - "all"
-       config_filter:
-         - "all"
+

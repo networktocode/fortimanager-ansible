@@ -50,57 +50,47 @@ netscaler_lb01
         address_name: "{{ item.name }}"
         address_type: "{{ item.type }}"
         subnet: "{{ item.subnet }}"
-          - "{{ item.network }}"
-          - "{{ item.mask }}"
       with_items:
         - name: "web01"
           fg: "prod_dmz"
           vdom: "prod"
           type: "subnet"
-          network: "10.10.10.10"
-          mask: "255.255.255.255"
+          subnet: "10.10.10.10/32"
         - name: "web01"
           fg: "dr_dmz"
           vdom: "dr"
           type: "subnet"
-          network: "10.20.10.10"
-          mask: "255.255.255.255"
+          subnet: "10.20.10.10/32"
         - name: "web02"
           fg: "prod_dmz"
           vdom: "prod"
           type: "subnet"
-          network: "10.10.20.10"
-          mask: "255.255.255.255"
+          subnet: "10.10.20.10/32"
         - name: "web02"
           fg: "dr_dmz"
           vdom: "dr"
           type: "subnet"
-          network: "10.20.20.10"
-          mask: "255.255.255.255"
+          subnet: "10.20.20.10/32"
         - name: "db01"
           fg: "prod_dmz"
           vdom: "prod"
           type: "subnet"
-          network: "10.10.100.10"
-          mask: "255.255.255.255"
+          subnet: "10.10.100.10/32"
         - name: "db01"
           fg: "dr_dmz"
           vdom: "dr"
           type: "subnet"
-          network: "10.20.100.10"
-          mask: "255.255.255.255"
+          network: "10.20.100.10/32"
         - name: "db02"
           fg: "prod_dmz"
           vdom: "prod"
           type: "subnet"
-          network: "10.10.120.10"
-          mask: "255.255.255.255"
+          network: "10.10.120.10/32"
         - name: "db02"
           fg: "dr_dmz"
           vdom: "dr"
           type: "subnet"
-          network: "10.20.120.10"
-          mask: "255.255.255.255"
+          network: "10.20.120.10/32"
 
     - name: CONFIGURE ADDRESS GROUPS
       fortimgr_address_group:
@@ -132,16 +122,15 @@ netscaler_lb01
       with_items:
         - name: "http"
           protocol: "TCP"
-          port_range:
-            - "80"
+          port_range: "80"
         - name: "https"
           protocol: "TCP"
           port_range:
             - "443"
+            - "8443"
         - name: "sql"
           protocol: "TCP"
-          port_range:
-            - "1433"
+          port_range: "1433"
 
     - name: CONFIGURE SERVICE GROUPS
       fortimgr_service_group:
@@ -157,8 +146,7 @@ netscaler_lb01
             - "http"
             - "https"
         - name: "db_app01_svcs"
-          port_range:
-            - "sql"
+          members: "sql"
 
     - name: CONFIGURE IP POOL MAPS
       fortimgr_ip_pool_map:
@@ -202,42 +190,30 @@ netscaler_lb01
           fg: "prod_dmz"
           vdom: "prod"
           type: "static-nat"
-          ext_ip:
-            - "100.10.10.10"
-          mapped:
-            - "10.10.10.10"
-          ext_intfc:
-            - "internet"
+          ext_ip: "100.10.10.10"
+          mapped: "10.10.10.10"
+          ext_intfc: "internet"
         - name: "app01_vip01"
           fg: "dr_dmz"
           vdom: "dr"
           type: "static-nat"
-          ext_ip:
-            - "100.20.10.10"
-          mapped:
-            - "10.20.10.10"
-          ext_intfc:
-            - "internet"
+          ext_ip: "100.20.10.10"
+          mapped: "10.20.10.10"
+          ext_intfc: "internet"
         - name: "app01_vip02"
           fg: "prod_dmz"
           vdom: "prod"
           type: "static-nat"
-          ext_ip:
-            - "100.10.10.11"
-          mapped:
-            - "10.10.20.10"
-          ext_intfc:
-            - "internet"
+          ext_ip: "100.10.10.11"
+          mapped: "10.10.20.10"
+          ext_intfc: "internet"
         - name: "app01_vip02"
           fg: "dr_dmz"
           vdom: "dr"
           type: "static-nat"
-          ext_ip:
-            - "100.20.20.11"
-          mapped:
-            - "10.20.20.10"
-          ext_intfc:
-            - "internet"
+          ext_ip: "100.20.20.11"
+          mapped: "10.20.20.10"
+          ext_intfc: "internet"
 
     - name: CONFIGURE VIP GROUP
       fortimgr_vip_group:
@@ -273,31 +249,20 @@ netscaler_lb01
         reference_policy_name: "explicit_deny_all"
       with_items:
         - name: "internet_to_web"
-          src_addr:
-            - "all"
-          src_intfc:
-            - "internet"
-          dst_addr:
-            - "app01_vipgrp"
-          dst_intfc:
-            - "web"
-          service:
-            - "web_app01_svcs"
+          src_addr: "all"
+          src_intfc: "internet"
+          dst_addr: "app01_vipgrp"
+          dst_intfc: "web"
+          service: "web_app01_svcs"
           nat: "enable"
           ip_pool: "enable"
-          pool_name:
-            - "app01_pool"
+          pool_name: "app01_pool"
         - name: "web_to_database"
-          src_addr:
-            - "web_app01_svrs"
-          src_intfc:
-            - "web"
-          dst_addr:
-            - "db_app01_svrs"
-          dst_intfc:
-            - "database"
-          service:
-            - "db_app01_svcs"
+          src_addr: "web_app01_svrs"
+          src_intfc: "web"
+          dst_addr: "db_app01_svrs"
+          dst_intfc: "database"
+          service: "db_app01_svcs"
 ```
 
 ## FortiManager Revision
@@ -367,8 +332,7 @@ netscaler_lb01
         check_install: True
         fortigate_name: "{{ item.fg }}"
         fortigate_revision_comments: "Weekly Policy Update for DMZ"
-        install_flags:
-          - "generate_rev"
+        install_flags: "generate_rev"
         package: "dmz"
         vdom: "{{ item.vdom }}"
       with_items:
@@ -392,10 +356,8 @@ netscaler_lb01
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "dmz"
-      fortigates:
-        - "all"
-      config_filter:
-        - "all"
+      fortigates: "all"
+      config_filter: "all"
 
     - name: GET SOME FACTS METHOD
       fortimgr_facts:

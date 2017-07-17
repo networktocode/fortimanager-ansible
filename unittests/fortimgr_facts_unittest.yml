@@ -35,6 +35,7 @@
         fortigates:
           - name: "lab1"
             vdom: "root"
+        fortigate_name: "hostname"
         config_filter:
           - "policy"
           - "route"

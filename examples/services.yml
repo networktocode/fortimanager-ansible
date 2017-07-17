@@ -1,3 +1,4 @@
+---
 - name: Ensure Service Objects Are in Desired State
   hosts: fortimanager
   connection: local
@@ -6,63 +7,72 @@
   tasks:
     - name: Ensure Service Object TCP Exists
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "http_svc"
+        protocol: "tcp"
+        port_range: "80"
+        comment: "Web Services"
+
+    - name: Ensure Service Object TCP Exists
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "web_svc"
-        protocol: "TCP"
+        protocol: "tcp"
         port_range:
           - "80"
           - "443"
         comment: "Web Services"
 
-    - name: Ensure Service Object TCP Port Does Not Exists
+    - name: Ensure Service Object TCP Port Does Not Exist
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "web_svc"
-        port_range:
-          - "80"
+        port_range: "80"
         state: "param_absent"
 
     - name: Ensure Service Object UDP Exists
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "snmp_svc"
-        protocol: "UDP"
-        port_range:
-          - "161-162"
+        protocol: "udp"
+        port_range: "161-162"
 
     - name: Ensure Service Object ICMP Exists
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "icmp_echo_svc"
-        protocol: "ICMP"
+        protocol: "icmp"
         icmp_code: 0
         icmp_type: 8
 
     - name: Ensure Service Object IP Exists
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "ah_svc"
-        protocol: "IP"
+        protocol: "ip"
         protocol_number: 51   
         
     - name: Ensure Service Group Exists
       fortimgr_service_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -71,29 +81,28 @@
           - "web_svc"
           - "snmp_svc"
 
-    - name: Ensure Service Group Member Does Not Exists
+    - name: Ensure Service Group Member Does Not Exist
       fortimgr_service_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name_group: "lab_svcgrp"
-        members:
-          - "snmp_svc"
+        members: "snmp_svc"
         state: "param_absent"
 
-    - name: Ensure Service Group Does Not Exists
+    - name: Ensure Service Group Does Not Exist
       fortimgr_service_group:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name_group: "lab_svcgrp"
         state: "absent"
 
-    - name: Ensure Service Object IP Exists
+    - name: Ensure Service Object IP Does Not Exist
       fortimgr_service:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"

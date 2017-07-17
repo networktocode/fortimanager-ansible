@@ -1,3 +1,4 @@
+---
 - name: Ensure IP Pools Are in Desired State
   hosts: fortimanager
   connection: local
@@ -6,7 +7,7 @@
   tasks:
     - name: Ensure IP Pool Overload Exists
       fortimgr_ip_pool:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -18,7 +19,7 @@
 
     - name: Ensure IP Pool One-to-One Exists
       fortimgr_ip_pool:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -29,7 +30,7 @@
 
     - name: Ensure IP Pool Fixed Port Range Exists
       fortimgr_ip_pool:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -42,7 +43,7 @@
 
     - name: Ensure IP Pool Fixed Port Range Exists Per Latest Need
       fortimgr_ip_pool:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -51,7 +52,7 @@
 
     - name: Ensure IP Pool Mapping Exists
       fortimgr_ip_pool_map:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -71,7 +72,7 @@
 
     - name: Ensure New IP Pool Mapping Exists
       fortimgr_ip_pool_map:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -84,7 +85,7 @@
 
     - name: Ensure IP Pool Mapping Does Not Exist
       fortimgr_ip_pool_map:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
@@ -94,16 +95,10 @@
 
     - name: Ensure IP Pool Does Not Exist
       fortimgr_ip_pool:
-        hosts: "{{ inventory_hostname }}"
+        host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         pool_name: "lab_pool_04"
         state: "absent"
-
-
-
-
-
-
 

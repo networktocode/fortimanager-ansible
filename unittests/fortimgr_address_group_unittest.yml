@@ -159,6 +159,27 @@
       ignore_errors: true
 
 
+- name: CLEANUP FORTIMANAGER ADDRESS GROUPS FOR UNIT TESTES
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: CLEANUP ADDRESS GROUPS - CHANGE
+      fortimgr_address_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_group_name: "{{ item }}"
+        state: "absent"
+      with_items:
+        - "addrgrp1"
+        - "addrgrp2"
+        - "addrgrp3"
+
+
 - name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES
   hosts: fortimanager
   connection: local
@@ -181,24 +202,3 @@
         - "addr4"
         - "addr5"
         - "addr6"
-
-- name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES
-  hosts: fortimanager
-  connection: local
-  gather_facts: false
-  tags: cleanup
-  
-  tasks:
-    - name: CLEANUP ADDRESS GROUPS - CHANGE
-      fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        address_group_name: "{{ item }}"
-        state: "absent"
-      with_items:
-        - "addrgrp1"
-        - "addrgrp2"
-        - "addrgrp3"
-

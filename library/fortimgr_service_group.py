@@ -145,8 +145,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     service_group_name: "App01_Web_Services"
-    members:
-      - "HTTP"
+    members: "HTTP"
     state: "param_absent"
 - name: Delete Service
   fortimgr_service_group:
@@ -237,12 +236,15 @@ class FortiManager(object):
         self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package, self.api_endpoint)
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom)
         self.headers = {"Content-Type": "application/json"}
-        self.port = kwargs.get("port", "")
+        if "port" not in kwargs:
+            self.port = ""
+        else:
+            self.port = ":{}".format(kwargs["port"])
 
         if use_ssl:
-            self.url = "https:{port}//{fw}/jsonrpc".format(port=self.port, fw=self.host)
+            self.url = "https://{fw}{port}/jsonrpc".format(fw=self.host, port=self.port)
         else:
-            self.url = "http:{port}//{fw}/jsonrpc".format(port=self.port, fw=self.host)
+            self.url = "http://{fw}{port}/jsonrpc".format(fw=self.host, port=self.port)
 
     def add_config(self, new_config):
         """
@@ -257,6 +259,124 @@ class FortiManager(object):
         response = self.make_request(body)
 
         return response
+
+    @staticmethod
+    def cidr_to_network(network):
+        """
+        Method is used to convert a network address in CIDR notation to a list with address and mask.
+  
+        :param network: Type str.
+                        The network address in CIDR notation.
+  
+        :return: A list with address and mask in that order.
+        """
+        cidr_mapping = {
+                "0": "0.0.0.0",
+                "1": "128.0.0.0",
+                "2": "192.0.0.0",
+                "3": "224.0.0.0",
+                "4": "240.0.0.0",
+                "5": "248.0.0.0",
+                "6": "252.0.0.0",
+                "7": "254.0.0.0",
+                "8": "255.0.0.0",
+                "9": "255.128.0.0",
+                "10": "255.192.0.0",
+                "11": "255.224.0.0",
+                "12": "255.240.0.0",
+                "13": "255.248.0.0",
+                "14": "255.252.0.0",
+                "15": "255.254.0.0",
+                "16": "255.255.0.0",
+                "17": "255.255.128.0",
+                "18": "255.255.192.0",
+                "19": "255.255.224.0",
+                "20": "255.255.240.0",
+                "21": "255.255.248.0",
+                "22": "255.255.252.0",
+                "23": "255.255.254.0",
+                "24": "255.255.255.0",
+                "25": "255.255.255.128",
+                "26": "255.255.255.192",
+                "27": "255.255.255.224",
+                "28": "255.255.255.240",
+                "29": "255.255.255.248",
+                "30": "255.255.255.252",
+                "31": "255.255.255.254",
+                "32": "255.255.255.255"
+            }
+  
+        if "/" in network:
+            network_address = network.split("/")
+            mask = network_address.pop()
+            
+            if mask and int(mask) in range(0, 33):
+                network_address.append(cidr_mapping[mask])
+            else:
+                network_address = []
+        else:
+            network_address = []
+  
+        return network_address
+
+    @staticmethod
+    def cidr_to_wildcard(wildcard):
+        """
+        Method is used to convert a wildcard address in CIDR notation to a list with address and mask.
+  
+        :param wildcard: Type str.
+                        The wildcard address in CIDR notation.
+  
+        :return: A list with address and mask in that order.
+        """
+        cidr_mapping = {
+            "0": "255.255.255.255",
+            "1": "127.255.255.255",
+            "2": "63.255.255.255",
+            "3": "31.255.255.255",
+            "4": "15.255.255.255",
+            "5": "7.255.255.255",
+            "6": "3.255.255.255",
+            "7": "1.255.255.255",
+            "8": "0.255.255.255",
+            "9": "0.127.255.255",
+            "10": "0.63.255.255",
+            "11": "0.31.255.255",
+            "12": "0.15.255.255",
+            "13": "0.7.255.255",
+            "14": "0.3.255.255",
+            "15": "0.1.255.255",
+            "16": "0.0.255.255",
+            "17": "0.0.127.255",
+            "18": "0.0.63.255",
+            "19": "0.0.31.255",
+            "20": "0.0.15.255",
+            "21": "0.0.7.255",
+            "22": "0.0.3.255",
+            "23": "0.0.1.255",
+            "24": "0.0.0.255",
+            "25": "0.0.0.127",
+            "26": "0.0.0.63",
+            "27": "0.0.0.31",
+            "28": "0.0.0.15",
+            "29": "0.0.0.7",
+            "30": "0.0.0.3",
+            "31": "0.0.0.1",
+            "32": "0.0.0.0"
+            }
+  
+        if "/" in wildcard:
+            wildcard_address = wildcard.split("/")
+            mask = wildcard_address.pop()
+
+            if mask and int(mask) in range(0, 33):
+                wildcard_address.append(cidr_mapping[mask])
+            else:
+                wildcard_address = []
+        else:
+            wildcard_address = []
+  
+        return wildcard_address
 
     def config_absent(self, module, proposed, existing):
         """
@@ -1254,8 +1374,8 @@ class FMServiceGroup(FortiManager):
 
 def main():
     argument_spec = dict(
-        adom=dict(required=True, type="str"),
-        host=dict(required=True, type="str"),
+        adom=dict(required=False, type="str"),
+        host=dict(required=False, type="str"),
         lock=dict(default=True, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
@@ -1269,7 +1389,7 @@ def main():
         comment=dict(required=False, type="str"),
         explicit_proxy=dict(choices=["enable", "disable"], required=False, type="str"),
         members=dict(required=False, type="list"),
-        service_group_name=dict(required=True, type="str")
+        service_group_name=dict(required=False, type="str")
     )
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
@@ -1304,6 +1424,11 @@ def main():
         "name": module.params["service_group_name"]
     }
 
+    argument_check = dict(adom=adom, host=host, service_group_name=args.get("name"))
+    for key, val in argument_check.items():
+        if not val:
+            module.fail_json(msg="{} is required".format(key))
+            
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v)
 
@@ -1312,7 +1437,7 @@ def main():
         kwargs["port"] = port
 
     # validate successful login or use established session id
-    session = FMServiceGroup(host, username, password, use_ssl, validate_certs, adom)
+    session = FMServiceGroup(host, username, password, use_ssl, validate_certs, adom, **kwargs)
     if not session_id:
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:
