@@ -1,0 +1,26 @@
+---
+- name: GET FACTS FROM FORTIMANAGER
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: GET FORTIMANAGER FACTS
+      fortimgr_facts:
+        provider: "{{ fortimanager_provider }}"
+      tags: fm
+
+    - name: GET FORTIMANAGER FACTS AND FORTIGATES
+      fortimgr_facts:
+        provider: "{{ fortimanager_provider }}"
+        fortigates: "all"
+      tags: fg
+
+    - name: GET FORTIMANAGER FACTS AND FORTIGATES AND CONFIGS
+      fortimgr_facts:
+        provider: "{{ fortimanager_provider }}"
+        fortigates: "all"
+        config_filter:
+          - "policy"
+          - "address"
+          - "route"

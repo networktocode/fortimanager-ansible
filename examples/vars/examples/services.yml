@@ -1,0 +1,26 @@
+---
+services:
+  tcp_udp:
+    - name: "svc_sql"
+      protocol: "tcp"
+      ports: "1434"
+    - name: "svc_syslog"
+      protocol: "udp"
+      ports: "514"
+    - name: "svc_web"
+      protocol: "tcp"
+      ports:
+        - "80"
+        - "443"
+  icmp:
+    - name: "svc_echo"
+      type: 8
+      code: 0
+    - name: "svc_echo_reply"
+      type: 0
+      code: 0
+  groups:
+    - name: "svcgrp_ping"
+      members:
+        - "svc_echo"
+        - "svc_echo_reply"

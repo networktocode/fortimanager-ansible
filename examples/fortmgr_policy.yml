@@ -1,0 +1,43 @@
+---
+- name: ENSURE POLICIES ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE POLICIES EXIST WITHOUT NAT
+      fortimgr_policy:
+        provider: "{{ fortimanager_provider }}"
+        package: "lab"
+        policy_name: "{{ item.name }}"
+        global_label: "{{ item.label }}"
+        action: "{{ item.action }}"
+        source_address: "{{ item.src_addr }}"
+        source_intfc: "{{ item.src_intfc }}"
+        destination_address: "{{ item.dst_addr }}"
+        destination_intfc: "{{ item.dst_intfc }}"
+        service: "{{ item.svc }}"
+        schedule: "always"
+        log_traffic: "all"
+        status: "enable"
+      with_items: "{{ policies.no_nat }}"
+
+    - name: ENSURE POLICIES EXIST WITH NAT
+      fortimgr_policy:
+        provider: "{{ fortimanager_provider }}"
+        package: "lab"
+        policy_name: "{{ item.name }}"
+        global_label: "{{ item.label }}"
+        action: "{{ item.action }}"
+        source_address: "{{ item.src_addr }}"
+        source_intfc: "{{ item.src_intfc }}"
+        destination_address: "{{ item.dst_addr }}"
+        destination_intfc: "{{ item.dst_intfc }}"
+        service: "{{ item.svc }}"
+        nat: "{{ item.nat }}"
+        ip_pool: "{{ item.pool }}"
+        pool_name: "{{ item.pool_name }}"
+        schedule: "always"
+        log_traffic: "all"
+        status: "enable"
+      with_items: "{{ policies.nat }}"

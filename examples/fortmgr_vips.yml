@@ -1,0 +1,45 @@
+---
+- name: ENSURE VIP ADDRESSES ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE VIP STATIC-NATS EXIST
+      fortimgr_vip:
+        provider: "{{ fortimanager_provider }}"
+        vip_name: "{{ item.name }}"
+        type: "static-nat"
+        external_ip: "{{ item.ext }}"
+        mapped_ip: "{{ item.map }}"
+        external_intfc: "{{ item.interface }}"
+        comment: "Lab VIP"
+      with_items: "{{ vips.statics }}"
+      tags: static
+
+    - name: ENSURE VIP MAPPINGS INTERFACE CONFIGS EXIST
+      fortimgr_vip:
+        provider: "{{ fortimanager_provider }}"
+        vip_name: "{{ item.name }}"
+        external_intfc: "{{ item.interface }}"
+      with_items: "{{ vips.mappings }}"
+      tags: map
+
+    - name: ENSURE VIP MAPPINGS EXIST
+      fortimgr_vip_map:
+        provider: "{{ fortimanager_provider }}"
+        fortigate: "{{ item.fw }}"
+        vip_name: "{{ item.name }}"
+        type: "static-nat"
+        external_ip: "{{ item.ext }}"
+        mapped_ip: "{{ item.map }}"
+      with_items: "{{ vips.mappings }}"
+      tags: map
+
+    - name: ENSURE VIP GROUPS EXIST
+      fortimgr_vip_group:
+        provider: "{{ fortimanager_provider }}"
+        vip_group_name: "{{ item.name }}"
+        members: "{{ item.members }}"
+      with_items: "{{ vips.groups }}"
+      tags: group

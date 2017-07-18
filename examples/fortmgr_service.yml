@@ -1,0 +1,34 @@
+---
+- name: ENSURE SERVICE OBJECTS ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE SERVICE OBJECTS TCP/UDP EXIST
+      fortimgr_service:
+        provider: "{{ fortimanager_provider }}"
+        service_name: "{{ item.name }}"
+        protocol: "{{ item.protocol }}"
+        port_range: "{{ item.ports }}"
+        comment: "Services"
+      with_items: "{{ services.tcp_udp }}"
+      tags: tcp_udp
+
+    - name: ENSURE SERVICE OBJECTS ICMP EXIST
+      fortimgr_service:
+        provider: "{{ fortimanager_provider }}"
+        service_name: "{{ item.name }}"
+        protocol: "ICMP"
+        icmp_code: "{{ item.code }}"
+        icmp_type: "{{ item.type  }}" 
+      with_items: "{{ services.icmp }}"
+      tags: icmp
+        
+    - name: ENSURE SERVICE GROUPS EXIST
+      fortimgr_service_group:
+        provider: "{{ fortimanager_provider }}"
+        service_group_name: "{{ item.name }}"
+        members: "{{ item.members }}"
+      with_items: "{{ services.groups }}"
+      tags: group
