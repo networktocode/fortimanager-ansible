@@ -1,0 +1,16 @@
+---
+- name: GET FACTS FROM FORTIMANAGER
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Add Route
+      fortimgr_route:
+        provider: "{{ fortimanager_provider }}"
+        fortigate: "labfg"
+        vdom: "root"
+        destination: "{{ item.dest }}"
+        gateway: "{{ item.gateway }}"
+        intfc: "{{ item.interface }}"
+      with_items: "{{ routes }}"

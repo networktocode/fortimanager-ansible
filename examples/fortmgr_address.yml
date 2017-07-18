@@ -1,0 +1,55 @@
+---
+- name: ENSURE ADDRESS OBJECTS ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE ADDRESS SUBNETS EXIST
+      fortimgr_address:
+        provider: "{{ fortimanager_provider }}"
+        address_name: "{{ item.name }}"
+        address_type: "ipmask"
+        subnet: "{{ item.subnet }}"
+        associated_intfc: "{{ item.interface }}"
+        comment: "Lab Server"
+      with_items: "{{ addresses.subnets }}"
+      tags: subnet
+
+    - name: ENSURE ADDRESS RANGES EXIST
+      fortimgr_address:
+        provider: "{{ fortimanager_provider }}"
+        address_name: "{{ item.name }}"
+        address_type: "iprange"
+        start_ip: "{{ item.start }}"
+        end_ip: "{{ item.end }}"
+        associated_intfc: "{{ item.interface }}"
+      with_items: "{{ addresses.ranges }}"
+      tags: range
+
+    - name: ENSURE ADDRESS INTERFACE IS SET FOR ADDRESS MAPS
+      fortimgr_address:
+        provider: "{{ fortimanager_provider }}"
+        address_name: "{{ item.name }}"
+        associated_intfc: "{{ item.interface }}"
+      with_items: "{{ addresses.maps }}"
+      tags: maps
+
+    - name: ENSURE ADDRESS MAPS EXIST
+      fortimgr_address_map:
+        provider: "{{ fortimanager_provider }}"
+        fortigate: "{{ item.fw }}"
+        address_name: "{{ item.name }}"
+        address_type: "ipmask"
+        subnet: "{{ item.subnet }}"
+        comment: "Lab Server"
+      with_items: "{{ addresses.maps }}"
+      tags: maps
+
+    - name: ENSURE ADDRESS GROUPS EXIST
+      fortimgr_address_group:
+        provider: "{{ fortimanager_provider }}"
+        address_group_name: "{{ item.name }}"
+        members: "{{ item.members }}"
+      with_items: "{{ addresses.groups }}"
+      tags: groups

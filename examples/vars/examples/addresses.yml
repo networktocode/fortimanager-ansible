@@ -1,0 +1,28 @@
+---
+addresses:
+  subnets:
+    - name: "web_svr01"
+      subnet: "192.168.1.1/32"
+      interface: "lab"
+    - name: "web_svr02"
+      subnet: "192.168.1.8/32"
+      interface: "lab"
+  ranges:
+    - name: "db_svrs"
+      start: "192.168.2.10"
+      end: "192.168.2.14"
+      interface: "db"
+  maps:
+    - fw: "lab01"
+      name: "users"
+      interface: "corp"
+      subnet: "10.10.10.0/24"
+    - fw: "lab02"
+      name: "users"
+      interface: "corp"
+      subnet: "10.10.20.0/24"
+  groups:
+    - name: web_servers
+      members:
+        - "web_svr01"
+        - "web_svr02"

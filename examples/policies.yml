@@ -1,0 +1,65 @@
+---
+- name: ENSURE POLICIES ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE POLICIES EXIST WITHOUT NAT
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        package: "lab"
+        policy_name: "lab_policy_01"
+        global_label: "lab_to_corp"
+        action: "accept"
+        source_address: "lab_web_grp"
+        source_intfc: "lab"
+        destination_address: "corp_ntp_grp"
+        destination_intfc: "corp"
+        service: "ntp"
+        schedule: "always"
+        log_traffic: "all"
+        status: "enable"
+
+    - name: ENSURE POLICIES EXIST WITH NAT
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        package: "lab"
+        policy_name: "corp_policy_01"
+        global_label: "corp_to_lab"
+        action: "accept"
+        source_address: "corp_user_grp"
+        source_intfc: "corp"
+        destination_address: "lab_web_grp"
+        destination_intfc: "lab"
+        service: "web_svcs"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "corp_pool"
+        schedule: "always"
+        log_traffic: "all"
+        status: "enable"
+
+    - name: ENSURE POLICIES EXIST AT LOCATION 
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        package: "lab"
+        policy_name: "corp_policy_02"
+        global_label: "corp_to_lab"
+        action: "deny"
+        source_address: "corp_prod_grp"
+        source_intfc: "corp"
+        destination_address: "lab_web_grp"
+        destination_intfc: "lab"
+        service: "web_svcs"
+        schedule: "always"
+        log_traffic: "all"
+        status: "enable"
+        direction: "before"
+        reference_policy_name: "corp_policy_01"
