@@ -1,6 +1,25 @@
 ---
 
-- name: FORTIMANAGER ADDRESS UNITTESTS
+- name: CREATE FORTIMANAGER ADDRESS FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: CREATE ADDRESS OBJECT - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "route_unittest"
+        address_type: "ipmask"
+        subnet:
+          - "10.2.1.1"
+          - "255.255.255.255"
+        allow_routing: "enable"
+
+- name: FORTIMANAGER ROUTE UNITTESTS
   hosts: fortimanager
   connection: local
   gather_facts: false
@@ -45,6 +64,7 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         vdom: "root"
+      register: config_results
 
     - name: CREATE ROUTE CIDR NOTATION AGAIN - NO CHANGE
       fortimgr_route:
@@ -55,6 +75,30 @@
         fortigate: "lab1"
         vdom: "root"
         destination: "10.20.10.0/24"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+
+    - name: CREATE ROUTE HOST NOTATION - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination: "10.20.16.16"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+
+    - name: CREATE ROUTE HOST NOTATION AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination: "10.20.16.16"
         gateway: "10.1.1.1"
         intfc: "port1"
 
@@ -84,6 +128,58 @@
         gateway: "10.1.1.1"
         intfc: "port1"
 
+    - name: CREATE ROUTE ADDRESS OBJECT - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination_object: "route_unittest"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+      ignore_errors: true
+
+    - name: CREATE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination_object: "route_unittest"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+      ignore_errors: true
+
+    - name: DELETE ROUTE ADDRESS OBJECT - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination_object: "route_unittest"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+        state: "absent"
+
+    - name: DELETE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        destination_object: "route_unittest"
+        gateway: "10.1.1.1"
+        intfc: "port1"
+        vdom: "root"
+        state: "absent"
+
     - name: ADD ROUTE TO DIFFERENT GATEWAY - CHANGE
       fortimgr_route:
         host: "{{ inventory_hostname }}"
@@ -98,6 +194,17 @@
         gateway: "10.1.1.2"
         intfc: "port1"
 
+    - name: MODIFY ROUTE'S INTERFACE USING SEQUENCE NUMBER - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        sequence_number: "{{ config_results.config.params[0].data.get('seq-num') }}"
+        intfc: "port2"
+
     - name: ADD ROUTE THROUGH DIFFERENT INTERFACE - FAIL
       fortimgr_route:
         host: "{{ inventory_hostname }}"
@@ -110,6 +217,47 @@
           - "10.10.10.0"
           - "255.255.255.0"
         gateway: "10.1.1.2"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE MISSING GATEWAY - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE MISSING DESTINATION - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        gateway: "10.1.1.1"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE DESTINATION ADDRESS AND OBJECT - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        destination_object: "route_unittest"
         intfc: "port2"
       ignore_errors: True
 
@@ -161,4 +309,25 @@
       with_items:
         - "10.20.10.0/24"
         - "10.30.10.0/24"
+        - "10.20.16.16"
       tags: cleanup
+
+- name: DELETE FORTIMANAGER ADDRESS FOR UNIT TESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  tags: cleanup
+  
+  tasks:
+    - name: DELETE ADDRESS OBJECT - CHANGE
+      fortimgr_address:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "route_unittest"
+        address_type: "ipmask"
+        subnet:
+          - "10.2.1.1"
+          - "255.255.255.255"
+        state: "absent"
