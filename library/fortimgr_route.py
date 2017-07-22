@@ -115,6 +115,25 @@ options:
       - Alternatively, the netmask and network params can be used.
     required: true
     type: list
+  destination_netmask: 
+    description:
+      - The netmask to use for the destination address.
+      - The network param must be used in conjuction with netmask.
+      - Alternatively, the destination param can be used for cidr notation.
+    required: false
+    type: str
+  destination_network: 
+    description:
+      - The network address to use destination address.
+      - The netmask param must be used in conjuction with network.
+      - Alternatively, the destination param can be used for cidr notation.
+    required: false
+    type: str
+  destination_object:
+    description
+      - The address or address-group object to use as the destination address
+    required: false
+    type: str
   fortigate:
     description:
       - The fortigate to apply the route to.
@@ -130,25 +149,17 @@ options:
       - The interface used to reach the route.
     required: false
     type: list
-  netmask: 
-    description:
-      - The netmask to use for the destination address.
-      - The network param must be used in conjuction with netmask.
-      - Alternatively, the destination param can be used for cidr notation.
-    required: false
-    type: str
-  network: 
-    description:
-      - The network address to use destination address.
-      - The netmask param must be used in conjuction with network.
-      - Alternatively, the destination param can be used for cidr notation.
-    required: false
-    type: str
   priority:
     description:
       - The priority to assign the route.
     required: false
     type: int
+  sequence_number:
+    description:
+      - The sequence number of the route in FortiManager
+      - This is required in order to modify an existing route's interface, destination, and gateway.
+    required: false
+    type: str
   vdom:
     description:
       - The vdom on the fortigate to add the route to.
@@ -201,7 +212,7 @@ config:
     returned: always
     type: dict
     sample: {"method": "update", "params": [{"data": {"device": ["port2"], "dst": ["7.7.7.7", "255.255.255.255"],
-             "gateway": "2.2.2.3"}, "url": "/pm/config/device/FortiGate-VM64-KVM/vdom/root/route/static"}]}
+             "gateway": "2.2.2.3"}, "seq-num": 15, "url": "/pm/config/device/FortiGate-VM64-KVM/vdom/root/route/static"}]}
 locked:
     description: The status of the ADOM lock command
     returned: When lock set to True
@@ -1436,6 +1447,33 @@ class FMRoute(FortiManager):
 
         return {"changed": changed, "config": config, "existing": existing}
 
+    def config_new(self, module, new_config):
+        """
+        This method is used to handle the logic for Ansible modules when the "state" is set to "present" and their is
+        not currently an object of the same type with the same name. The config_lock is used to lock the configuration
+        if the lock param is set to True. The config_response method is used to handle the logic from the response to
+        create the object.
+
+        :param module: The Ansible Module instance started by the task.
+        :param new_config: Type dict.
+                           The config dictionary with the objects configuration to send to the FortiManager API. This
+                           corresponds to the "data" portion of the request body.
+        :return: A dictionary that corresponds to the configuration that was sent in the request body to the
+                 FortiManager API. This dict will map to the "config" key returned by the Ansible Module.
+        """
+        # lock config if set and module not in check mode
+        if module.params["lock"] and not module.check_mode:
+            self.config_lock(module)
+
+        # configure if not in check mode
+        if not module.check_mode:
+            response = self.add_config(new_config)
+            self.config_response(module, response.json(), module.params["lock"])
+            sequence_number = response.json().get("result", [{}])[0].get("data", {}).get("seq-num", "None")
+            new_config.update({"seq-num": sequence_number})
+
+        return {"method": "add", "params": [{"url": self.obj_url, "data": new_config}]}
+
     def config_present(self, module, proposed, existing):
         """
         This function is used to determine the appropriate configuration to send to the FortiManager API when the
@@ -1455,11 +1493,13 @@ class FMRoute(FortiManager):
             changed = True
         else:
             diff = self.get_diff_add(proposed, existing)
-            if diff and "device" in diff:
-                module.fail_json(msg="This module does not support updating a route's associated interface, or creating"
-                                     " a route matching an existing destination prefix that points to a different"
-                                     " interface. This can be achieved by first running a task to delete the existing"
-                                     " route.", existing=existing)
+            if diff and module.params["sequence_number"]:
+                config = self.config_update(module, diff)
+                changed = True
+            elif diff and "device" in diff:
+                module.fail_json(msg="This module does not support creating a route matching an existing destination"
+                                     " prefix that points to a different interface. Modifying an existing route's"
+                                     " interface can be done using the sequence_number parameter", existing=existing)
             elif diff and "gateway" in diff:
                 diff.pop("seq-num")
                 config = self.config_new(module, proposed)
@@ -1543,7 +1583,26 @@ class FMRoute(FortiManager):
 
         return config
 
-    def get_item(self, destination, gateway):
+    def get_item(self, sequence_number):
+        """
+        This method is used to get a specific static route currently configured on the FortiGate and VDOM specified in
+        the class instance. The destination and gateway are used to distinguish the route.
+
+        :param sequence_number: Type: str.
+                                The sequence number in FortiManager of an existing route.
+        :return: The configuration for the object as a dictionary. An empty dict is returned if the request does not
+                 return any data.
+        """
+        route_url = "{}/{}".format(self.obj_url, sequence_number)
+        body = dict(method="get", params=[dict(url=route_url)], session=self.session)
+        response = self.make_request(body).json()["result"][0].get("data", {})
+
+        if not response:
+            response = {}
+
+        return response
+
+    def get_item_destination(self, destination, gateway):
         """
         This method is used to get a specific static route currently configured on the FortiGate and VDOM specified in
         the class instance. The destination and gateway are used to distinguish the route.
@@ -1553,7 +1612,7 @@ class FMRoute(FortiManager):
                             of [destination, mask]. Using an address or address group object should be a string.
         :param gateway: Type str.
                         The gateway address used to reach the destination.
-        :return: The configuration for the objects a list with a dictionary. A list with an empty dict is returned if
+        :return: The configuration for the objects as a list with a dictionary. A list with an empty dict is returned if
                  the request does not return any data.
         """
         if len(destination) == 2:
@@ -1618,12 +1677,14 @@ def main():
         comment=dict(required=False, type="str"),
         distance=dict(required=False, type="int"),
         destination=dict(required=False, type="list"),
+        destination_object=dict(required=False, type="str"),
         destination_netmask=dict(required=False, type="str"),
         destination_network=dict(required=False, type="str"),
         fortigate=dict(required=False, type="str"),
         gateway=dict(required=False, type="str"),
         intfc=dict(required=False, type="list"),
         priority=dict(required=False, type="int"),
+        sequence_number=dict(required=False, type="str"),
         vdom=dict(default="root", type="str"),
         weight=dict(required=False, type="int")
     )
@@ -1655,9 +1716,12 @@ def main():
     validate_certs = module.params["validate_certs"]
     fortigate = module.params["fortigate"]
     vdom = module.params["vdom"]
+    seq_num = module.params["sequence_number"]
     dst = module.params["destination"]
-    if dst and "/" in dst[0]:
+    if dst and len(dst) == 1 and "/" in dst[0]:
         dst = FortiManager.cidr_to_network(dst[0])
+    elif dst and len(dst) == 1:
+        dst = [str(dst[0]), "255.255.255.255"]
     elif module.params["destination_network"] and module.params["destination_netmask"]:
         dst = [module.params["destination_network"], module.params["destination_netmask"]]
 
@@ -1666,15 +1730,28 @@ def main():
         "device": module.params["intfc"],
         "distance": module.params["distance"],
         "dst": dst,
+        "dstaddr": module.params["destination_object"],
         "gateway": module.params["gateway"],
         "priority": module.params["priority"],
+        "seq-num": seq_num,
         "weight": module.params["weight"]
     }
 
-    argument_check = dict(host=host, fortigate=fortigate, gateway=args.get("gateway"))
+    argument_check = dict(host=host, fortigate=fortigate)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
+
+    if args.get("dst") and args.get("dstaddr"):
+        module.fail_json(msg="Destination Addresses cannnot be both Network Addresses and Address Objects")
+
+    if not seq_num:
+        if not args.get("gateway"):
+            module.fail_json(msg="The gateway parameter is required when not specifying the sequence number"
+                                 " of an existing route.")
+        elif not args.get("dst") and not args.get("dstaddr"):
+            module.fail_json(msg="Either the destination or destination_object parameter is required when"
+                                 " not specifying the sequence number of an existing route.")
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v)
@@ -1693,7 +1770,14 @@ def main():
         session.session = session_id
 
     # get existing configuration from fortimanager and make necessary changes
-    existing = session.get_item(proposed.get("dst", proposed.get("dstaddr")), proposed["gateway"])[0]
+    if seq_num:
+        existing = session.get_item(seq_num)
+    else:
+        destination = proposed.get("dst")
+        if not destination:
+            destination = proposed.get("dstaddr")
+        existing = session.get_item_destination(destination, proposed["gateway"])[0]
+
     if state == "present":
         results = session.config_present(module, proposed, existing)
     else:
