@@ -888,13 +888,13 @@ class FortiManager(object):
         config = {}
         for field in proposed.keys():
             if field in existing and proposed[field] != existing[field]:
-                if type(existing[field]) is list:
+                if isinstance(existing[field], list):
                     diff = list(set(proposed[field]).union(existing[field]))
                     if diff != existing[field]:
                         config[field] = diff
-                elif type(existing[field]) is dict:
+                elif isinstance(existing[field], dict):
                     config[field] = dict(set(proposed[field].items()).union(existing[field].items()))
-                elif type(existing[field]) is str or type(existing[field]) is unicode:
+                elif isinstance(existing[field], str) or isinstance(existing[field], unicode):
                     config[field] = proposed[field]
             elif field not in existing:
                 config[field] = proposed[field]
@@ -934,13 +934,13 @@ class FortiManager(object):
                 for field in proposed_map.keys():
                     # only consider relevant fields that have a difference
                     if field in mapping and proposed_map[field] != mapping[field]:
-                        if type(mapping[field]) is list:
+                        if isinstance(mapping[field], list):
                             diff = list(set(proposed_map[field]).union(mapping[field]))
                             if diff != mapping[field]:
                                 updated_map[field] = diff
-                        elif type(mapping[field]) is dict:
+                        elif isinstance(mapping[field], dict):
                             updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
-                        elif type(mapping[field]) is str or type(mapping[field]) is unicode:
+                        elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
                             updated_map[field] = proposed_map[field]
                     elif field not in mapping:
                         updated_map[field] = proposed_map[field]
@@ -1004,11 +1004,11 @@ class FortiManager(object):
         """
         config = {}
         for field in proposed.keys():
-            if field in existing and type(existing[field]) is list:
+            if field in existing and isinstance(existing[field], list):
                 diff = list(set(existing[field]).difference(proposed[field]))
                 if diff != existing[field]:
                     config[field] = diff
-            elif field in existing and type(existing[field]) is dict:
+            elif field in existing and isinstance(existing[field], dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing[field]:
                     config[field] = diff
@@ -1047,11 +1047,11 @@ class FortiManager(object):
                 present = True
                 updated_map = {}
                 for field in proposed_map.keys():
-                    if field in mapping and type(mapping[field]) is list:
+                    if field in mapping and isinstance(mapping[field], list):
                         diff = list(set(mapping[field]).difference(proposed_map[field]))
                         if diff != mapping[field]:
                             updated_map[field] = diff
-                    elif field in mapping and type(mapping[field]) is dict:
+                    elif field in mapping and isinstance(mapping[field], dict):
                         diff = dict(set(proposed_map.items()).difference(mapping.items()))
                         if diff != mapping[field]:
                             updated_map[field] = diff
@@ -1532,13 +1532,13 @@ class FMRoute(FortiManager):
                 if field in replace:
                     # replace the entries that are lists with fixed length of one
                     config[field] = proposed[field]
-                elif type(existing[field]) is list:
+                elif isinstance(existing[field], list):
                     diff = list(set(proposed[field]).union(existing[field]))
                     if diff != existing[field]:
                         config[field] = diff
-                elif type(existing[field]) is dict:
+                elif isinstance(existing[field], dict):
                     config[field] = dict(set(proposed[field].items()).union(existing[field].items()))
-                elif type(existing[field]) is str or type(existing[field]) is unicode or type(existing[field]) is int:
+                elif isinstance(existing[field], str) or isinstance(existing[field], int) or isinstance(existing[field], unicode):
                     config[field] = proposed[field]
             elif field not in existing:
                 config[field] = proposed[field]
@@ -1569,11 +1569,11 @@ class FMRoute(FortiManager):
             # ignore lists that can only have a length of one
             if field in ignore:
                 pass
-            elif field in existing and type(existing[field]) is list:
+            elif field in existing and isinstance(existing[field], list):
                 diff = list(set(existing[field]).difference(proposed[field]))
                 if diff != existing[field]:
                     config[field] = diff
-            elif field in existing and type(existing[field]) is dict:
+            elif field in existing and isinstance(existing[field], dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing[field]:
                     config[field] = diff
@@ -1615,7 +1615,7 @@ class FMRoute(FortiManager):
         :return: The configuration for the objects as a list with a dictionary. A list with an empty dict is returned if
                  the request does not return any data.
         """
-        if len(destination) == 2:
+        if isinstance(destination, list):
             dst = ["dst", "==", destination]
         else:
             dst = ["dstaddr", "==", destination]
@@ -1644,7 +1644,7 @@ class FMRoute(FortiManager):
         :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
                  not return any data.
         """
-        if type(destination) is str:
+        if isinstance(destination, list):
             dst = ["dst", "==", destination]
         else:
             dst = ["dstaddr", "==", destination]
