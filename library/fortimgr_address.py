@@ -1730,10 +1730,12 @@ def main():
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
     subnet = module.params["subnet"]
-    if subnet and "/" in subnet[0]:
+    if subnet and len(subnet) == 1 and "/" in subnet[0]:
         subnet = FortiManager.cidr_to_network(subnet[0])
         if not subnet:
             module.fail_json(msg="The prefix must be a value between 0 and 32")
+    elif subnet and len(subnet) == 1:
+        subnet.append("255.255.255.255")
     elif module.params["network_address"] and module.params["network_mask"]:
         subnet = [module.params["network_address"], module.params["network_mask"]]
 
