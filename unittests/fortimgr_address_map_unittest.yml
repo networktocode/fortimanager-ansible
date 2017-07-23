@@ -115,7 +115,7 @@
           subnet: "10.10.20.10/33"
       ignore_errors: true
 
-    - name: CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION - CHANGE
+    - name: CREATE ADDRESS MAP IPMASK HOST NOTATION - CHANGE
       fortimgr_address_map:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -124,6 +124,46 @@
         fortigate: "{{ item.fg }}"
         vdom: "root"
         address_name: "addr4"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        color: 1
+        subnet: "{{ item.subnet }}"
+        comment: "ipmask unit test"
+      with_items:
+        - fg: "lab1"
+          subnet: "10.20.10.15"
+        - fg: "lab2"
+          subnet: "10.20.20.15"
+
+    - name: CREATE ADDRESS MAP IPMASK HOST NOTATION AGAIN - NO CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr4"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        color: 1
+        subnet: "{{ item.subnet }}"
+        comment: "ipmask unit test"
+      with_items:
+        - fg: "lab1"
+          subnet: "10.20.10.15"
+        - fg: "lab2"
+          subnet: "10.20.20.15"
+
+    - name: CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION - CHANGE
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "{{ item.fg }}"
+        vdom: "root"
+        address_name: "addr5"
         address_type: "ipmask"
         allow_routing: "enable"
         color: 1
@@ -146,7 +186,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr4"
+        address_name: "addr5"
         address_type: "ipmask"
         allow_routing: "enable"
         color: 1
@@ -169,7 +209,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr5"
+        address_name: "addr6"
         address_type: "iprange"
         allow_routing: "disable"
         color: 2
@@ -192,7 +232,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr5"
+        address_name: "addr6"
         address_type: "iprange"
         allow_routing: "disable"
         color: 2
@@ -215,7 +255,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr6"
+        address_name: "addr7"
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
@@ -237,7 +277,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr6"
+        address_name: "addr7"
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
@@ -259,7 +299,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr7"
+        address_name: "addr8"
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
@@ -277,7 +317,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr7"
+        address_name: "addr8"
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
@@ -295,7 +335,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr8"
+        address_name: "addr9"
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
@@ -314,7 +354,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr9"
+        address_name: "addr10"
         address_type: "wildcard"
         wildcard_address: "{{ item.address }}"
         wildcard_mask: "{{ item.mask }}"
@@ -335,7 +375,7 @@
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
-        address_name: "addr9"
+        address_name: "addr10"
         address_type: "wildcard"
         wildcard_address: "{{ item.address }}"
         wildcard_mask: "{{ item.mask }}"
@@ -412,7 +452,7 @@
         username: "{{ username }}"
         password: "{{ password }}"
         fortigate: "lab1"
-        address_name: "addr10"
+        address_name: "addr11"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
@@ -425,7 +465,7 @@
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        address_name: "addr10"
+        address_name: "addr11"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
@@ -472,3 +512,4 @@
         - "addr8"
         - "addr9"
         - "addr10"
+        - "addr11"
