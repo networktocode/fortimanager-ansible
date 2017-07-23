@@ -29,6 +29,7 @@
         subnet:
           - "10.1.1.1"
           - "255.255.255.255"
+        lock: false
 
     - name: CREATE ADDRESS MAP - CHANGE
       fortimgr_address_map:
@@ -42,6 +43,7 @@
         subnet:
           - "10.1.1.2"
           - "255.255.255.255"
+        lock: false
 
     - name: CREATE ADDRESS GROUP - CHANGE
       fortimgr_address_group:
@@ -51,6 +53,7 @@
         address_group_name: "addrgrp1"
         members:
           - "addr1"
+        lock: false
 
     - name: CREATE SERVICE - CHANGE
       fortimgr_service:
@@ -61,6 +64,7 @@
         protocol: TCP
         port_range:
           - 80
+        lock: false
 
     - name: CREATE SERVICE GROUP - CHANGE
       fortimgr_service_group:
@@ -70,6 +74,7 @@
         service_group_name: "svcgrp1"
         members:
           - "svc1"
+        lock: false
 
     - name: CREATE IP POOL - CHANGE
       fortimgr_ip_pool:
@@ -80,6 +85,7 @@
         type: "overload"
         start_ip: "10.10.10.10"
         end_ip: "10.10.10.10"
+        lock: false
 
     - name: CREATE IP POOL MAP - CHANGE
       fortimgr_ip_pool_map:
@@ -92,6 +98,7 @@
         type: "overload"
         start_ip: "10.10.10.11"
         end_ip: "10.10.10.11"
+        lock: false
 
     - name: CREATE VIP - CHANGE
       fortimgr_vip:
@@ -104,6 +111,7 @@
           - "100.10.10.12"
         mapped_ip:
           - "10.10.10.12"
+        lock: false
 
     - name: CREATE VIP MAP - CHANGE
       fortimgr_vip_map:
@@ -118,6 +126,7 @@
           - "100.10.10.13"
         mapped_ip:
           - "10.10.10.13"
+        lock: false
 
     - name: CREATE VIP GROUP - CHANGE
       fortimgr_vip_group:
@@ -127,6 +136,7 @@
         vip_group_name: "vipgrp1"
         members:
           - "vip1"
+        lock: false
 
     - name: CREATE POLICY - CHANGE
       fortimgr_policy:
@@ -148,6 +158,7 @@
           - "all"
         source_intfc:
           - "any"
+        lock: false
 
     - name: FORTIMANAGER SAVE - CHANGE
       fortimgr_lock:
@@ -163,6 +174,7 @@
         adom: "lab"
         address_group_name: "addrgrp1"
         state: "absent"
+        lock: false
 
     - name: DELETE ADDRESS - CHANGE
       fortimgr_address:
@@ -171,6 +183,7 @@
         adom: "lab"
         address_name: "addr1"
         state: "absent"
+        lock: false
 
     - name: DELETE ADDRESS MAP - CHANGE
       fortimgr_address_map:
@@ -181,6 +194,7 @@
         vdom: "root"
         address_name: "addr2"
         state: "absent"
+        lock: false
 
     - name: DELETE ADDRESS - CHANGE
       fortimgr_address:
@@ -189,6 +203,7 @@
         adom: "lab"
         address_name: "addr2"
         state: "absent"
+        lock: false
 
     - name: DELETE SERVICE GROUP - CHANGE
       fortimgr_service_group:
@@ -197,6 +212,7 @@
         adom: "lab"
         service_group_name: "svcgrp1"
         state: "absent"
+        lock: false
 
     - name: DELETE SERVICE - CHANGE
       fortimgr_service:
@@ -205,6 +221,7 @@
         adom: "lab"
         service_name: "svc1"
         state: "absent"
+        lock: false
 
     - name: DELETE IP POOL - CHANGE
       fortimgr_ip_pool:
@@ -213,6 +230,7 @@
         adom: "lab"
         pool_name: "pool1"
         state: "absent"
+        lock: false
 
     - name: DELETE IP POOL MAP - CHANGE
       fortimgr_ip_pool_map:
@@ -223,6 +241,7 @@
         vdom: "root"
         pool_name: "pool2"
         state: "absent"
+        lock: false
 
     - name: DELETE IP POOL - CHANGE
       fortimgr_ip_pool:
@@ -231,6 +250,7 @@
         adom: "lab"
         pool_name: "pool2"
         state: "absent"
+        lock: false
 
     - name: DELETE VIP GROUP - CHANGE
       fortimgr_vip_group:
@@ -239,6 +259,7 @@
         adom: "lab"
         vip_group_name: "vipgrp1"
         state: "absent"
+        lock: false
 
     - name: DELETE VIP - CHANGE
       fortimgr_vip:
@@ -247,6 +268,7 @@
         adom: "lab"
         vip_name: "vip1"
         state: "absent"
+        lock: false
 
     - name: DELETE VIP MAP - CHANGE
       fortimgr_vip_map:
@@ -257,6 +279,7 @@
         vdom: "root"
         vip_name: "vip2"
         state: "absent"
+        lock: false
 
     - name: DELETE VIP - CHANGE
       fortimgr_vip:
@@ -265,6 +288,7 @@
         adom: "lab"
         vip_name: "vip2"
         state: "absent"
+        lock: false
 
     - name: DELETE POLICY - CHANGE
       fortimgr_policy:
@@ -274,6 +298,7 @@
         package: "lab"
         policy_name: "policy1"
         state: "absent"
+        lock: false
 
     - name: FORTIMANAGER SAVE AND UNLOCK - CHANGE
       fortimgr_lock:
