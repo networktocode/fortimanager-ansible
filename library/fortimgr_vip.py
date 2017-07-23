@@ -341,7 +341,7 @@ class FortiManager(object):
         if "/" in network:
             network_address = network.split("/")
             mask = network_address.pop()
-            
+
             if mask and int(mask) in range(0, 33):
                 network_address.append(cidr_mapping[mask])
             else:
@@ -910,40 +910,41 @@ class FortiManager(object):
         name = proposed.get("name")
         proposed_map = proposed.get("dynamic_mapping")[0]
         proposed_scope = proposed_map.pop("_scope")[0]
-        existing_map = existing.get("dynamic_mapping", [])
+        existing_map = existing.get("dynamic_mapping")
         config = dict(name=name, dynamic_mapping=[])
         present = False
 
-        # check if mapping already exists and make necessary updates to config
-        for mapping in existing_map:
-            if proposed_scope in mapping["_scope"]:
-                present = True
-                updated_map = {}
-                for field in proposed_map.keys():
-                    # only consider relevant fields that have a difference
-                    if field in mapping and proposed_map[field] != mapping[field]:
-                        if isinstance(mapping[field], list):
-                            diff = list(set(proposed_map[field]).union(mapping[field]))
-                            if diff != mapping[field]:
-                                updated_map[field] = diff
-                        elif isinstance(mapping[field], dict):
-                            updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
-                        elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
+        # check if proposed mapping already exists and make necessary updates to config
+        if existing_map:
+            for mapping in existing_map:
+                if proposed_scope in mapping["_scope"]:
+                    present = True
+                    updated_map = {}
+                    for field in proposed_map.keys():
+                        # only consider relevant fields that have a difference
+                        if field in mapping and proposed_map[field] != mapping[field]:
+                            if isinstance(mapping[field], list):
+                                diff = list(set(proposed_map[field]).union(mapping[field]))
+                                if diff != mapping[field]:
+                                    updated_map[field] = diff
+                            elif isinstance(mapping[field], dict):
+                                updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
+                            elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
+                                updated_map[field] = proposed_map[field]
+                        elif field not in mapping:
                             updated_map[field] = proposed_map[field]
-                    elif field not in mapping:
-                        updated_map[field] = proposed_map[field]
-                # config update if dynamic_mapping dict has any keys, need to append _scope key
-                if updated_map:
-                    # add scope to updated_map and append the config to the list of other mappings
-                    updated_map["_scope"] = mapping["_scope"]
-                    config["dynamic_mapping"].append(updated_map)
+                    # config update if dynamic_mapping dict has any keys, need to append _scope key
+                    if updated_map:
+                        # add scope to updated_map and append the config to the list of other mappings
+                        updated_map["_scope"] = mapping["_scope"]
+                        config["dynamic_mapping"].append(updated_map)
+                    else:
+                        # set config to a null dictionary if dynamic mappings are identical and exit loop
+                        config = {}
+                        break
                 else:
-                    # set config to a null dictionary if dynamic mappings are identical and exit loop
-                    config = {}
-                    break
-            else:
-                # keep unrelated mapping in diff so that diff can be used to update FortiManager
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+                    # keep unrelated mapping in diff so that diff can be used to update FortiManager
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         # add mapping to config if it does not currently exist
         if not present:
@@ -966,11 +967,15 @@ class FortiManager(object):
                  update_config method.
         """
         config = dict(name=proposed["name"], dynamic_mapping=[])
-        for mapping in existing.get("dynamic_mapping", []):
-            if mapping["_scope"] != proposed["dynamic_mapping"][0]["_scope"]:
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+        existing_map = existing.get("dynamic_mapping")
+        if existing_map:
+            for mapping in existing_map:
+                if mapping["_scope"] != proposed["dynamic_mapping"][0]["_scope"]:
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
-        if len(config["dynamic_mapping"]) == len(existing.get("dynamic_mapping", [])):
+            if len(config["dynamic_mapping"]) == len(existing_map):
+                config = {}
+        else:
             config = {}
 
         return config
@@ -1025,37 +1030,37 @@ class FortiManager(object):
         name = proposed.get("name")
         proposed_map = proposed.get("dynamic_mapping")[0]
         proposed_scope = proposed_map.pop("_scope")[0]
-        existing_map = existing.get("dynamic_mapping", [])
+        existing_map = existing.get("dynamic_mapping")
         config = dict(name=name, dynamic_mapping=[])
         present = False
 
-        # check if mapping already exists and make necessary updates to config
-        for mapping in existing_map:
-            if proposed_scope in mapping["_scope"]:
-                present = True
-                updated_map = {}
-                for field in proposed_map.keys():
-                    if field in mapping and isinstance(mapping[field], list):
-                        diff = list(set(mapping[field]).difference(proposed_map[field]))
-                        if diff != mapping[field]:
-                            updated_map[field] = diff
-                    elif field in mapping and isinstance(mapping[field], dict):
-                        diff = dict(set(proposed_map.items()).difference(mapping.items()))
-                        if diff != mapping[field]:
-                            updated_map[field] = diff
-
-                # config update if dynamic_mapping dict has any keys, need to append _scope key
-                if updated_map:
-                    # add scope to updated_map and append the config to the list of other mappings
-                    updated_map["_scope"] = mapping["_scope"]
-                    config["dynamic_mapping"].append(updated_map)
+        # check if proposed mapping already exists and make necessary updates to config
+        if existing_map:
+            for mapping in existing_map:
+                if proposed_scope in mapping["_scope"]:
+                    present = True
+                    updated_map = {}
+                    for field in proposed_map.keys():
+                        if field in mapping and isinstance(mapping[field], list):
+                            diff = list(set(mapping[field]).difference(proposed_map[field]))
+                            if diff != mapping[field]:
+                                updated_map[field] = diff
+                        elif field in mapping and isinstance(mapping[field], dict):
+                            diff = dict(set(proposed_map.items()).difference(mapping.items()))
+                            if diff != mapping[field]:
+                                updated_map[field] = diff
+                    # config update if dynamic_mapping dict has any keys, need to append _scope key
+                    if updated_map:
+                        # add scope to updated_map and append the config to the list of other mappings
+                        updated_map["_scope"] = mapping["_scope"]
+                        config["dynamic_mapping"].append(updated_map)
+                    else:
+                        # remove dynamic mapping from proposed if proposed matches existing config
+                        config = {}
+                        break
                 else:
-                    # remove dynamic mapping from proposed if proposed matches existing config
-                    config = {}
-                    break
-            else:
-                # keep unrelated mapping in diff so that diff can be used to update FortiManager
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+                    # keep unrelated mapping in diff so that diff can be used to update FortiManager
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         # set config to dict with name only if mapping does not exist representing no change
         if not present:
@@ -1459,44 +1464,45 @@ class FMVIP(FortiManager):
         name = proposed.get("name")
         proposed_map = proposed.get("dynamic_mapping")[0]
         proposed_scope = proposed_map.pop("_scope")[0]
-        existing_map = existing.get("dynamic_mapping", [])
+        existing_map = existing.get("dynamic_mapping")
         config = dict(name=name, dynamic_mapping=[])
         present = False
 
-        # check if mapping already exists and make necessary updates to config
-        for mapping in existing_map:
-            if proposed_scope in mapping["_scope"]:
-                replace = ["extintf", "extip"]
-                present = True
-                updated_map = {}
-                for field in proposed_map.keys():
-                    # only consider relevant fields that have a difference
-                    if field in mapping and proposed_map[field] != mapping[field]:
-                        # check for lists that need to be replaced instead of appended.
-                        if field in replace:
+        # check if proposed mapping already exists and make necessary updates to config
+        if existing_map:
+            for mapping in existing_map:
+                if proposed_scope in mapping["_scope"]:
+                    replace = ["extintf", "extip"]
+                    present = True
+                    updated_map = {}
+                    for field in proposed_map.keys():
+                        # only consider relevant fields that have a difference
+                        if field in mapping and proposed_map[field] != mapping[field]:
+                            # check for lists that need to be replaced instead of appended.
+                            if field in replace:
+                                updated_map[field] = proposed_map[field]
+                            elif isinstance(mapping[field], list):
+                                diff = list(set(proposed_map[field]).union(mapping[field]))
+                                if diff != mapping[field]:
+                                    updated_map[field] = diff
+                            elif isinstance(mapping[field], dict):
+                                updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
+                            elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
+                                updated_map[field] = proposed_map[field]
+                        elif field not in mapping:
                             updated_map[field] = proposed_map[field]
-                        elif isinstance(mapping[field], list):
-                            diff = list(set(proposed_map[field]).union(mapping[field]))
-                            if diff != mapping[field]:
-                                updated_map[field] = diff
-                        elif isinstance(mapping[field], dict):
-                            updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
-                        elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
-                            updated_map[field] = proposed_map[field]
-                    elif field not in mapping:
-                        updated_map[field] = proposed_map[field]
-                # config update if dynamic_mapping dict has any keys, need to append _scope key
-                if updated_map:
-                    # add scope to updated_map and append the config to the list of other mappings
-                    updated_map["_scope"] = mapping["_scope"]
-                    config["dynamic_mapping"].append(updated_map)
+                    # config update if dynamic_mapping dict has any keys, need to append _scope key
+                    if updated_map:
+                        # add scope to updated_map and append the config to the list of other mappings
+                        updated_map["_scope"] = mapping["_scope"]
+                        config["dynamic_mapping"].append(updated_map)
+                    else:
+                        # set config to a null dictionary if dynamic mappings are identical and exit loop
+                        config = {}
+                        break
                 else:
-                    # set config to a null dictionary if dynamic mappings are identical and exit loop
-                    config = {}
-                    break
-            else:
-                # keep unrelated mapping in diff so that diff can be used to update FortiManager
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+                    # keep unrelated mapping in diff so that diff can be used to update FortiManager
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         # add mapping to config if it does not currently exist
         if not present:
@@ -1562,42 +1568,42 @@ class FMVIP(FortiManager):
         name = proposed.get("name")
         proposed_map = proposed.get("dynamic_mapping")[0]
         proposed_scope = proposed_map.pop("_scope")[0]
-        existing_map = existing.get("dynamic_mapping", [])
+        existing_map = existing.get("dynamic_mapping")
         config = dict(name=name, dynamic_mapping=[])
         present = False
 
-        # check if mapping already exists and make necessary updates to config
-        for mapping in existing_map:
-            if proposed_scope in mapping["_scope"]:
-                ignore = ["extintf", "extip"]
-                present = True
-                updated_map = {}
-                for field in proposed_map.keys():
-                    if field in ignore:
-                        pass
-                    elif field == "mappedip" and len(mapping.get(field, [])) < 2:
-                        pass
-                    elif field in mapping and isinstance(mapping[field], list):
-                        diff = list(set(mapping[field]).difference(proposed_map[field]))
-                        if diff != mapping[field]:
-                            updated_map[field] = diff
-                    elif field in mapping and isinstance(mapping[field], dict):
-                        diff = dict(set(proposed_map.items()).difference(mapping.items()))
-                        if diff != mapping[field]:
-                            updated_map[field] = diff
-
-                # config update if dynamic_mapping dict has any keys, need to append _scope key
-                if updated_map:
-                    # add scope to updated_map and append the config to the list of other mappings
-                    updated_map["_scope"] = mapping["_scope"]
-                    config["dynamic_mapping"].append(updated_map)
+        # check if proposed mapping already exists and make necessary updates to config
+        if existing_map:
+            for mapping in existing_map:
+                if proposed_scope in mapping["_scope"]:
+                    ignore = ["extintf", "extip"]
+                    present = True
+                    updated_map = {}
+                    for field in proposed_map.keys():
+                        if field in ignore:
+                            pass
+                        elif field == "mappedip" and len(mapping.get(field, [])) < 2:
+                            pass
+                        elif field in mapping and isinstance(mapping[field], list):
+                            diff = list(set(mapping[field]).difference(proposed_map[field]))
+                            if diff != mapping[field]:
+                                updated_map[field] = diff
+                        elif field in mapping and isinstance(mapping[field], dict):
+                            diff = dict(set(proposed_map.items()).difference(mapping.items()))
+                            if diff != mapping[field]:
+                                updated_map[field] = diff
+                    # config update if dynamic_mapping dict has any keys, need to append _scope key
+                    if updated_map:
+                        # add scope to updated_map and append the config to the list of other mappings
+                        updated_map["_scope"] = mapping["_scope"]
+                        config["dynamic_mapping"].append(updated_map)
+                    else:
+                        # remove dynamic mapping from proposed if proposed matches existing config
+                        config = {}
+                        break
                 else:
-                    # remove dynamic mapping from proposed if proposed matches existing config
-                    config = {}
-                    break
-            else:
-                # keep unrelated mapping in diff so that diff can be used to update FortiManager
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+                    # keep unrelated mapping in diff so that diff can be used to update FortiManager
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         # set config to dict with name only if mapping does not exist representing no change
         if not present:
