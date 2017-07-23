@@ -945,13 +945,13 @@ class FortiManager(object):
         config = {}
         for field in proposed.keys():
             if field in existing and proposed[field] != existing[field]:
-                if type(existing[field]) is list:
+                if isinstance(existing[field], list):
                     diff = list(set(proposed[field]).union(existing[field]))
                     if diff != existing[field]:
                         config[field] = diff
-                elif type(existing[field]) is dict:
+                elif isinstance(existing[field], dict):
                     config[field] = dict(set(proposed[field].items()).union(existing[field].items()))
-                elif type(existing[field]) is str or type(existing[field]) is unicode:
+                elif isinstance(existing[field], str) or isinstance(existing[field], unicode):
                     config[field] = proposed[field]
             elif field not in existing:
                 config[field] = proposed[field]
@@ -991,13 +991,13 @@ class FortiManager(object):
                 for field in proposed_map.keys():
                     # only consider relevant fields that have a difference
                     if field in mapping and proposed_map[field] != mapping[field]:
-                        if type(mapping[field]) is list:
+                        if isinstance(mapping[field], list):
                             diff = list(set(proposed_map[field]).union(mapping[field]))
                             if diff != mapping[field]:
                                 updated_map[field] = diff
-                        elif type(mapping[field]) is dict:
+                        elif isinstance(mapping[field], dict):
                             updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
-                        elif type(mapping[field]) is str or type(mapping[field]) is unicode:
+                        elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
                             updated_map[field] = proposed_map[field]
                     elif field not in mapping:
                         updated_map[field] = proposed_map[field]
@@ -1061,11 +1061,11 @@ class FortiManager(object):
         """
         config = {}
         for field in proposed.keys():
-            if field in existing and type(existing[field]) is list:
+            if field in existing and isinstance(existing[field], list):
                 diff = list(set(existing[field]).difference(proposed[field]))
                 if diff != existing[field]:
                     config[field] = diff
-            elif field in existing and type(existing[field]) is dict:
+            elif field in existing and isinstance(existing[field], dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing[field]:
                     config[field] = diff
@@ -1104,11 +1104,11 @@ class FortiManager(object):
                 present = True
                 updated_map = {}
                 for field in proposed_map.keys():
-                    if field in mapping and type(mapping[field]) is list:
+                    if field in mapping and isinstance(mapping[field], list):
                         diff = list(set(mapping[field]).difference(proposed_map[field]))
                         if diff != mapping[field]:
                             updated_map[field] = diff
-                    elif field in mapping and type(mapping[field]) is dict:
+                    elif field in mapping and isinstance(mapping[field], dict):
                         diff = dict(set(proposed_map.items()).difference(mapping.items()))
                         if diff != mapping[field]:
                             updated_map[field] = diff
@@ -1494,13 +1494,13 @@ class FMAddress(FortiManager):
                 # check for lists that need to be replaced instead of appended.
                 if field in replace:
                     config[field] = proposed[field]
-                elif type(existing[field]) is list:
+                elif isinstance(existing[field], list):
                     diff = list(set(proposed[field]).union(existing[field]))
                     if diff != existing[field]:
                         config[field] = diff
-                elif type(existing[field]) is dict:
+                elif isinstance(existing[field], dict):
                     config[field] = dict(set(proposed[field].items()).union(existing[field].items()))
-                elif type(existing[field]) is str or type(existing[field] is unicode):
+                elif isinstance(existing[field], str) or isinstance(existing[field], unicode):
                     config[field] = proposed[field]
             elif field not in existing:
                 config[field] = proposed[field]
@@ -1544,13 +1544,13 @@ class FMAddress(FortiManager):
                         # check for lists that need to be replaced instead of appended.
                         if field in replace:
                             updated_map[field] = proposed_map[field]
-                        elif type(mapping[field]) is list:
+                        elif isinstance(mapping[field], list):
                             diff = list(set(proposed_map[field]).union(mapping[field]))
                             if diff != mapping[field]:
                                 updated_map[field] = diff
-                        elif type(mapping[field]) is dict:
+                        elif isinstance(mapping[field], dict):
                             updated_map[field] = dict(set(proposed_map[field].items()).union(mapping[field].items()))
-                        elif type(mapping[field]) is str or type(mapping[field]) is unicode:
+                        elif isinstance(mapping[field], str) or isinstance(mapping[field], unicode):
                             updated_map[field] = proposed_map[field]
                     elif field not in mapping:
                         updated_map[field] = proposed_map[field]
@@ -1596,11 +1596,11 @@ class FMAddress(FortiManager):
             ignore = ["associated-interface", "end-ip", "fqdn", "start-ip", "subnet", "type", "wildcard", "wildcard-fqdn"]
             if field in ignore:
                 pass
-            elif field in existing and type(existing[field]) is list:
+            elif field in existing and isinstance(existing[field], list):
                 diff = list(set(existing[field]).difference(proposed[field]))
                 if diff != existing[field]:
                     config[field] = diff
-            elif field in existing and type(existing[field]) is dict:
+            elif field in existing and isinstance(existing[field], dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing[field]:
                     config[field] = diff
@@ -1642,11 +1642,11 @@ class FMAddress(FortiManager):
                 for field in proposed_map.keys():
                     if field in ignore:
                         pass
-                    elif field in mapping and type(mapping[field]) is list:
+                    elif field in mapping and isinstance(mapping[field], list):
                         diff = list(set(mapping[field]).difference(proposed_map[field]))
                         if diff != mapping[field]:
                             updated_map[field] = diff
-                    elif field in mapping and type(mapping[field]) is dict:
+                    elif field in mapping and isinstance(mapping[field], dict):
                         diff = dict(set(proposed_map.items()).difference(mapping.items()))
                         if diff != mapping[field]:
                             updated_map[field] = diff
@@ -1730,10 +1730,12 @@ def main():
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
     subnet = module.params["subnet"]
-    if subnet and "/" in subnet[0]:
+    if subnet and len(subnet) == 1 and "/" in subnet[0]:
         subnet = FortiManager.cidr_to_network(subnet[0])
         if not subnet:
             module.fail_json(msg="The prefix must be a value between 0 and 32")
+    elif subnet and len(subnet) == 1:
+        subnet.append("255.255.255.255")
     elif module.params["network_address"] and module.params["network_mask"]:
         subnet = [module.params["network_address"], module.params["network_mask"]]
 
