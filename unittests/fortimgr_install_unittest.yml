@@ -55,7 +55,7 @@
         adom: "lab"
         state: "preview"
         dst_file:
-        fortigate_name: "New_Jersey"
+        fortigate_name: "FortiGate-VM64-KVM"
         package: "lab"
         vdom: "root"
       ignore_errors: true
@@ -71,7 +71,7 @@
         adom_revision_name: "InstallTest"
         check_install: false
         dst_file: "./preview.txt"
-        fortigate_name: "New_Jersey"
+        fortigate_name: "FortiGate-VM64-KVM"
         fortigate_revision_comments: "Install Unit Test"
         install_flags:
           - "generate_rev"
