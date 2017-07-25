@@ -1019,8 +1019,9 @@ class FortiManager(object):
         if not present:
             config = proposed
             config["dynamic_mapping"][0]["_scope"] = [proposed_scope]
-            for mapping in existing_map:
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+            if existing_map:
+                for mapping in existing_map:
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         return config
 
@@ -1131,7 +1132,7 @@ class FortiManager(object):
                     # keep unrelated mapping in diff so that diff can be used to update FortiManager
                     config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
-        # set config to dict with name only if mapping does not exist representing no change
+        # set config to empty dict if mapping was not found, representing no change
         if not present:
             config = {}
 
@@ -1577,8 +1578,9 @@ class FMAddress(FortiManager):
         if not present:
             config = proposed
             config["dynamic_mapping"][0]["_scope"] = [proposed_scope]
-            for mapping in existing_map:
-                config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
+            if existing_map:
+                for mapping in existing_map:
+                    config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
         return config
 
@@ -1670,7 +1672,7 @@ class FMAddress(FortiManager):
                     # keep unrelated mapping in diff so that diff can be used to update FortiManager
                     config["dynamic_mapping"].append(dict(_scope=mapping["_scope"]))
 
-        # set config to dict with name only if mapping does not exist representing no change
+        # set config to empty dict if mapping was not found, representing no change
         if not present:
             config = {}
 
