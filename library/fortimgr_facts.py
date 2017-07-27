@@ -86,7 +86,7 @@ options:
     description:
       - A list of ADOMs for which configurations from FortiManager will be retrieved; "all" can be used to retrieve all ADOMs.
       - If "all" is used, or the value is a list of ADOM names (as strings), then all packages for each ADOM will be retrieved.
-      - Passing a list of dictionaries with "adom" and "package" keys can be used to limit the scope of policies retrieved.
+      - Passing a list of dictionaries with "name" and "package" keys can be used to limit the scope of policies retrieved.
         A key/value pair is required for each package (the dictionary values cannot be lists).
       - The objects and policy elements will be collected based on what is listed in the config_filter param.
     required: false
@@ -137,7 +137,7 @@ EXAMPLES = '''
       - "lab"
       - "prod"
       - "dmz"
-- name: Get Configs
+- name: Get Fortigate Configs
   fortimgr_facts:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
@@ -155,7 +155,7 @@ EXAMPLES = '''
     config_filter:
       - "route"
       - "policy"
-- name: Get All Configs
+- name: Get All Fortigate Configs
   fortimgr_facts:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
@@ -163,6 +163,15 @@ EXAMPLES = '''
     adom: "lab"
     fortigates: "all"
     config_filter: "all"
+- name: Get FortiManager Configs
+  fortimanager_facts:
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    adoms:
+      name: "lab"
+      package: "lab"
+    config_filter: "all" 
 '''
 
 RETURN = '''
@@ -202,28 +211,29 @@ configs:
     description: The configurations on the devices managed by the FortiManager.
     returned: Always
     type: dict
-    sample: {"lab_fg": {"address_groups": [], "ip_pools": [], "service_groups": []}, "prod_fg": {"address_groups": [{
-             "allow-routing": "enable", "color":1, "comment": "", "member": ["g"], "name": "a",
+    sample: {"lab_fg": {"root": {"address_groups": [], "ip_pools": [], "service_groups": []}}, "prod_fg": {"root":
+             {"address_groups": [{"allow-routing": "enable", "color":1, "comment": "", "member": ["g"], "name": "a",
              "uuid": "74f4df96-4a01-51e7-0062-081788762948", "visibility": "enable"}"ip_pools": [], "service_groups": [{
              "color":0, "comment": "", "explicit-proxy": "disable", "member": ["DNS","IMAP","IMAPS","POP3","POP3S",
              "SMTP","SMTPS"], "name": "Email Access"}, {"color":0, "comment": "", "explicit-proxy": "disable", "member":
              ["DNS","HTTP","HTTPS"], "name": "Web Access"}, {"color":0, "comment": "", "explicit-proxy": "disable",
              "member": ["DCE-RPC","DNS","KERBEROS","LDAP","LDAP_UDP","SAMBA","SMB"], "name": "Windows AD"}, {"color":0,
              "comment": "", "explicit-proxy": "disable", "member": ["DCE-RPC","DNS","HTTPS"], "name": "Exchange Server"}
-             ]}}
+             ]}}}
 fortimanager_configs:
     description: The configurations on the FortiManager.
     returned: Always
     type: dict
-    sample: {"lab_fg": {"address_groups": [], "ip_pools": [], "service_groups": []}, "prod_fg": {"address_groups": [{
-             "allow-routing": "enable", "color":1, "comment": "", "member": ["g"], "name": "a",
-             "uuid": "74f4df96-4a01-51e7-0062-081788762948", "visibility": "enable"}"ip_pools": [], "service_groups": [{
-             "color":0, "comment": "", "explicit-proxy": "disable", "member": ["DNS","IMAP","IMAPS","POP3","POP3S",
-             "SMTP","SMTPS"], "name": "Email Access"}, {"color":0, "comment": "", "explicit-proxy": "disable", "member":
-             ["DNS","HTTP","HTTPS"], "name": "Web Access"}, {"color":0, "comment": "", "explicit-proxy": "disable",
-             "member": ["DCE-RPC","DNS","KERBEROS","LDAP","LDAP_UDP","SAMBA","SMB"], "name": "Windows AD"}, {"color":0,
-             "comment": "", "explicit-proxy": "disable", "member": ["DCE-RPC","DNS","HTTPS"], "name": "Exchange Server"}
-             ]}}
+    sample: {"lab_adom": {"address_groups": [], "ip_pools": [], "service_groups": [], "default": {"policies": []},
+             "lab_pkg": {"policies": []}}, "prod_adom": {"address_groups": [{"allow-routing": "enable", "color":1,
+             "comment": "", "member": ["g"], "name": "a", "uuid": "74f4df96-4a01-51e7-0062-081788762948", "visibility":
+             "enable"}], "ip_pools": [], "service_groups": [{ "color":0, "comment": "", "explicit-proxy": "disable",
+             "member": ["DNS","IMAP","IMAPS","POP3","POP3S", "SMTP","SMTPS"], "name": "Email Access"}, {"color":0,
+             "comment": "", "explicit-proxy": "disable", "member": ["DNS","HTTP","HTTPS"], "name": "Web Access"},
+             {"color":0, "comment": "", "explicit-proxy": "disable", "member": ["DCE-RPC","DNS","KERBEROS","LDAP",
+             "LDAP_UDP","SAMBA","SMB"], "name": "Windows AD"}, {"color":0, "comment": "", "explicit-proxy": "disable",
+             "member": ["DCE-RPC","DNS","HTTPS"], "name": "Exchange Server"}], "default": {"policies": []}, "lab_pkg":
+             {"policies": []}}}
 '''
 
 import time
@@ -1455,7 +1465,7 @@ def main():
         adoms=dict( required=False, type="list"),
         config_filter=dict(required=False, type="list"),
         fortigates=dict(required=False, type="list"),
-        fortigate_name=dict(choices=["device_id", "hostname"], default="device_id", type="str"),
+        fortigate_name=dict(choices=["device_id", "hostname"], default="device_id", type="str")
     )
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
@@ -1682,7 +1692,7 @@ def main():
                     adom_name = adom["name"]
                     packages = session.get_all_packages(adom_name)
                     for package in packages:
-                        adom_dicts.append({"adom": adom_name, "package": package})
+                        adom_dicts.append({"name": adom_name, "package": package})
 
         # build list of dicts if adoms is a list of strings
         elif isinstance(adoms[0], str):
@@ -1690,7 +1700,7 @@ def main():
             for adom in adoms:
                 packages = session.get_all_packages(adom)
                 for package in packages:
-                    adom_dicts.append({"adom": adom, "package": package})
+                    adom_dicts.append({"name": adom, "package": package})
         
         # normalize adom list to use adom_dicts variable name
         elif isinstance(adoms[0], dict):
@@ -1700,7 +1710,7 @@ def main():
             adom_dicts = []
 
         for package in adom_dicts:
-            adom_name = package["adom"]
+            adom_name = package["name"]
             pkg_name = package["package"]
             # create adom key and config dictionary on first policy package collection or object collection
             if adom_name not in fortimanager_configs:

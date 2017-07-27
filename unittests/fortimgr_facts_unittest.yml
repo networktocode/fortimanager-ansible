@@ -92,7 +92,7 @@
         username: "{{ username }}"
         password: "{{ password }}"
         adoms:
-          - adom: "lab"
+          - name: "lab"
             package: "lab"
         config_filter:
           - "ip_pool"
@@ -107,7 +107,7 @@
           - name: "lab1"
             vdom: "root"
         adoms: 
-          - adom: "lab"
+          - name: "lab"
             package: "lab"
         config_filter:
           - "address_group"
