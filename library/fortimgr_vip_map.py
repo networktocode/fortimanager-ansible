@@ -767,6 +767,20 @@ class FortiManager(object):
 
         return response.json()["result"][0].get("data", [])
 
+    def get_all_custom(self, url):
+        """
+        This method is used to get all objects currently configured for the specified URL.
+
+        :param url: Type str.
+                    The URL of the endpoint to retrieve configurations from.
+        :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
+                 not return any data.
+        """
+        body = dict(method="get", params=[{"url": url}], verbose=1, session=self.session)
+        response = self.make_request(body)
+
+        return response.json()["result"][0].get("data", [])
+
     def get_all_fields(self, fields):
         """
         This method is used to get all objects currently configured on the FortiManager for the ADOM and API Endpoint.
@@ -783,18 +797,38 @@ class FortiManager(object):
 
         return response.json()["result"][0].get("data", [])
 
+    def get_all_packages(self, adom):
+        """
+        This method is used to get all packages associated with an ADOM.
+
+        :param adom: Type str.
+                     The ADOM from which to retrieve packages.
+        :return: A list of package names associated with the ADOM. If the ADOM is not found or does not have any
+                 packages, then an empty list is returned.
+        """
+        body = dict(method="get", params=[{"url": "/pm/pkg/adom/{}".format(adom)}], verbose=1, session=self.session)
+        response = self.make_request(body)
+        package_dicts = response.json().get("result", [{}])[0].get("data", [])
+
+        packages = []
+        for pkg in package_dicts:
+            if pkg.get("name"):
+                packages.append(pkg["name"])
+
+        return packages
+
     def get_device_config(self, device, vdom, config_url, fields=[]):
         """
-        This method is used to retrieve the static routes configured on the managed device.
+        This method is used to retrieve the configurations from the managed device.
 
         :param device: Type str.
-                       The device to retrieve the static route configuration from.
+                       The device to retrieve the configuration from.
         :param vdom: Type str.
-                     The vdom to retrieve the static route configuration from.
+                     The vdom to retrieve the configuration from.
         :param config_url: Type str.
                            The url associated with the configuration section to retrieve.
         :param fields: Type list.
-                       A list of fields to retrieve for the device.
+                       A list of configuration fields to retrieve from the device.
         :return: The json response from the request to retrieve the static routes. An empty list is returned if the
                  request does not return any data.
         """
