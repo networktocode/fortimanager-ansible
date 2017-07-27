@@ -82,9 +82,19 @@ options:
     required: false
     default: False
     type: bool
+  adoms:
+    description:
+      - A list of ADOMs for which configurations from FortiManager will be retrieved; "all" can be used to retrieve all ADOMs.
+      - If "all" is used, or the value is a list of ADOM names (as strings), then all packages for each ADOM will be retrieved.
+      - Passing a list of dictionaries with "adom" and "package" keys can be used to limit the scope of policies retrieved.
+        A key/value pair is required for each package (the dictionary values cannot be lists).
+      - The objects and policy elements will be collected based on what is listed in the config_filter param.
+    required: false
+    type: list
   config_filter:
     description:
-      - The list of configuration items to retrieve from the list of FortiGates managed by the FortiManager.
+      - The list of configuration items to retrieve from the list of ADOMs and FortiGates managed by the FortiManager.
+      - This list will only be used if the fortigates or adoms parameters are passed.
     required: false
     type: list
     choices: ["all", "route", "address", "address_group", "service", "service_group", "ip_pool", "vip", "vip_group",
@@ -92,6 +102,7 @@ options:
   fortigate_name:
     description:
       - The name to use as the config dictionary key when returning configuration data.
+        This is only used when fortigates is all or a list of fortigate names.
       - "device_id" will use the device ID that FortiManager has associated to the device.
       - "hostname" will use the hostname of the device.
     required: false
@@ -189,6 +200,19 @@ devices:
               "tab_status": ""}]}]
 configs:
     description: The configurations on the devices managed by the FortiManager.
+    returned: Always
+    type: dict
+    sample: {"lab_fg": {"address_groups": [], "ip_pools": [], "service_groups": []}, "prod_fg": {"address_groups": [{
+             "allow-routing": "enable", "color":1, "comment": "", "member": ["g"], "name": "a",
+             "uuid": "74f4df96-4a01-51e7-0062-081788762948", "visibility": "enable"}"ip_pools": [], "service_groups": [{
+             "color":0, "comment": "", "explicit-proxy": "disable", "member": ["DNS","IMAP","IMAPS","POP3","POP3S",
+             "SMTP","SMTPS"], "name": "Email Access"}, {"color":0, "comment": "", "explicit-proxy": "disable", "member":
+             ["DNS","HTTP","HTTPS"], "name": "Web Access"}, {"color":0, "comment": "", "explicit-proxy": "disable",
+             "member": ["DCE-RPC","DNS","KERBEROS","LDAP","LDAP_UDP","SAMBA","SMB"], "name": "Windows AD"}, {"color":0,
+             "comment": "", "explicit-proxy": "disable", "member": ["DCE-RPC","DNS","HTTPS"], "name": "Exchange Server"}
+             ]}}
+fortimanager_configs:
+    description: The configurations on the FortiManager.
     returned: Always
     type: dict
     sample: {"lab_fg": {"address_groups": [], "ip_pools": [], "service_groups": []}, "prod_fg": {"address_groups": [{
@@ -727,6 +751,20 @@ class FortiManager(object):
 
         return response.json()["result"][0].get("data", [])
 
+    def get_all_custom(self, url):
+        """
+        This method is used to get all objects currently configured for the specified URL.
+
+        :param url: Type str.
+                    The URL of the endpoint to retrieve configurations from.
+        :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
+                 not return any data.
+        """
+        body = dict(method="get", params=[{"url": url}], verbose=1, session=self.session)
+        response = self.make_request(body)
+
+        return response.json()["result"][0].get("data", [])
+
     def get_all_fields(self, fields):
         """
         This method is used to get all objects currently configured on the FortiManager for the ADOM and API Endpoint.
@@ -743,18 +781,38 @@ class FortiManager(object):
 
         return response.json()["result"][0].get("data", [])
 
+    def get_all_packages(self, adom):
+        """
+        This method is used to get all packages associated with an ADOM.
+
+        :param adom: Type str.
+                     The ADOM from which to retrieve packages.
+        :return: A list of package names associated with the ADOM. If the ADOM is not found or does not have any
+                 packages, then an empty list is returned.
+        """
+        body = dict(method="get", params=[{"url": "/pm/pkg/adom/{}".format(adom)}], verbose=1, session=self.session)
+        response = self.make_request(body)
+        package_dicts = response.json().get("result", [{}])[0].get("data", [])
+
+        packages = []
+        for pkg in package_dicts:
+            if pkg.get("name"):
+                packages.append(pkg["name"])
+
+        return packages
+
     def get_device_config(self, device, vdom, config_url, fields=[]):
         """
-        This method is used to retrieve the static routes configured on the managed device.
+        This method is used to retrieve the configurations from the managed device.
 
         :param device: Type str.
-                       The device to retrieve the static route configuration from.
+                       The device to retrieve the configuration from.
         :param vdom: Type str.
-                     The vdom to retrieve the static route configuration from.
+                     The vdom to retrieve the configuration from.
         :param config_url: Type str.
                            The url associated with the configuration section to retrieve.
         :param fields: Type list.
-                       A list of fields to retrieve for the device.
+                       A list of configuration fields to retrieve from the device.
         :return: The json response from the request to retrieve the static routes. An empty list is returned if the
                  request does not return any data.
         """
@@ -1394,9 +1452,10 @@ def main():
         use_ssl=dict(default=True, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
         validate_certs=dict(default=False, type="bool"),
+        adoms=dict( required=False, type="list"),
         config_filter=dict(required=False, type="list"),
         fortigates=dict(required=False, type="list"),
-        fortigate_name=dict(choices=["device_id", "hostname"], default="device_id", type="str")
+        fortigate_name=dict(choices=["device_id", "hostname"], default="device_id", type="str"),
     )
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
@@ -1424,6 +1483,7 @@ def main():
     fortigates = module.params["fortigates"]
     config_filter = module.params["config_filter"]
     fortigate_name = module.params["fortigate_name"]
+    adoms = module.params["adoms"]
 
     argument_check = dict(host=host)
     for key, val in argument_check.items():
@@ -1450,20 +1510,20 @@ def main():
 
     # collect and normalize fortimanager adom info
     fm_adoms = session.get_adoms_fields(["desc", "flags", "mode", "name", "os_ver"])
-    adoms = []
+    adom_list = []
     for adom in fm_adoms:
-        if type(adom.get("flags")) is str:
+        if isinstance(adom.get("flags"), str):
             # convert single entry flags to match multi-entry flags by putting single in a list
             adom["flags"] = [adom["flags"]]
 
-        adoms.append(adom)
+        adom_list.append(adom)
 
     # collect fortimanager status, normalize data, and append ha and adom info
     fm_status = session.get_status()
     fortimanager = dict(name=fm_status.get("Hostname"), adom=fm_status.get("Admin Domain Configuration"),
                         high_availabilty=fm_ha, license_status=fm_status.get("License Status"),
                         platform=fm_status.get("Platform Type"), serial_num=fm_status.get("Serial Number"),
-                        version=fm_status.get("Version"), adoms=adoms)
+                        version=fm_status.get("Version"), adoms=adom_list)
 
     # collect fortigate information and config if specified
     if fortigates:
@@ -1475,10 +1535,10 @@ def main():
         if "all" in fortigates:
             devices = session.get_devices_fields(device_fields)
         # catch string input that ansible module converts to a list
-        elif len(fortigates) == 1 and type(fortigates[0]) is str:
+        elif len(fortigates) == 1 and isinstance(fortigates[0], str):
             devices = session.get_device_fields(fortigates[0], device_fields)
         # capture data for list of devices
-        elif type(fortigates[0]) is str:
+        elif isinstance(fortigates[0], str):
             device_filter = ["hostname", "in", ""]
             for device in fortigates:
                 # add fortigate and , to all but last device to string
@@ -1488,7 +1548,7 @@ def main():
                     device_filter[2] += device
             devices = session.get_devices_fields(device_fields, device_filter)
         # capture data for list of devices as a dict
-        elif type(fortigates[0]) is dict:
+        elif isinstance(fortigates[0], dict):
             device_filter = ["hostname", "in", ""]
             for device in fortigates:
                 # add fortigate and , to all but last device to string
@@ -1502,8 +1562,8 @@ def main():
 
     configs = {}
 
-    # build list of all devices and vdom mappings if all is used for devices
-    if config_filter:
+    # build list of all devices and vdom mappings if all or fortigate names are used for devices
+    if fortigates and isinstance(fortigates[0], str) and config_filter:
         for device in devices:
             for vdom in device["vdom"]:
                 if fortigate_name == "hostname":
@@ -1518,12 +1578,9 @@ def main():
                     # iterate through each fortigate and append a dictionary of configuration items
                     config_dict = {"static_routes": session.get_device_config(vdom["devid"], vdom["name"], "router/static"),
                                    "addresses": session.get_device_config(vdom["devid"], vdom["name"], "firewall/address"),
-                                   "address_groups": session.get_device_config(vdom["devid"], vdom["name"],
-                                                                               "firewall/addrgrp"),
-                                   "services": session.get_device_config(vdom["devid"], vdom["name"],
-                                                                         "firewall/service/custom"),
-                                   "service_groups": session.get_device_config(vdom["devid"], vdom["name"],
-                                                                               "firewall/service/group"),
+                                   "address_groups": session.get_device_config(vdom["devid"], vdom["name"], "firewall/addrgrp"),
+                                   "services": session.get_device_config(vdom["devid"], vdom["name"], "firewall/service/custom"),
+                                   "service_groups": session.get_device_config(vdom["devid"], vdom["name"], "firewall/service/group"),
                                    "ip_pools": session.get_device_config(vdom["devid"], vdom["name"], "firewall/ippool"),
                                    "vips": session.get_device_config(vdom["devid"], vdom["name"], "firewall/vip"),
                                    "vip_groups": session.get_device_config(vdom["devid"], vdom["name"], "firewall/vipgrp"),
@@ -1560,8 +1617,136 @@ def main():
                         config_dict["policies"] = session.get_device_config(vdom["devid"], vdom["name"], "firewall/policy")
     
                     configs[fortigate_key].update({vdom["name"]: config_dict})
+    
+    # build list of all devices and vdom mappings if fortigate name and vdom dicts are used for devices
+    elif fortigates and isinstance(fortigates[0], dict) and config_filter:
+        for device in fortigates:
+            fg_name = device["name"]
+            vdom_name = device["vdom"]
+            if fg_name not in configs:
+                configs[fg_name] = {}
 
-    results = dict(fortimanager=fortimanager, devices=devices, configs=configs)
+            if "all" in config_filter:
+                # iterate through each fortigate and append a dictionary of configuration items
+                config_dict = {"static_routes": session.get_device_config(fg_name, vdom_name, "router/static"),
+                               "addresses": session.get_device_config(fg_name, vdom_name, "firewall/address"),
+                               "address_groups": session.get_device_config(fg_name, vdom_name, "firewall/addrgrp"),
+                               "services": session.get_device_config(fg_name, vdom_name, "firewall/service/custom"),
+                               "service_groups": session.get_device_config(fg_name, vdom_name, "firewall/service/group"),
+                               "ip_pools": session.get_device_config(fg_name, vdom_name, "firewall/ippool"),
+                               "vips": session.get_device_config(fg_name, vdom_name, "firewall/vip"),
+                               "vip_groups": session.get_device_config(fg_name, vdom_name, "firewall/vipgrp"),
+                               "policies": session.get_device_config(fg_name, vdom_name, "firewall/policy")}
+
+                configs[fg_name].update({vdom_name: config_dict})
+            else:
+                config_dict = {}
+                if "route" in config_filter:
+                    config_dict["static_routes"] = session.get_device_config(fg_name, vdom_name, "router/static")
+        
+                if "address" in config_filter:
+                    config_dict["addresses"] = session.get_device_config(fg_name, vdom_name, "firewall/address")
+        
+                if "address_group" in config_filter:
+                    config_dict["address_groups"] = session.get_device_config(fg_name, vdom_name, "firewall/addrgrp")
+        
+                if "service" in config_filter:
+                    config_dict["services"] = session.get_device_config(fg_name, vdom_name, "firewall/service/custom")
+        
+                if "service_group" in config_filter:
+                    config_dict["service_groups"] = session.get_device_config(fg_name, vdom_name, "firewall/service/group")
+        
+                if "ip_pool" in config_filter:
+                    config_dict["ip_pools"] = session.get_device_config(fg_name, vdom_name, "firewall/ippool")
+        
+                if "vip" in config_filter:
+                    config_dict["vips"] = session.get_device_config(fg_name, vdom_name, "firewall/vip")
+        
+                if "vip_group" in config_filter:
+                    config_dict["vip_groups"] = session.get_device_config(fg_name, vdom_name, "firewall/vipgrp")
+        
+                if "policy" in config_filter:
+                    config_dict["policies"] = session.get_device_config(fg_name, vdom_name, "firewall/policy")
+    
+                configs[fg_name].update({vdom_name: config_dict})
+
+    fortimanager_configs = {}
+
+    if adoms and config_filter:
+        # build list of dicts if all adoms if all is used for devices
+        if "all" in adoms:
+            adom_dicts = []
+            # adom_list is generated in the fortimanager device facts section
+            for adom in adom_list:
+                if adom.get("name"):
+                    adom_name = adom["name"]
+                    packages = session.get_all_packages(adom_name)
+                    for package in packages:
+                        adom_dicts.append({"adom": adom_name, "package": package})
+
+        # build list of dicts if adoms is a list of strings
+        elif isinstance(adoms[0], str):
+            adom_dicts = []
+            for adom in adoms:
+                packages = session.get_all_packages(adom)
+                for package in packages:
+                    adom_dicts.append({"adom": adom, "package": package})
+        
+        # normalize adom list to use adom_dicts variable name
+        elif isinstance(adoms[0], dict):
+            adom_dicts = adoms
+        
+        else:
+            adom_dicts = []
+
+        for package in adom_dicts:
+            adom_name = package["adom"]
+            pkg_name = package["package"]
+            # create adom key and config dictionary on first policy package collection or object collection
+            if adom_name not in fortimanager_configs:
+                if "all" in config_filter:
+                    fortimanager_configs[adom_name] = {
+                        "addresses": session.get_all_custom("pm/config/adom/{}/obj/firewall/address".format(adom_name)),
+                        "address_groups": session.get_all_custom("pm/config/adom/{}/obj/firewall/addrgrp".format(adom_name)),
+                        "services": session.get_all_custom("pm/config/adom/{}/obj/firewall/service/custom".format(adom_name)),
+                        "service_groups": session.get_all_custom("pm/config/adom/{}/obj/firewall/service/group".format(adom_name)),
+                        "ip_pools": session.get_all_custom("pm/config/adom/{}/obj/firewall/ippool".format(adom_name)),
+                        "vips": session.get_all_custom("pm/config/adom/{}/obj/firewall/vip".format(adom_name)),
+                        "vip_groups": session.get_all_custom("pm/config/adom/{}/obj/firewall/vipgrp".format(adom_name)),
+                        pkg_name: {"policies": session.get_all_custom("pm/config/adom/{}/pkg/{}/firewall/policy".format(adom_name, pkg_name))}
+                    }
+                else:
+                    config_dict = {}
+                    if "address" in config_filter:
+                        config_dict["addresses"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/address".format(adom_name))
+            
+                    if "address_group" in config_filter:
+                        config_dict["address_groups"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/addrgrp".format(adom_name))
+            
+                    if "service" in config_filter:
+                        config_dict["services"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/service/custom".format(adom_name))
+            
+                    if "service_group" in config_filter:
+                        config_dict["service_groups"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/service/group".format(adom_name))
+            
+                    if "ip_pool" in config_filter:
+                        config_dict["ip_pools"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/ippool".format(adom_name))
+            
+                    if "vip" in config_filter:
+                        config_dict["vips"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/vip".format(adom_name))
+            
+                    if "vip_group" in config_filter:
+                        config_dict["vip_groups"] = session.get_all_custom("pm/config/adom/{}/obj/firewall/vipgrp".format(adom_name))
+            
+                    if "policy" in config_filter:
+                        config_dict[pkg_name] = {"policies": session.get_all_custom("pm/config/adom/{}/pkg/{}/firewall/policy".format(adom_name, pkg_name))}
+
+                    fortimanager_configs[adom_name] = config_dict
+            # only add new package key and policy configuration if policies need to be collected; objects are per adom so no need to collect after first pass
+            elif "all" in config_filter or "policy" in config_filter:
+                fortimanager_configs[adom_name][pkg_name] = {"policies": session.get_all_custom("pm/config/adom/{}/pkg/{}/firewall/policy".format(adom_name, pkg_name))}
+
+    results = dict(fortimanager=fortimanager, devices=devices, configs=configs, fortimanager_configs=fortimanager_configs)
 
     # logout, build in check for future logging capabilities
     if not session_id:
