@@ -57,3 +57,58 @@
         password: "{{ password }}"
         fortigates: "all"
         config_filter: "all"
+
+    - name: GET ALL FORTIMANAGER FACTS AND ALL CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adoms: "all"
+        config_filter: "all"
+
+    - name: GET ALL FORTIMANAGER FACTS AND SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adoms: "all"
+        config_filter:
+          - "address"
+          - "policy"
+
+    - name: GET SOME FORTIMANAGER FACTS (LIST) AND SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adoms: "lab"
+        config_filter:
+          - "vip"
+          - "policy"
+
+    - name: GET SOME FORTIMANAGER FACTS (DICT) AND SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adoms:
+          - name: "lab"
+            package: "lab"
+        config_filter:
+          - "ip_pool"
+          - "policy"
+
+    - name: GET SOME FORTIGATE FACTS, SOME FORTIMANAGER FACTS, AND SOME CONFIGS
+      fortimgr_facts:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        fortigates:
+          - name: "lab1"
+            vdom: "root"
+        adoms: 
+          - name: "lab"
+            package: "lab"
+        config_filter:
+          - "address_group"
+          - "policy"
