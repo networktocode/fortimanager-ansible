@@ -564,7 +564,7 @@ class FortiManager(object):
         else:
             # determine what diff method to call
             if "dynamic_mapping" not in proposed:
-                diff = self.get_diff_add(proposed, existing, module)
+                diff = self.get_diff_add(proposed, existing)
             else:
                 diff = self.get_diff_add_map(proposed, existing)
 
@@ -1461,7 +1461,7 @@ class FMService(FortiManager):
         super(FMService, self).__init__(host, user, passw, use_ssl, verify, adom, package, api_endpoint, **kwargs)
 
     @staticmethod
-    def get_diff_add(proposed, existing, module):
+    def get_diff_add(proposed, existing):
         """
         This method is used to get the difference between two configurations when the "proposed" configuration is a dict
         of configuration items that should exist in the configuration for the object in the FortiManager. Either the
