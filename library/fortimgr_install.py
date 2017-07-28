@@ -1523,8 +1523,7 @@ def main():
         # verify fortigate health if check_install is True
         if check_install:
             status = session.get_install_status(fortigate)["result"][0]
-            if status["status"]["code"] != 0 or status["data"][0]["conf_status"] != "synchronized" or status["data"][0][
-                "conn_status"] != "up":
+            if status["status"]["code"] != 0 or status["data"][0]["conf_status"] not in ["insync", "synchronized"] or status["data"][0]["conn_status"] != "up":
                 results = dict(status=status, msg="Device Status did not Pass Checks")
                 module.fail_json(**results)
 
