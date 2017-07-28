@@ -1479,7 +1479,7 @@ class FMService(FortiManager):
         for field in proposed.keys():
             proposed_field = proposed[field]
             existing_field = existing.get(field)
-            if existing_field and proposed_field != existing_field:
+            if (existing_field or existing_field == 0) and proposed_field != existing_field:
                 if field in ["tcp-portrange", "udp-portrange"]:
                     # ensure proposed port range is a list of strings
                     proposed_field = [str(entry) for entry in proposed_field]
@@ -1492,7 +1492,7 @@ class FMService(FortiManager):
                     config[field] = list(set(proposed_field).union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, str) or isinstance(existing_field, int) or isinstance(existing_field, unicode):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -1635,7 +1635,7 @@ def main():
         args["protocol"] = module.params["protocol"].upper()
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
-    proposed = dict((k, v) for k, v in args.items() if v)
+    proposed = dict((k, v) for k, v in args.items() if v == 0 or v)
 
     kwargs = dict()
     if port:

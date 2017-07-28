@@ -105,13 +105,61 @@
         icmp_type: 1
         comment: "service unit test"
 
-    - name: CREATE SERVICE IP - CHANGE
+    - name: CREATE SERVICE ICMP TYPE 0 CODE 0 - CHANGE
       fortimgr_service:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
         service_name: "svc4"
+        protocol: "ICMP"
+        icmp_type: 0
+        icmp_code: 0
+        comment: "service unit test"
+
+    - name: CREATE SERVICE ICMP TYPE 0 CODE 0 AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc4"
+        protocol: "ICMP"
+        icmp_type: 0
+        icmp_code: 0
+        comment: "service unit test"
+
+    - name: MODIFY SERVICE ICMP TYPE 0 TO 4 CODE 0 TO 4 - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc4"
+        protocol: "ICMP"
+        icmp_type: 4
+        icmp_code: 4
+        comment: "service unit test"
+
+    - name: MODIFY SERVICE ICMP TYPE 4 TO 0 CODE 4 TO 0 - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc4"
+        protocol: "ICMP"
+        icmp_type: 0
+        icmp_code: 0
+        comment: "service unit test"
+
+    - name: CREATE SERVICE IP - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc5"
         protocol: "IP"
         protocol_number: 51
         comment: "service unit test"
@@ -122,7 +170,7 @@
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
-        service_name: "svc4"
+        service_name: "svc5"
         protocol: "IP"
         protocol_number: 51
         comment: "service unit test"
@@ -140,4 +188,5 @@
         - "svc2"
         - "svc3"
         - "svc4"
+        - "svc5"
       tags: cleanup
