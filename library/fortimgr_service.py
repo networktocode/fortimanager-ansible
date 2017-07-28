@@ -1479,6 +1479,7 @@ class FMService(FortiManager):
         for field in proposed.keys():
             proposed_field = proposed[field]
             existing_field = existing.get(field)
+            # icmp type and code values can be 0, so check includes existing == 0
             if (existing_field or existing_field == 0) and proposed_field != existing_field:
                 if field in ["tcp-portrange", "udp-portrange"]:
                     # ensure proposed port range is a list of strings
@@ -1634,6 +1635,7 @@ def main():
     elif module.params["protocol"]:
         args["protocol"] = module.params["protocol"].upper()
 
+    # icmp_code and icmp_type can have value of 0, so check is made for 0 values.
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v == 0 or v)
 
