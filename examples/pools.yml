@@ -57,6 +57,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
+        vdom: "root"
         pool_name: "lab_pool_04"
         type: "overload"
         start_ip: "{{ item.start }}"
@@ -77,6 +78,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "lab3"
+        vdom: "root"
         pool_name: "lab_pool_04"
         type: "overload"
         start_ip: "100.10.30.40"
@@ -90,6 +92,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "lab1"
+        vdom: "root"
         pool_name: "lab_pool_04"
         state: "absent"
 

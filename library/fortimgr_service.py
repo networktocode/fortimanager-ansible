@@ -1559,15 +1559,15 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "param_absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         category=dict(choices=CATEGORY, required=False, type="list"),
         color=dict(required=False, type="int"),
         comment=dict(required=False, type="str"),
@@ -1594,42 +1594,71 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
     category = module.params["category"]
-    if category:
-      category.title()
+    if isinstance(category, list):
+        category = [item.title() for item in category]
+    elif isinstance(category, str):
+        category = [category.title()]
+    color = module.params["color"]
+    if color:
+        color = int(color)
+    icmp_code = module.params["icmp_code"]
+    if icmp_code:
+        icmp_code = int(icmp_code)
+    icmp_type = module.params["icmp_type"]
+    if icmp_type:
+        icmp_type = int(icmp_type)
+    port_range = module.params["port_range"]
+    if isinstance(port_range, str) or isinstance(port_range, int):
+        port_range = [port_range]
+    protocol_number = module.params["protocol_number"]
+    if isinstance(protocol_number, str):
+        protocol_number = str(protocol_number)
+    service_name = module.params["service_name"]
 
-    args = {
-        "category": category,
-        "color": module.params["color"],
-        "comment": module.params["comment"],
-        "explicit-proxy": module.params["explicit_proxy"],
-        "icmpcode": module.params["icmp_code"],
-        "icmptype": module.params["icmp_type"],
-        "protocol-number": module.params["protocol_number"],
-        "name": module.params["service_name"]
-    }
-
-    argument_check = dict(adom=adom, host=host, service_name=args.get("name"))
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(adom=adom, host=host, service_name=service_name)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
+            
+    args = {
+        "category": category,
+        "color": color,
+        "comment": module.params["comment"],
+        "explicit-proxy": module.params["explicit_proxy"],
+        "icmpcode": icmp_code,
+        "icmptype": icmp_type,
+        "protocol-number": protocol_number,
+        "name": service_name
+    }
 
     # convert argument protocol inputs to fortimanager format
     if module.params["protocol"] in ["TCP", "SOCKS-TCP", "tcp", "socks-tcp"]:
         args["protocol"] = "TCP/UDP/SCTP"
-        args["tcp-portrange"] = module.params["port_range"]
+        args["tcp-portrange"] = port_range
     elif module.params["protocol"] in ["UDP", "SOCKS-UDP", "udp", "socks-udp"]:
         args["protocol"] = "TCP/UDP/SCTP"
-        args["udp-portrange"] = module.params["port_range"]
+        args["udp-portrange"] = port_range
     elif module.params["protocol"] in ["SCTP", "sctp"]:
         args["protocol"] = "TCP/UDP/SCTP"
     elif module.params["protocol"]:

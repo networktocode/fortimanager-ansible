@@ -29,6 +29,7 @@
       fortimgr_vip_map:
         provider: "{{ fortimanager_provider }}"
         fortigate: "{{ item.fw }}"
+        vdom: "{{ item.vdom }}"
         vip_name: "{{ item.name }}"
         type: "static-nat"
         external_ip: "{{ item.ext }}"

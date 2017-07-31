@@ -163,7 +163,7 @@ options:
   vdom:
     description:
       - The vdom on the fortigate to add the route to.
-    default: root
+    required: true
     type: str
   weight:
     description:
@@ -1713,27 +1713,27 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         comment=dict(required=False, type="str"),
-        distance=dict(required=False, type="int"),
         destination=dict(required=False, type="list"),
-        destination_object=dict(required=False, type="str"),
         destination_netmask=dict(required=False, type="str"),
         destination_network=dict(required=False, type="str"),
+        destination_object=dict(required=False, type="str"),
+        distance=dict(required=False, type="int"),
         fortigate=dict(required=False, type="str"),
         gateway=dict(required=False, type="str"),
         intfc=dict(required=False, type="list"),
         priority=dict(required=False, type="int"),
         sequence_number=dict(required=False, type="str"),
-        vdom=dict(default="root", type="str"),
+        vdom=dict(required=False, type="str"),
         weight=dict(required=False, type="int")
     )
 
@@ -1753,53 +1753,90 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    destination = module.params["destination"]
+    if isinstance(destination, str):
+        destination = [destination]
+    destination_netmask = module.params["destination_netmask"]
+    destination_network = module.params["destination_network"]
+    destination_object = module.params["destination_object"]
+    distance = module.params["distance"]
+    if isinstance(distance, str):
+        distance = int(distance)
     fortigate = module.params["fortigate"]
-    vdom = module.params["vdom"]
+    gateway = module.params["gateway"]
+    intfc = module.params["intfc"]
+    if isinstance(intfc, str):
+        intfc = [intfc]
+    priority = module.params["priority"]
+    if isinstance(priority, str):
+        priority = int(priority)
     seq_num = module.params["sequence_number"]
-    dst = module.params["destination"]
-    if dst and len(dst) == 1 and "/" in dst[0]:
-        dst = FortiManager.cidr_to_network(dst[0])
-    elif dst and len(dst) == 1:
-        dst = [str(dst[0]), "255.255.255.255"]
-    elif module.params["destination_network"] and module.params["destination_netmask"]:
-        dst = [module.params["destination_network"], module.params["destination_netmask"]]
+    if isinstance(seq_num, int):
+        seq_num = str(seq_num)
+    vdom = module.params["vdom"]
+    weight = module.params["weight"]
+    if isinstance(weight, str):
+        weight = int(weight)
 
-    args = {
-        "comment": module.params["comment"],
-        "device": module.params["intfc"],
-        "distance": module.params["distance"],
-        "dst": dst,
-        "dstaddr": module.params["destination_object"],
-        "gateway": module.params["gateway"],
-        "priority": module.params["priority"],
-        "seq-num": seq_num,
-        "weight": module.params["weight"]
-    }
-
-    argument_check = dict(host=host, fortigate=fortigate)
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(host=host, fortigate=fortigate, vdom=vdom)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
 
-    if args.get("dst") and args.get("dstaddr"):
+    # validate route parameters are passed correctly
+    if destination and destination_object:
         module.fail_json(msg="Destination Addresses cannnot be both Network Addresses and Address Objects")
-
-    if not seq_num:
-        if not args.get("gateway"):
+    elif destination and (destination_network or destination_netmask):
+        module.fail_json(msg="The destination parameter cannot be used with the destination_network and destination_netmask parameters")
+    elif (destination_netmask and not destination_network) or (destination_network and not destination_netmask):
+        module.fail_json(msg="The destination_network and destination_netmask parameters must be provided together.")
+    elif not seq_num:
+        if not gateway:
             module.fail_json(msg="The gateway parameter is required when not specifying the sequence number"
                                  " of an existing route.")
-        elif not args.get("dst") and not args.get("dstaddr"):
+        elif not (destination or destination_network) and not destination_object:
             module.fail_json(msg="Either the destination or destination_object parameter is required when"
                                  " not specifying the sequence number of an existing route.")
+
+    # use destination variables to normalize dst into a list that fortimanager expects
+    if destination and len(destination) == 1 and "/" in destination[0]:
+        destination = FortiManager.cidr_to_network(destination[0])
+    elif destination and len(destination) == 1:
+        destination = [str(destination[0]), "255.255.255.255"]
+    elif destination_network and destination_netmask:
+        destination = [destination_network, destination_netmask]
+
+    args = {
+        "comment": module.params["comment"],
+        "device": intfc,
+        "distance": distance,
+        "dst": destination,
+        "dstaddr": destination_object,
+        "gateway": gateway,
+        "priority": priority,
+        "seq-num": seq_num,
+        "weight": weight
+    }
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v)

@@ -60,6 +60,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
+        vdom: "root"
         vip_name: "lab_vip_03"
         type: "static-nat"
         external_ip: "{{ item.ext }}"
@@ -84,6 +85,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "lab1"
+        vdom: "root"
         vip_name: "lab_vip_03"
         state: "absent"
 

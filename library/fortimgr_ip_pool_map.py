@@ -159,9 +159,8 @@ options:
   vdom:
     description:
       - The vdom on the fortigate that the config should be associated to.
-    required: false
+    required: true
     type: str
-    default: root
 '''
 
 EXAMPLES = '''
@@ -172,6 +171,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "{{ item.fg }}"
+    vdom: "root"
     pool_name: "App01_Pool"
     type: "overload"
     start_ip: "{{ item.start }}"
@@ -191,6 +191,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "{{ item.fg }}"
+    vdom: root
     pool_name: "App01_Pool"
     validate_certs: True
     port: 8443
@@ -207,6 +208,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "lab03_fortigate"
+    vdom: "root"
     pool_name: "App01_Pool"
     start_ip: "100.10.14.10"
     end_ip: "100.10.14.11"
@@ -217,6 +219,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "lab01_fortigate"
+    vdom: "root"
     pool_name: "App01_Pool"
 '''
 
@@ -1525,15 +1528,15 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "param_absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         arp_intfc=dict(required=False, type="str"),
         arp_reply=dict(choices=["enable", "disable"], required=False, type="str"),
         comment=dict(required=False, type="str"),
@@ -1546,7 +1549,7 @@ def main():
         start_ip=dict(required=False, type="str"),
         type=dict(choices=["overload", "one-to-one", "fixed-port-range", "port-block-allocation"],
                   required=False, type="str"),
-        vdom=dict(required=False, default="root", type="str")
+        vdom=dict(required=False, type="str")
     )
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
@@ -1563,35 +1566,49 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    fortigate = module.params["fortigate"]
+    pool_name = module.params["pool_name"]
+    vdom = module.params["vdom"]
+
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(adom=adom, fortigate=fortigate, host=host, pool_name=pool_name, vdom=vdom)
+    for key, val in argument_check.items():
+        if not val:
+            module.fail_json(msg="{} is required".format(key))
 
     args = {
         "arp-intf": module.params["arp_intfc"],
         "arp-reply": module.params["arp_reply"],
         "comments": module.params["comment"],
-        "name": module.params["pool_name"],
+        "name": pool_name,
         "endip": module.params["end_ip"],
-        "fortigate": module.params["fortigate"],
+        "fortigate": fortigate,
         "permit-any-host": module.params["permit_any_host"],
         "source-endip": module.params["source_end_ip"],
         "source-startip": module.params["source_start_ip"],
         "startip": module.params["start_ip"],
         "type": module.params["type"],
-        "vdom": module.params["vdom"]
+        "vdom": vdom
     }
-
-    argument_check = dict(adom=adom, fortigate=args.get("fortigate"), host=host, pool_name=args.get("name"))
-    for key, val in argument_check.items():
-        if not val:
-            module.fail_json(msg="{} is required".format(key))
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed_args = dict((k, v) for k, v in args.items() if v)

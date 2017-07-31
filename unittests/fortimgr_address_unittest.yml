@@ -36,6 +36,36 @@
           - "255.255.255.255"
         comment: "ipmask unit test"
 
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr1"
+          address_type: "ipmask"
+          allow_routing: "enable"
+          associated_intfc: "port1"
+          color: "1"
+          subnet: "10.1.1.1/32"
+          comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK LIST NOTATION WITH PROVIDER - NO CHANGE
+      fortimgr_address:
+        provider: "{{ provider }}"
+
+    - name: CREATE ADDRESS IPMASK LIST NOTATION OVERRIDE PROVIDER - CHANGE
+      fortimgr_address:
+        provider: "{{ provider }}"
+        address_name: "provider_addr1"
+        address_type: "ipmask"
+        allow_routing: "disable"
+        associated_intfc: "port2"
+        color: 2
+        subnet: "10.1.2.0/27"
+        comment: "provider ipmask unit test"
+
     - name: CREATE ADDRESS IPMASK CIDR NOTATION - CHANGE
       fortimgr_address:
         host: "{{ ansible_host }}"
@@ -446,6 +476,149 @@
           - "255.255.255.255"
       ignore_errors: true
 
+    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "ipmask"
+        subnet: "10.1.1.1/32"
+        network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "ipmask"
+          subnet: "10.1.1.1/32"
+          network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard: "10.1.1.1/32"
+        wildcard_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard: "10.1.1.1/32"
+          wildcard_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "ipmask"
+        network_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "ipmask"
+          network_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "ipmask"
+        network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "ipmask"
+          network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard_mask: "255.255.0.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard_mask: "255.255.0.255"
+      ignore_errors: true
+
+
 - name: CLEANUP FORTIMANAGER ADDRESSES
   hosts: fortimanager
   connection: local
@@ -473,3 +646,4 @@
         - "addr9"
         - "addr10"
         - "addr11"
+        - "provider_addr1"

@@ -44,6 +44,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
+        vdom: "root"
         address_name: "lab_web_svrs"
         address_type: "ipmask"
         network_address: "{{ item.net }}"
@@ -103,6 +104,7 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "lab1"
+        vdom: "root"
         address_name: "lab_web_svrs"
       state: "absent"
 

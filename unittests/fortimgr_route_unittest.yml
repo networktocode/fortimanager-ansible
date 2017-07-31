@@ -78,6 +78,31 @@
         gateway: "10.1.1.1"
         intfc: "port1"
 
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          destination: "10.20.10.0/24"
+          gateway: "10.1.1.1"
+          intfc: "port1"
+          vdom: "root"
+
+    - name: CREATE ROUTE WITH PROVIDER - NO CHANGE
+      fortimgr_route:
+        provider: "{{ provider }}"
+
+    - name: CREATE ROUTE OVERRIDE PROVIDER - CHANGE
+      fortimgr_route:
+        provider: "{{ provider }}"
+        fortigate: "lab2"
+        destination: "10.20.11.0/24"
+        gateway: "10.1.1.2"
+        intfc: "port2"
+
     - name: CREATE ROUTE HOST NOTATION - CHANGE
       fortimgr_route:
         host: "{{ inventory_hostname }}"
@@ -261,6 +286,78 @@
         intfc: "port2"
       ignore_errors: True
 
+    - name: ADD ROUTE DESTINATION ADDRESS AND OBJECT PROVIDER - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        provider:
+          destination:
+            - "10.10.10.0"
+            - "255.255.255.0"
+          destination_object: "route_unittest"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETMASK - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination:
+          - "10.10.10.0"
+          - "255.255.255.0"
+        destination_netmask: "255.255.255.0"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETWORK/DESTINATION_NETMASK PROVIDER - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        provider:
+          destination:
+            - "10.10.10.0"
+            - "255.255.255.0"
+          destination_netmask: "255.255.255.0"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        destination_network: "10.10.10.0"
+        intfc: "port2"
+      ignore_errors: True
+
+    - name: ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK PROVIDER - FAIL
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        provider:
+          destination_network: "10.10.10.0"
+        intfc: "port2"
+      ignore_errors: True
+
     - name: DELETE ROUTE - CHANGE
       fortimgr_route:
         host: "{{ inventory_hostname }}"
@@ -278,6 +375,7 @@
       with_items:
         - "10.1.1.1"
         - "10.1.1.2"
+      tags: cleanup
 
     - name: DELETE ROUTE AGAIN - NO CHANGE
       fortimgr_route:
@@ -310,6 +408,20 @@
         - "10.20.10.0/24"
         - "10.30.10.0/24"
         - "10.20.16.16"
+      tags: cleanup
+
+    - name: DELETE ROUTE FROM OVERRIDE PROVIDER - CHANGE
+      fortimgr_route:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab2"
+        vdom: "root"
+        destination: "10.20.11.0/24"
+        gateway: "10.1.1.2"
+        intfc: "port2"
+        state: "absent"
       tags: cleanup
 
 - name: DELETE FORTIMANAGER ADDRESS FOR UNIT TESTS

@@ -39,6 +39,7 @@
       fortimgr_address_map:
         provider: "{{ fortimanager_provider }}"
         fortigate: "{{ item.fw }}"
+        vdom: "{{ item.vdom }}"
         address_name: "{{ item.name }}"
         address_type: "ipmask"
         subnet: "{{ item.subnet }}"

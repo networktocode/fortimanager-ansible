@@ -19,6 +19,7 @@
       fortimgr_ip_pool_map:
         provider: "{{ fortimanager_provider }}"
         fortigate: "{{ item.fg }}"
+        vdom: "{{ item.vdom }}"
         pool_name: "{{ item.name }}"
         type: "overload"
         start_ip: "{{ item.start }}"
