@@ -582,7 +582,7 @@ class FortiManager(object):
         if lock_status["result"][0]["status"]["code"] != 0:
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=False, saved=False, unlocked=False)
+            module.fail_json(msg=msg, locked=False, saved=False, unlocked=False, fortimanager_response=lock_status)
 
         return True
 
@@ -684,16 +684,17 @@ class FortiManager(object):
         :return: True if configuration was saved and the adom unlocked.
         """
         # save if config successful and session locked
-        if json_response["result"][0]["status"]["code"] == 0 and lock:
+        status_code = json_response["result"][0]["status"]["code"]
+        if status_code == 0 and lock:
             self.config_save(module)
             self.config_unlock(module)
         # attempt to unlock if config unsuccessful
-        elif json_response["result"][0]["status"]["code"] != 0 and lock:
+        elif status_code != 0 and lock:
             self.config_unlock(module, msg=json_response, saved=False)
-            module.fail_json(msg=json_response, locked=True, saved=False, unlocked=True)
+            module.fail_json(msg="Unable to Apply Config", locked=True, saved=False, unlocked=True, fortimanager_response=json_response)
         # fail if not using lock mode and config unsuccessful
-        elif json_response["result"][0]["status"]["code"] != 0:
-            module.fail_json(msg=json_response)
+        elif status_code != 0:
+            module.fail_json(msg="Unable to Apply Config", fortimanager_response=json_response)
 
     def config_save(self, module, msg="Unable to Save Config, Successfully Unlocked"):
         """
@@ -711,7 +712,7 @@ class FortiManager(object):
             self.config_unlock(module, "Config Updated, but Unable to Save or Unlock", False)
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=True, saved=False, unlocked=True)
+            module.fail_json(msg=msg, locked=True, saved=False, unlocked=True, fortimanager_response=save_status)
 
         return True
 
@@ -732,7 +733,7 @@ class FortiManager(object):
         if unlock_status["result"][0]["status"]["code"] != 0:
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=True, saved=saved, unlocked=False)
+            module.fail_json(msg=msg, locked=True, saved=saved, unlocked=False, fortimanager_response=unlock_status)
 
         return True
 
@@ -1663,7 +1664,8 @@ class FMPolicy(FortiManager):
 
             # configure if not in check mode
             if not module.check_mode:
-                response = self.move_config(policy_id, direction, reference_id)
+                response = self.move_config(policy_id, direction, reference_id).json()
+                status_code = response["result"][0]["status"]["code"]
                 if module.params["session_id"]:
                     self.save()
 
@@ -1674,14 +1676,15 @@ class FMPolicy(FortiManager):
                     if module.params["session_id"]:
                         self.save()
 
-                if response.json()["result"][0]["status"]["code"] == 0 and module.params["lock"]:
+                if status_code == 0 and module.params["lock"]:
                     save_status = self.save()
                     if save_status["result"][0]["status"]["code"] == 0:
                         unlock_status = self.unlock()
                         # fail of unlock is unsuccessful
                         if unlock_status["result"][0]["status"]["code"] != 0:
                             results.append(dict(locked=True, saved=True, unlock=False, moved=move,
-                                                msg="Config Updated and Saved, but Unable to Unlock"))
+                                                msg="Config Updated and Saved, but Unable to Unlock",
+                                                fortimanager_response=unlock_status))
                             module.fail_json(**results)
                     else:
                         # attempt to unlock before failing for unsuccessful save
@@ -1689,7 +1692,8 @@ class FMPolicy(FortiManager):
                         if unlock_status["result"][0]["status"]["code"] != 0:
                             # fail with save unsuccessful but unlock successful
                             results.append(dict(locked=True, saved=False, unlocked=False,
-                                                msg="Config Updated, but Unable to Save or Unlock"))
+                                                msg="Config Updated, but Unable to Save or Unlock",
+                                                fortimanager_response=unlock_status))
                             module.fail_json(**results)
                         else:
                             # fail with save and unlock unsuccessful
@@ -1697,19 +1701,21 @@ class FMPolicy(FortiManager):
                                                 msg="Config Updated, Unable to Save, but Unlocked"))
                             module.fail_json(**results)
                 # do not attempt to save if unsuccessful move, but try to unlock before failing
-                elif response.json()["result"][0]["status"]["code"] != 0 and module.params["lock"]:
+                elif status_code != 0 and module.params["lock"]:
                     unlock_status = self.unlock()
                     if unlock_status["result"][0]["status"]["code"] == 0:
                         results.append(dict(locked=True, saved=False, unlocked=True,
-                                            msg="Policy Move Failed, Did not Save, but Unlocked"))
+                                            msg="Policy Move Failed, Did not Save, but Unlocked",
+                                            fortimanager_response=response))
                         module.fail_json(**results)
                     else:
                         results.append(dict(locked=True, saved=False, unlocked=False,
-                                            msg="Policy Move Failed, Did not Save and Unable to Unlock"))
+                                            msg="Policy Move Failed, Did not Save and Unable to Unlock",
+                                            fortimanager_response=response))
                         module.fail_json(**results)
                 # fail module when move unsuccessful and not in lock mode
-                elif response.json()["result"][0]["status"]["code"] != 0:
-                    results.append({"msg": response.json()})
+                elif status_code != 0:
+                    results.append(dict(msg="Policy Move Failed", fortimanager_response=response))
                     module.fail_json(**results)
 
             return move
@@ -1735,7 +1741,7 @@ class FMPolicy(FortiManager):
         log = module.params.get("log_traffic")
         if module.params["action"] == "deny":
             if log == "utm" or not log:
-                module.fail_json(msg="Configuring a new policy requires the log_traffic parameter to be set to either"
+                module.fail_json(msg="Configuring a new deny policy requires the log_traffic parameter to be set to either"
                                      " disable or all")
 
         # lock config if set and module not in check mode
