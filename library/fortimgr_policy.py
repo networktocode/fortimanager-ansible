@@ -2011,15 +2011,15 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         provider=dict(required=False, type="dict"),
         port=dict(required=False, type="int"),
         session_id=dict(required=False, type="str"),
         state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         action=dict(choices=["accept", "deny", "ipsec", "ssl-vpn"], required=False, type="str"),
         comment=dict(required=False, type="str"),
         destination_address=dict(required=False, type="list"),
@@ -2060,33 +2060,76 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     package = module.params["package"]
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    destination_address = module.params["destination_address"]
+    if isinstance(destination_address, str):
+        destination_address = [destination_address]
+    destination_intfc = module.params["destination_intfc"]
+    if isinstance(destination_intfc, str):
+        destination_intfc = [destination_intfc]
+    direction = module.params["direction"]
+    nat_ip = module.params["nat_ip"]
+    if isinstance(nat_ip, str):
+        nat_ip = [nat_ip]
+    policy_id = module.params["policy_id"]
+    if isinstance(policy_id, str):
+        policy_id = int(policy_id)
+    pool_name = module.params["pool_name"]
+    if isinstance(pool_name, str):
+        pool_name = [pool_name]
+    reference_policy_id = module.params["reference_policy_id"]
+    if isinstance(reference_policy_id, int):
+        reference_policy_id = str(reference_policy_id)
+    reference_policy_name = module.params["reference_policy_name"]
+    schedule = module.params["schedule"]
+    if isinstance(schedule, str):
+        schedule = [schedule]
+    service = module.params["service"]
+    if isinstance(service, str):
+        service = [service]
+    source_address = module.params["source_address"]
+    if isinstance(source_address, str):
+        source_address = [source_address]
+    source_intfc = module.params["source_intfc"]
+    if isinstance(source_intfc, str):
+        source_intfc = [source_intfc]
 
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
     argument_check = dict(adom=adom, host=host, package=package)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
 
     # check that required arguments are passed for policy move before making any changes.
-    if module.params["reference_policy_id"] and not module.params["direction"]:
+    if reference_policy_id and not direction:
         module.fail_json(msg="passing the direction argument is required when passing reference_policy_id")
-    elif module.params["reference_policy_name"] and not module.params["direction"]:
+    elif reference_policy_name and not direction:
         module.fail_json(msg="passing the direction argument is required when passing reference_policy_name")
 
     args = {
         "action": module.params["action"],
         "comments": module.params["comment"],
-        "dstaddr": module.params["destination_address"],
-        "dstintf": module.params["destination_intfc"],
+        "dstaddr": destination_address,
+        "dstintf": destination_intfc,
         "global-label": module.params["global_label"],
         "ippool": module.params["ip_pool"],
         "label": module.params["label"],
@@ -2094,14 +2137,14 @@ def main():
         "logtraffic-start": module.params["log_traffic_start"],
         "name": module.params["policy_name"],
         "nat": module.params["nat"],
-        "natip": module.params["nat_ip"],
+        "natip": nat_ip,
         "permit-any-host": module.params["permit_any_host"],
-        "policyid": module.params["policy_id"],
-        "poolname": module.params["pool_name"],
-        "schedule": module.params["schedule"],
-        "service": module.params["service"],
-        "srcaddr": module.params["source_address"],
-        "srcintf": module.params["source_intfc"],
+        "policyid": policy_id,
+        "poolname": pool_name,
+        "schedule": schedule,
+        "service": service,
+        "srcaddr": source_address,
+        "srcintf": source_intfc,
         "status": module.params["status"]
     }
 
@@ -2145,7 +2188,7 @@ def main():
         results = session.config_param_absent(module, proposed, existing)
 
     # if module has made it this far and lock set, then all related return values are true
-    if module.params["lock"] and results["changed"]:
+    if lock and results["changed"]:
         locked = dict(locked=True, saved=True, unlocked=True)
         results.update(locked)
 
@@ -2159,7 +2202,7 @@ def main():
         moved = session.config_move(module, policy_id, results)
 
         # if module has made it this far and lock set, then all related return values are true
-        if moved and module.params["lock"]:
+        if moved and lock:
             results.update(dict(moved=moved, changed=True, locked=True, saved=True, unlocked=True))
         elif moved:
             results.update(dict(moved=moved, changed=True))

@@ -43,6 +43,7 @@
           - "addr1"
           - "addr2"
         comment: "addrgroup unit test"
+        color: 3
 
     - name: CREATE ADDRESS GROUP AGAIN - NO CHANGE
       fortimgr_address_group:
@@ -56,6 +57,34 @@
           - "addr1"
           - "addr2"
         comment: "addrgroup unit test"
+        color: "3"
+
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          address_group_name: "addrgrp1"
+          allow_routing: "enable"
+          members: "addr1"
+          comment: "addrgroup unit test"
+          color: "3"
+
+    - name: CREATE ADDRESS GROUP WITH PROVIDER - NO CHANGE
+      fortimgr_address_group:
+        provider: "{{ provider }}"
+
+    - name: CREATE ADDRESS GROUP OVERRIDE PROVIDER - CHANGE
+      fortimgr_address_group:
+        provider: "{{ provider }}"
+        address_group_name: "provider_addrgrp1"
+        allow_routing: "disable"
+        members:
+          - "addr3"
+        comment: "addrgroup unit test"
+        color: 4
 
     - name: MODIFY ADDRESS GROUP ROUTING - CHANGE
       fortimgr_address_group:
@@ -178,6 +207,7 @@
         - "addrgrp1"
         - "addrgrp2"
         - "addrgrp3"
+        - "provider_addrgrp1"
 
 
 - name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES

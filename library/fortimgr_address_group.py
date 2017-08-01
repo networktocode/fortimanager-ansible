@@ -1435,15 +1435,15 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "param_absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         address_group_name=dict(required=False, type="str"),
         allow_routing=dict(choices=["enable", "disable"], required=False, type="str"),
         color=dict(required=False, type="int"),
@@ -1465,28 +1465,46 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    address_group_name = module.params["address_group_name"]
+    color = module.params["color"]
+    if isinstance(color, str):
+        color = int(color)
+    members = module.params["members"]
+    if isinstance(members, str):
+        members = [members]
 
-    args = {
-        "allow-routing": module.params["allow_routing"],
-        "color": module.params["color"],
-        "comment": module.params["comment"],
-        "member": module.params["members"],
-        "name": module.params["address_group_name"]
-    }
-
-    argument_check = dict(adom=adom, host=host, address_group_name=args.get("name"))
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(adom=adom, host=host, address_group_name=address_group_name)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
+
+    args = {
+        "allow-routing": module.params["allow_routing"],
+        "color": color,
+        "comment": module.params["comment"],
+        "member": members,
+        "name": address_group_name
+    }
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v)
