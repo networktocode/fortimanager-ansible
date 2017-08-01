@@ -1465,8 +1465,8 @@ def main():
     args = dict(
         created_by=module.params["created_by"],
         desc=module.params["description"],
-        locked=module.params["lock_revision"],
-        name=module.params["revision_name"]
+        locked=lock_revision,
+        name=revision_name
     )
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
