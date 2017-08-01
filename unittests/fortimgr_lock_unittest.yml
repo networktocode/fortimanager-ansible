@@ -160,12 +160,19 @@
           - "any"
         lock: false
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - name: FORTIMANAGER SAVE OVERRIDE PROVIDER - CHANGE
       fortimgr_lock:
+        provider:
+          adom: "FAKE"
+          save: false
+          lock: true
+          unlock: true
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+        lock: false
+        unlock: false
 
     - name: DELETE ADDRESS GROUP - CHANGE
       fortimgr_address_group:
@@ -300,11 +307,12 @@
         state: "absent"
         lock: false
 
-    - name: FORTIMANAGER SAVE AND UNLOCK - CHANGE
+    - name: FORTIMANAGER SAVE AND UNLOCK WITH PROVIDER - CHANGE
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
-        session_id: "{{ session_id }}"
-        adom: "lab"
-        save: true
-        unlock: true
+        provider:
+          host: "{{ inventory_hostname }}"
+          session_id: "{{ session_id }}"
+          adom: "lab"
+          save: true
+          unlock: true
       tags: unlock

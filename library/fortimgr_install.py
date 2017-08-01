@@ -113,7 +113,6 @@ options:
       - True performs the check.
       - False attempts the install regardless of device status.
     required: false
-    default: False
     type: bool
   dst_file:
     description:
@@ -1419,18 +1418,18 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["present", "preview"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["present", "preview"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         adom_revision_comments=dict(required=False, type="str"),
         adom_revision_name=dict(required=False, type="str"),
-        check_install=dict(default=False, required=False, type="bool"),
+        check_install=dict(required=False, type="bool"),
         dst_file=dict(required=False, type="str"),
         fortigate_name=dict(required=False, type="str"),
         fortigate_revision_comments=dict(required=False, type="str"),
@@ -1453,22 +1452,32 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
     lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
     check_install = module.params["check_install"]
     dst = module.params["dst_file"]
     fortigate = module.params["fortigate_name"]
     vdom = module.params["vdom"]
     package = module.params["package"]
 
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
     argument_check = dict(adom=adom, fortigate_name=fortigate, host=host, package=package)
     for key, val in argument_check.items():
         if not val:

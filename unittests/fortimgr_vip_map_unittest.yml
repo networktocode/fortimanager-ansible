@@ -23,6 +23,7 @@
           - "{{ item.map }}"
         external_intfc: "port1"
         comment: "vip group unit test"
+        color: 6
       with_items:
         - fg: "lab1"
           ext: "100.1.1.1"
@@ -48,6 +49,7 @@
           - "{{ item.map }}"
         external_intfc: "port1"
         comment: "vip group unit test"
+        color: 6
       with_items:
         - fg: "lab1"
           ext: "100.1.1.1"
@@ -55,7 +57,41 @@
         - fg: "lab2"
           ext: "100.1.20.1"
           map: "10.1.20.1" 
- 
+
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          vip_name: "vip1"
+          type: "static-nat"
+          arp_reply: "enable"
+          external_ip: "100.1.1.1"
+          mapped_ip: "10.1.1.1"
+          external_intfc: "port1"
+          comment: "vip group unit test"
+          color: 12
+
+    - name: CREATE VIP MAP WITH PROVIDER - NO CHANGE
+      fortimgr_vip_map:
+        provider: "{{ provider }}"
+
+    - name: CREATE VIP MAP OVERRIDE PROVIDER - CHANGE
+      fortimgr_vip_map:
+        provider: "{{ provider }}"
+        fortigate: "lab2"
+        vip_name: "provider_vip1"
+        type: "static-nat"
+        arp_reply: "disable"
+        external_ip: "100.1.21.1"
+        mapped_ip: "10.1.21.1"
+        external_intfc: "port2"
+        comment: "vip group unit test provider" 
+    
     - name: MODIFY VIP MAP CHANGE EXTERNAL IP AND ARP REPLY - CHANGE
       fortimgr_vip_map:
         host: "{{ inventory_hostname }}"
@@ -143,3 +179,4 @@
         state: "absent"
       with_items:
         - "vip1"
+        - "provider_vip1"

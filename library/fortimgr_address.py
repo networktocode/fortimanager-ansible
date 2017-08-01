@@ -1725,15 +1725,15 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "param_absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         address_name=dict(required=False, type="str"),
         address_type=dict(choices=["ipmask", "iprange", "fqdn", "wildcard", "wildcard-fqdn"],
                           required=False, type="str"),
@@ -1770,52 +1770,95 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    address_name = module.params["address_name"]
+    associated_intfc = module.params["associated_intfc"]
+    if isinstance(associated_intfc, str):
+        associated_intfc = [associated_intfc]
+    color = module.params["color"]
+    if isinstance(color, str):
+        color = int(color)
+    network_address = module.params["network_address"]
+    network_mask = module.params["network_mask"]
     subnet = module.params["subnet"]
+    if isinstance(subnet, str):
+        subnet = [subnet]
+    wildcard = module.params["wildcard"]
+    if isinstance(wildcard, str):
+        wildcard = [wildcard]
+    wildcard_address = module.params["wildcard_address"]
+    wildcard_mask = module.params["wildcard_mask"]
+
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(adom=adom, host=host, address_name=address_name)
+    for key, val in argument_check.items():
+        if not val:
+            module.fail_json(msg="{} is required".format(key))
+
+    # validate address parameters are passed correctly
+    if subnet and (network_address or network_mask):
+        module.fail_json(msg="The subnet parameter cannot be used with the network_address and network_mask parameters")
+    elif wildcard and (wildcard_address or wildcard_mask):
+        module.fail_json(msg="The wildcard parameter cannot be used with the wildcard_address and wildcard_mask parameters")
+    elif network_address and not network_mask:
+        module.fail_json(msg="The network_address and network_mask parameters must be provided together; missing network_mask.")
+    elif network_mask and not network_address:
+        module.fail_json(msg="The network_address and network_mask parameters must be provided together; missing network_address.")
+    elif wildcard_address and not wildcard_mask:
+        module.fail_json(msg="The wildcard_address and wildcard_mask parameters must be provided together; missing wildcard_mask.")
+    elif wildcard_mask and not wildcard_address:
+        module.fail_json(msg="The wildcard_address and wildcard_mask parameters must be provided together; missing wildcard_address.")
+
+    # use subnet variables to normalize the subnet into a list that fortimanager expects
     if subnet and len(subnet) == 1 and "/" in subnet[0]:
         subnet = FortiManager.cidr_to_network(subnet[0])
         if not subnet:
             module.fail_json(msg="The prefix must be a value between 0 and 32")
     elif subnet and len(subnet) == 1:
         subnet.append("255.255.255.255")
-    elif module.params["network_address"] and module.params["network_mask"]:
-        subnet = [module.params["network_address"], module.params["network_mask"]]
+    elif network_address and network_mask:
+        subnet = [network_address, network_mask]
 
-    wildcard = module.params["wildcard"]
+    # use wildcard variables to normalize the wildcard into a list that fortimanager expects
     if wildcard and "/" in wildcard[0]:
         wildcard = FortiManager.cidr_to_wildcard(wildcard[0])
         if not wildcard:
             module.fail_json(msg="The prefix must be a value between 0 and 32")
-    elif module.params["wildcard_address"] and module.params["wildcard_mask"]:
-        wildcard = [module.params["wildcard_address"], module.params["wildcard_mask"]]
+    elif wildcard_address and wildcard_mask:
+        wildcard = [wildcard_address, wildcard_mask]
 
     args = {
         "allow-routing": module.params["allow_routing"],
-        "associated-interface": module.params["associated_intfc"],
-        "color": module.params["color"],
+        "associated-interface": associated_intfc,
+        "color": color,
         "comment": module.params["comment"],
         "end-ip": module.params["end_ip"],
         "fqdn": module.params["fqdn"],
-        "name": module.params["address_name"],
+        "name": address_name,
         "start-ip": module.params["start_ip"],
         "subnet": subnet,
         "type": module.params["address_type"],
         "wildcard": wildcard,
         "wildcard-fqdn": module.params["wildcard_fqdn"]
     }
-
-    argument_check = dict(adom=adom, host=host, address_name=args.get("name"))
-    for key, val in argument_check.items():
-        if not val:
-            module.fail_json(msg="{} is required".format(key))
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed = dict((k, v) for k, v in args.items() if v)

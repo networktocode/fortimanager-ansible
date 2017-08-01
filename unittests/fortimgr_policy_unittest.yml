@@ -205,6 +205,64 @@
         direction: "before"
         reference_policy_name: "unittest_explicit_deny"
 
+    - name: CREATE POLICY WITH PROVIDER - NO CHANGE
+      fortimgr_policy:
+        provider:
+          host: "{{ inventory_hostname }}"
+          session_id: "{{ session_id }}"
+          adom: "lab"
+          package: "lab"
+          policy_id: "{{ first_policy_id }}"
+          global_label: "unit test"
+          action: "accept"
+          log_traffic: "all"
+          destination_address: "vip1"
+          destination_intfc: "any"
+          schedule: "always"
+          service: "svc1"
+          source_address: "srcaddr1"
+          source_intfc: "any"
+          nat: "enable"
+          ip_pool: "enable"
+          pool_name: "pool1"
+          direction: "before"
+          reference_policy_name: "unittest_explicit_deny"
+
+    - name: CREATE POLICY OVERRIDE PROVIDER - CHANGE
+      fortimgr_policy:
+        provider:
+          host: "{{ inventory_hostname }}"
+          session_id: "{{ session_id }}"
+          adom: "lab"
+          package: "lab"
+          global_label: "unit test"
+          action: "accept"
+          log_traffic: "all"
+          destination_address: "vip1"
+          destination_intfc: "any"
+          schedule: "always"
+          service: "svc1"
+          source_address: "srcaddr1"
+          source_intfc: "any"
+          nat: "enable"
+          ip_pool: "enable"
+          pool_name: "pool1"
+        package: "default"
+        policy_name: "provider_policy1"
+        policy_id: null
+        global_label: "provider unit test"
+        action: "deny"
+        log_traffic: "disable"
+        destination_address: "vip2"
+        destination_intfc: "port2"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr2"
+        source_intfc: "port1"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool2"
+
     - name: MODIFY POLICY ADD - CHANGE
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
@@ -381,6 +439,15 @@
         adom: "lab"
         package: "lab"
         policy_name: "unittest_explicit_deny"
+        state: "absent"
+
+    - name: CLEANUP POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "default"
+        policy_name: "provider_policy1"
         state: "absent"
 
     - name: CLEANUP ADDRESSES - CHANGE

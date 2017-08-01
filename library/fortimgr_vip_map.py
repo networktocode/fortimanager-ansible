@@ -108,7 +108,7 @@ options:
     description:
       - A tag that can be used to group objects.
     required: false
-    type: str
+    type: int
   comment:
     description:
       - A comment to add to the VIP.
@@ -147,9 +147,8 @@ options:
   vdom:
     description:
       - The vdom on the fortigate that the config should be associated to.
-    required: false
+    required: true
     type: str
-    default: root
   vip_name:
     description:
       - The name of the VIP.
@@ -165,6 +164,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "Prod"
+    vdom: "root"
     vip_name: "App02_VIP"
     type: "static-nat"
     external_ip: "100.10.10.12"
@@ -177,6 +177,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     fortigate: "Prod"
+    vdom: "root"
     vip_name: "App02_VIP"
     external_intfc: "port2"
     validate_certs: True
@@ -204,6 +205,7 @@ EXAMPLES = '''
     use_ssl: False
     adom: "lab"
     fortigate: "DR"
+    vdom: "lab"
     vip_name: "App02_VIP"
     state: "absent"
 '''
@@ -1684,17 +1686,17 @@ def main():
     argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
-        lock=dict(default=True, type="bool"),
+        lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        state=dict(choices=["absent", "param_absent", "present"], default="present", type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        state=dict(choices=["absent", "param_absent", "present"], type="str"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         arp_reply=dict(choices=["enable", "disable"], required=False, type="str"),
-        color=dict(required=False, type="str"),
+        color=dict(required=False, type="int"),
         comment=dict(required=False, type="str"),
         external_intfc=dict(required=False, type="str"),
         external_ip=dict(required=False, type="list"),
@@ -1702,7 +1704,7 @@ def main():
         mapped_ip=dict(required=False, type="list"),
         source_filter=dict(required=False, type="list"),
         type=dict(choices=["static-nat", "fqdn", "dns-translation"], type="str"),
-        vdom=dict(required=False, default="root", type="str"),
+        vdom=dict(required=False, type="str"),
         vip_name=dict(required=False, type="str")
     )
 
@@ -1720,34 +1722,60 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
+    lock = module.params["lock"]
+    if lock is None:
+        module.params["lock"] = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     state = module.params["state"]
+    if state is None:
+        state = "present"
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
+    color = module.params["color"]
+    if color:
+        color = int(color)
+    external_ip = module.params["external_ip"]
+    if isinstance(external_ip, str):
+        external_ip = [external_ip]
+    fortigate = module.params["fortigate"]
+    mapped_ip = module.params["mapped_ip"]
+    if isinstance(mapped_ip, str):
+        mapped_ip = [mapped_ip]
+    source_filter = module.params["source_filter"]
+    if isinstance(source_filter, str):
+        source_filter = [source_filter]
+    vdom = module.params["vdom"]
+    vip_name = module.params["vip_name"]
 
-    args = {
-        "arp-reply": module.params["arp_reply"],
-        "color": module.params["color"],
-        "comment": module.params["comment"],
-        "extintf": module.params["external_intfc"],
-        "extip": module.params["external_ip"],
-        "fortigate": module.params["fortigate"],
-        "mappedip": module.params["mapped_ip"],
-        "name": module.params["vip_name"],
-        "src-filter": module.params["source_filter"],
-        "type": module.params["type"],
-        "vdom": module.params["vdom"]
-    }
-
-    argument_check = dict(adom=adom, fortigate=args.get("fortigate"), host=host, vip_name=args.get("name"))
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
+    argument_check = dict(adom=adom, fortigate=fortigate, host=host, vdom=vdom, vip_name=vip_name)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
+
+    args = {
+        "arp-reply": module.params["arp_reply"],
+        "color": color,
+        "comment": module.params["comment"],
+        "extintf": module.params["external_intfc"],
+        "extip": external_ip,
+        "fortigate": fortigate,
+        "mappedip": mapped_ip,
+        "name": vip_name,
+        "src-filter": source_filter,
+        "type": module.params["type"],
+        "vdom": vdom
+    }
 
     # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
     proposed_args = dict((k, v) for k, v in args.items() if v)

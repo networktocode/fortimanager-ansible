@@ -18,6 +18,7 @@
           - "80"
           - "443"
         comment: "service unit test"
+        color: "18"
 
     - name: CREATE SERVICE TCP AGAIN - NO CHANGE
       fortimgr_service:
@@ -31,6 +32,35 @@
           - "80"
           - "443"
         comment: "service unit test"
+        color: 18
+
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          service_name: "svc1"
+          protocol: "TCP"
+          port_range: 80
+          comment: "service unit test"
+          color: 18
+
+    - name: CREATE SERVICE TCP WITH PROVIDER - NO CHANGE
+      fortimgr_service:
+        provider: "{{ provider }}"
+
+    - name: CREATE SERVICE TCP OVERRIDE PROVIDER - CHANGE
+      fortimgr_service:
+        provider: "{{ provider }}"
+        service_name: "provider_svc1"
+        protocol: "UDP"
+        port_range:
+          - "80"
+          - "443"
+        comment: "provider service unit test"
+        color: "20"
 
     - name: MODIFY SERVICE TCP ADD PORT - CHANGE
       fortimgr_service:
@@ -175,6 +205,24 @@
         protocol_number: 51
         comment: "service unit test"
 
+    - name: DELETE SERVICE - CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        state: "absent"
+
+    - name: DELETE SERVICE AGAIN - NO CHANGE
+      fortimgr_service:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_name: "svc1"
+        state: "absent"
+
     - name: DELETE SERVICES - CHANGE
       fortimgr_service:
         host: "{{ inventory_hostname }}"
@@ -189,4 +237,5 @@
         - "svc3"
         - "svc4"
         - "svc5"
+        - "provider_svc1"
       tags: cleanup

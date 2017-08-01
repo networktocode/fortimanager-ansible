@@ -16,15 +16,16 @@
         description: "revision unittest 1"
         revision_name: "unittest1"
 
-    - name: CREATE ANOTHER REVISION - CHANGE
+    - name: CREATE ANOTHER REVISION WITH PROVIDER - CHANGE
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        created_by: "ansible"
-        description: "revision unittest 2"
-        revision_name: "unittest2"
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          created_by: "ansible"
+          description: "revision unittest 2"
+          revision_name: "unittest2"
 
     - name: RESTORE REVISION - CHANGE
       fortimgr_revision:

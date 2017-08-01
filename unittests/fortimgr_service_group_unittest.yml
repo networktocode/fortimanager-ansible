@@ -43,6 +43,7 @@
           - "svc1"
           - "svc2"
         comment: "service group unit test"
+        color: 18
 
     - name: CREATE SERVICE GROUP AGAIN - NO CHANGE
       fortimgr_service_group:
@@ -55,6 +56,33 @@
           - "svc1"
           - "svc2"
         comment: "service group unit test"
+        color: "18"
+
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          service_group_name: "svcgrp1"
+          members: "svc1"
+          comment: "service group unit test"
+          color: "18"
+
+    - name: CREATE SERVICE GROUP WITH PROVIDER - NO CHANGE
+      fortimgr_service_group:
+        provider: "{{ provider }}"
+
+    - name: CREATE SERVICE GROUP OVERRIDE PROVIDER - CHANGE
+      fortimgr_service_group:
+        provider: "{{ provider }}"
+        service_group_name: "provider_svcgrp1"
+        members:
+          - "svc3"
+          - "svc4"
+        comment: "service group unit test"
+        color: 14
 
     - name: MODIFY SERVICE GROUP ADD MEMBER WITH EXISTING MEMBERS - CHANGE
       fortimgr_service_group:
@@ -80,7 +108,7 @@
           - "svc4"
         comment: "service group unit test"
 
-    - name: MODIFY SERVICE GROUP ADD MEMBER REMOVE MEMBER - CHANGE
+    - name: MODIFY SERVICE GROUP REMOVE MEMBER - CHANGE
       fortimgr_service_group:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -93,7 +121,7 @@
         state: "param_absent"
         comment: "service group unit test"
 
-    - name: MODIFY SERVICE GROUP ADD MEMBER REMOVE MEMBER AGAIN - NO CHANGE
+    - name: MODIFY SERVICE GROUP REMOVE MEMBER AGAIN - NO CHANGE
       fortimgr_service_group:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -130,7 +158,6 @@
           - "svc4"
         comment: "service group unit test"
         state: "absent"
-      tags: cleanup
 
     - name: DELETE SERVICE GROUP AGAIN - NO CHANGE
       fortimgr_service_group:
@@ -141,18 +168,6 @@
         service_group_name: "svcgrp1"
         state: "absent"
 
-    - name: DELETE SERVICE GROUPS - CHANGE
-      fortimgr_service_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        service_group_name: "{{ item }}"
-        state: "absent"
-      with_items:
-        - "svcgrp2"
-      tags: cleanup
-
 
 - name: CLEANUP FORTIMANAGER SERVICES FOR UNIT TESTS
   hosts: fortimanager
@@ -161,6 +176,19 @@
   tags: cleanup
   
   tasks:
+    - name: CLEANUP SERVICE GROUPS - CHANGE
+      fortimgr_service_group:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        service_group_name: "{{ item.name }}"
+        state: "absent"
+      with_items:
+        - name: "svcgrp1"
+        - name: "svcgrp2"
+        - name: "provider_svcgrp1"
+
     - name: CLEANUP SERVICES - CHANGE
       fortimgr_service:
         host: "{{ inventory_hostname }}"

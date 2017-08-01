@@ -1463,13 +1463,13 @@ def main():
         port=dict(required=False, type="int"),
         provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
-        use_ssl=dict(default=True, type="bool"),
+        use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
-        validate_certs=dict(default=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         adoms=dict( required=False, type="list"),
         config_filter=dict(required=False, type="list"),
-        fortigates=dict(required=False, type="list"),
-        fortigate_name=dict(choices=["device_id", "hostname"], default="device_id", type="str")
+        fortigate_name=dict(choices=["device_id", "hostname"], type="str"),
+        fortigates=dict(required=False, type="list")
     )
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
@@ -1486,19 +1486,34 @@ def main():
         if module.params.get(param) is None:
             module.params[param] = pvalue
 
+    # handle params passed via provider and insure they are represented as the data type expected by fortimanager
     adom = module.params["adom"]
     host = module.params["host"]
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
-    fortigates = module.params["fortigates"]
-    config_filter = module.params["config_filter"]
-    fortigate_name = module.params["fortigate_name"]
+    if validate_certs is None:
+        validate_certs = False
     adoms = module.params["adoms"]
+    if isinstance(adoms, str):
+        adoms = [adoms]
+    config_filter = module.params["config_filter"]
+    if isinstance(config_filter, str):
+        config_filter = [config_filter]
+    fortigate_name = module.params["fortigate_name"]
+    if fortigate_name is None:
+        fortigate_name = "device_id"
+    fortigates = module.params["fortigates"]
+    if isinstance(fortigates, str):
+        fortigates = [fortigates]
 
+
+    # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
     argument_check = dict(host=host)
     for key, val in argument_check.items():
         if not val:

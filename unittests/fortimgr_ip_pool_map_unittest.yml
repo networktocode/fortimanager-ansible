@@ -50,6 +50,37 @@
           start: "200.10.10.1"
           end: "200.10.10.1" 
 
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          pool_name: "pool1"
+          type: "overload"
+          permit_any_host: "enable"
+          start_ip: "100.10.10.1"
+          end_ip: "100.10.10.1"
+          comment: "pool unit test"
+
+    - name: CREATE IP POOL MAP OVERLOAD AGAIN WITH PROVIDER - NO CHANGE
+      fortimgr_ip_pool_map:
+        provider: "{{ provider }}"
+
+    - name: CREATE IP POOL MAP OVERLOAD AGAIN OVERRIDE PROVIDER - CHANGE
+      fortimgr_ip_pool_map:
+        provider: "{{ provider }}"
+        fortigate: "lab2"
+        pool_name: "provider_pool1"
+        type: "overload"
+        permit_any_host: "disable"
+        start_ip: "100.20.10.1"
+        end_ip: "100.20.10.1"
+        comment: "provider pool unit test"
+
     - name: MODIFY IP POOL MAP OVERLOAD INCREASE RANGE - CHANGE
       fortimgr_ip_pool_map:
         host: "{{ inventory_hostname }}"
@@ -257,3 +288,4 @@
         - "pool1"
         - "pool2"
         - "pool3"
+        - "provider_pool1"

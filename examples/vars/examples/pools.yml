@@ -5,10 +5,12 @@ pools:
       end: "192.168.20.1"
   mappings:
     - fg: "lab01"
+      vdom: "root"
       name: "db_pool01"
       start: "10.20.20.1"
       end: "10.20.20.1"
     - fg: "lab02"
+      vdom: "root"
       name: "db_pool01"
       start: "10.20.21.1"
       end: "10.20.21.1"

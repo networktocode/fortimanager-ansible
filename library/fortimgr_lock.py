@@ -1386,13 +1386,13 @@ def main():
         port=dict(required=False, type="int"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
-        use_ssl=dict(default=True, type="bool"),
-        validate_certs=dict(default=False, type="bool"),
+        use_ssl=dict(required=False, type="bool"),
+        validate_certs=dict(required=False, type="bool"),
         provider=dict(required=False, type="dict"),
-        save=dict(default=False, type="bool"),
+        save=dict(required=False, type="bool"),
         session_id=dict(required=False, type="str"),
-        lock=dict(default=False, type="bool"),
-        unlock=dict(default=False, type="bool")
+        lock=dict(required=False, type="bool"),
+        unlock=dict(required=False, type="bool")
     )
 
     module = AnsibleModule(argument_spec)
@@ -1414,8 +1414,12 @@ def main():
     password = module.params["password"]
     port = module.params["port"]
     use_ssl = module.params["use_ssl"]
+    if use_ssl is None:
+        use_ssl = True
     username = module.params["username"]
     validate_certs = module.params["validate_certs"]
+    if validate_certs is None:
+        validate_certs = False
     lock = module.params["lock"]
     save = module.params["save"]
     session_id = module.params["session_id"]

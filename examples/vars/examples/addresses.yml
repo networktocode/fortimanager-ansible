@@ -14,10 +14,12 @@ addresses:
       interface: "db"
   maps:
     - fw: "lab01"
+      vdom: "root"
       name: "users"
       interface: "corp"
       subnet: "10.10.10.0/24"
     - fw: "lab02"
+      vdom: "root"
       name: "users"
       interface: "corp"
       subnet: "10.10.20.0/24"

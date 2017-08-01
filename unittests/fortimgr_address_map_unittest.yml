@@ -54,6 +54,37 @@
             - "10.10.20.10"
             - "255.255.255.255"
 
+    - name: SET PROVIDER - NO CHANGE
+      set_fact:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr1"
+          address_type: "ipmask"
+          allow_routing: "enable"
+          color: "1"
+          subnet: "10.10.10.10/32"
+          comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS MAP IPMASK WITH PROVIDER - NO CHANGE
+      fortimgr_address_map:
+        provider: "{{ provider }}"
+
+    - name: CREATE ADDRESS MAP IPMASK OVERRIDE PROVIDER - CHANGE
+      fortimgr_address_map:
+        provider: "{{ provider }}"
+        fortigate: "lab2"
+        address_name: "provider_addr1"
+        address_type: "ipmask"
+        allow_routing: "disable"
+        color: 3
+        subnet: "10.10.10.8/30"
+        comment: "provider ipmask unit test"
+
     - name: CREATE ADDRESS MAP IPMASK CIDR NOTATION - CHANGE
       fortimgr_address_map:
         host: "{{ inventory_hostname }}"
@@ -452,6 +483,7 @@
         username: "{{ username }}"
         password: "{{ password }}"
         fortigate: "lab1"
+        vdom: "root"
         address_name: "addr11"
         address_type: "ipmask"
         subnet:
@@ -465,6 +497,21 @@
         username: "{{ username }}"
         password: "{{ password }}"
         adom: "lab"
+        vdom: "root"
+        address_name: "addr11"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS MAP IPMASK NO VDOM - FAIL
+      fortimgr_address_map:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
         address_name: "addr11"
         address_type: "ipmask"
         subnet:
@@ -479,10 +526,177 @@
         password: "{{ password }}"
         adom: "lab"
         fortigate: "lab1"
+        vdom: "root"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
           - "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "ipmask"
+        subnet: "10.1.1.1/32"
+        network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "ipmask"
+          subnet: "10.1.1.1/32"
+          network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard: "10.1.1.1/32"
+        wildcard_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard: "10.1.1.1/32"
+          wildcard_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "ipmask"
+        network_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "ipmask"
+          network_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "ipmask"
+        network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "ipmask"
+          network_mask: "255.255.255.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard_address: "10.1.1.1"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr7"
+        address_type: "wildcard"
+        wildcard_mask: "255.255.0.255"
+      ignore_errors: true
+
+    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+      fortimgr_address_map:
+        provider:
+          host: "{{ ansible_host }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+          adom: "lab"
+          fortigate: "lab1"
+          vdom: "root"
+          address_name: "addr7"
+          address_type: "wildcard"
+          wildcard_mask: "255.255.0.255"
       ignore_errors: true
 
 
@@ -513,3 +727,4 @@
         - "addr9"
         - "addr10"
         - "addr11"
+        - "provider_addr1"
