@@ -514,7 +514,7 @@ class FortiManager(object):
         if lock_status["result"][0]["status"]["code"] != 0:
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=False, saved=False, unlocked=False)
+            module.fail_json(msg=msg, locked=False, saved=False, unlocked=False, fortimanager_response=lock_status)
 
         return True
 
@@ -616,16 +616,17 @@ class FortiManager(object):
         :return: True if configuration was saved and the adom unlocked.
         """
         # save if config successful and session locked
-        if json_response["result"][0]["status"]["code"] == 0 and lock:
+        status_code = json_response["result"][0]["status"]["code"]
+        if status_code == 0 and lock:
             self.config_save(module)
             self.config_unlock(module)
         # attempt to unlock if config unsuccessful
-        elif json_response["result"][0]["status"]["code"] != 0 and lock:
+        elif status_code != 0 and lock:
             self.config_unlock(module, msg=json_response, saved=False)
-            module.fail_json(msg=json_response, locked=True, saved=False, unlocked=True)
+            module.fail_json(msg="Unable to Apply Config", locked=True, saved=False, unlocked=True, fortimanager_response=json_response)
         # fail if not using lock mode and config unsuccessful
-        elif json_response["result"][0]["status"]["code"] != 0:
-            module.fail_json(msg=json_response)
+        elif status_code != 0:
+            module.fail_json(msg="Unable to Apply Config", fortimanager_response=json_response)
 
     def config_save(self, module, msg="Unable to Save Config, Successfully Unlocked"):
         """
@@ -643,7 +644,7 @@ class FortiManager(object):
             self.config_unlock(module, "Config Updated, but Unable to Save or Unlock", False)
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=True, saved=False, unlocked=True)
+            module.fail_json(msg=msg, locked=True, saved=False, unlocked=True, fortimanager_response=save_status)
 
         return True
 
@@ -664,7 +665,7 @@ class FortiManager(object):
         if unlock_status["result"][0]["status"]["code"] != 0:
             # try to logout before failing
             self.logout()
-            module.fail_json(msg=msg, locked=True, saved=saved, unlocked=False)
+            module.fail_json(msg=msg, locked=True, saved=saved, unlocked=False, fortimanager_response=unlock_status)
 
         return True
 
@@ -1635,7 +1636,7 @@ def main():
     if not session_id:
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:
-            module.fail_json(msg="Unable to login")
+            module.fail_json(msg="Unable to login", fortimanager_response=session_login())
     else:
         session.session = session_id
 
