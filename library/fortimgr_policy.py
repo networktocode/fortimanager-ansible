@@ -1741,7 +1741,8 @@ class FMPolicy(FortiManager):
                         module.fail_json(**results)
                 # fail module when move unsuccessful and not in lock mode
                 elif status_code != 0:
-                    results.update(dict(msg="Policy Move Failed", fortimanager_response=response.json()))
+                    results.update(dict(msg="Policy Move Failed", fortimanager_response=response.json(),
+                                        request_body=response.request.body))
                     module.fail_json(**results)
 
             return move
@@ -2224,7 +2225,7 @@ def main():
         source_intfc = [source_intfc]
 
     # validate match_filters is not used with policy_name or policy_id
-    elif match_filters and not match_filter:
+    if match_filters and not match_filter:
         module.fail_json(msg="match_filter and match_filters must be used together; missing match_filter")
     elif match_filter and policy_id:
         module.fail_json(msg="match_filter and policy_id cannot be used together.")
