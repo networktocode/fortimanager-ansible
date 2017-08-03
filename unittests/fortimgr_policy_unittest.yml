@@ -29,6 +29,7 @@
       fortimgr_address:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         address_name: "{{ item.name }}"
         address_type: "ipmask"
@@ -53,6 +54,7 @@
       fortimgr_service:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         service_name: "{{ item.name }}"
         protocol: TCP
@@ -70,6 +72,7 @@
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         pool_name: "{{ item.name }}"
         type: "overload"
@@ -90,6 +93,7 @@
       fortimgr_vip:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         vip_name: "{{ item.name }}"
         type: "static-nat"
@@ -127,6 +131,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_name: "unittest_explicit_deny"
@@ -149,6 +154,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         global_label: "unit test"
@@ -181,6 +187,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ first_policy_id }}"
@@ -210,6 +217,7 @@
         provider:
           host: "{{ inventory_hostname }}"
           session_id: "{{ session_id }}"
+          lock: false
           adom: "lab"
           package: "lab"
           policy_id: "{{ first_policy_id }}"
@@ -233,6 +241,7 @@
         provider:
           host: "{{ inventory_hostname }}"
           session_id: "{{ session_id }}"
+          lock: false
           adom: "lab"
           package: "lab"
           global_label: "unit test"
@@ -267,6 +276,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ first_policy_id }}"
@@ -301,6 +311,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ first_policy_id }}"
@@ -328,6 +339,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         global_label: "unit test"
@@ -368,6 +380,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
@@ -384,6 +397,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
@@ -400,6 +414,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
@@ -411,6 +426,332 @@
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS ALL - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "all"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip1"
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc3"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+      register: "policy3"
+
+    - name: SET POLICY ID
+      set_fact:
+        third_policy_id: "{{ policy3.config.params[0].data.policyid }}"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS ALL AGAIN - NO CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "all"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip1"
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc3"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS NULL - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc3"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+      register: "policy4"
+
+    - name: SET POLICY ID
+      set_fact:
+        fourth_policy_id: "{{ policy4.config.params[0].data.policyid }}"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS NULL AGAIN - NO CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc3"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS LIST MODIFY POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters:
+          - "source_address"
+          - "destination_address"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "pool1"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS LARGER LIST NEW POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters:
+          - "source_address"
+          - "destination_address"
+          - "nat"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address:
+          - "srcaddr4"
+          - "srcaddr5"
+        source_intfc: "any"
+        nat: "disable"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+      register: "policy5"
+
+    - name: SET POLICY ID
+      set_fact:
+        fifth_policy_id: "{{ policy5.config.params[0].data.policyid }}"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS PARTIAL MATCH DOESN'T COUNT NEW POLICY - CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters:
+          - "source_address"
+          - "destination_address"
+        global_label: "unit test"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address:
+          - "srcaddr4"
+        source_intfc: "any"
+        nat: "disable"
+        direction: "before"
+        reference_policy_name: "unittest_explicit_deny"
+      register: "policy6"
+
+    - name: SET POLICY ID
+      set_fact:
+        sixth_policy_id: "{{ policy6.config.params[0].data.policyid }}"
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS NO MATCH_FILTER - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filters: "all"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_ID - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "all"
+        policy_id: "{{ first_policy_id }}"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_NAME - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "all"
+        policy_name: "UNIT_TEST"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS INVALID FILTER - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "FAKE"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS FILTER NOT IN PARAM - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "nat"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
+
+    - name: CREATE POLICY USING MATCH MATCH FILTERS MULTIPLE POLICIES MATCHED - FAIL
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        match_filter: true
+        match_filters: "action"
+        global_label: "unit test"
+        action: "accept"
+        destination_address: "vip2"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "svc2"
+        source_address: "srcaddr4"
+        source_intfc: "any"
+      ignore_errors: true
 
 
 - name: CLEANUP FORTIMANAGER ADDRESSES
@@ -424,6 +765,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ item }}"
@@ -431,11 +773,16 @@
       with_items:
         - "{{ first_policy_id }}"
         - "{{ second_policy_id }}"
+        - "{{ third_policy_id }}"
+        - "{{ fourth_policy_id }}"
+        - "{{ fifth_policy_id }}"
+        - "{{ sixth_policy_id }}"
 
     - name: CLEANUP POLICY - CHANGE
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "lab"
         policy_name: "unittest_explicit_deny"
@@ -445,6 +792,7 @@
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         package: "default"
         policy_name: "provider_policy1"
@@ -454,6 +802,7 @@
       fortimgr_address:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
@@ -469,6 +818,7 @@
       fortimgr_service:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         service_name: "{{ item }}"
         state: "absent"
@@ -481,6 +831,7 @@
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         pool_name: "{{ item }}"
         state: "absent"
@@ -493,6 +844,7 @@
       fortimgr_vip:
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
+        lock: false
         adom: "lab"
         vip_name: "{{ item }}"
         state: "absent"
