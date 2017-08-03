@@ -153,6 +153,23 @@ options:
     required: false
     type:
     choices: ["enable", "disable"]
+  match_filter:
+    description:
+      - Determines whether to use match_filters to retrieve existing policies.
+      - True will use match_filters to retrieve a matching policy.
+      - False will not use match_filters to retrieve a matching policy.
+    type: bool
+    default: false
+  match_filters:
+    description:
+      - This is an alternative means of matching an existing policy when not using policy_id or policy_name.
+      - The config parameters to match existing policies against for comparing module parameters against existing configurations.
+        All fields passed into the list will be used to retrieve an exact match from existing policies.
+        If multiple policies match on the parameters, the module will fail with the list of matching policies.
+      - "all" can be used to match all parameters that are passed to the module.
+    type: list
+    default: ["source_address", "source_intfc", "destination_address", "destination_intfc", "service"]
+    options: All policy config parameters accepted by the module and the word "all"
   nat:
     description:
       - Setting the NAT to enable or disable.
@@ -1634,12 +1651,17 @@ class FMPolicy(FortiManager):
 
             direction = module.params["direction"]
             if module.params["reference_policy_name"]:
-                reference_id = str(self.get_item_name(module.params["reference_policy_name"]))
+                reference_policy = self.get_item_from_name(module.params["reference_policy_name"])
+                if reference_policy:
+                    reference_id = reference_policy["policyid"]
+                else:
+                    results["msg"] = "Unable to Find Reference Policy Name"
+                    module.fail_json(**results)
             else:
                 reference_id = module.params["reference_policy_id"]
 
             proposed_reference = self.get_item_fields(policy_id, ["policyid"])
-            existing_reference = self.get_item_fields(int(reference_id), ["policyid"])
+            existing_reference = self.get_item_fields(reference_id, ["policyid"])
             if not proposed_reference or not existing_reference:
                 results["msg"] = "Unable to Find the Policies; Please Verify the Policy Params."
                 module.fail_json(**results)
@@ -1657,15 +1679,15 @@ class FMPolicy(FortiManager):
                 return {}
 
             obj_url = self.pkg_url + "/{}".format(str(policy_id))
-            move = {"method": "move", "params": [{"url": obj_url, "option": direction, "target": reference_id}]}
+            move = {"method": "move", "params": [{"url": obj_url, "option": direction, "target": str(reference_id)}]}
 
             if module.params["lock"]:
                 self.config_lock(module)
 
             # configure if not in check mode
             if not module.check_mode:
-                response = self.move_config(policy_id, direction, reference_id).json()
-                status_code = response["result"][0]["status"]["code"]
+                response = self.move_config(policy_id, direction, str(reference_id))
+                status_code = response.json()["result"][0]["status"]["code"]
                 if module.params["session_id"]:
                     self.save()
 
@@ -1682,7 +1704,7 @@ class FMPolicy(FortiManager):
                         unlock_status = self.unlock()
                         # fail of unlock is unsuccessful
                         if unlock_status["result"][0]["status"]["code"] != 0:
-                            results.append(dict(locked=True, saved=True, unlock=False, moved=move,
+                            results.update(dict(locked=True, saved=True, unlock=False, moved=move,
                                                 msg="Config Updated and Saved, but Unable to Unlock",
                                                 fortimanager_response=unlock_status))
                             module.fail_json(**results)
@@ -1691,31 +1713,31 @@ class FMPolicy(FortiManager):
                         unlock_status = self.unlock()
                         if unlock_status["result"][0]["status"]["code"] != 0:
                             # fail with save unsuccessful but unlock successful
-                            results.append(dict(locked=True, saved=False, unlocked=False,
+                            results.update(dict(locked=True, saved=False, unlocked=False,
                                                 msg="Config Updated, but Unable to Save or Unlock",
                                                 fortimanager_response=unlock_status))
                             module.fail_json(**results)
                         else:
                             # fail with save and unlock unsuccessful
-                            results.append(dict(locked=True, saved=False, unlocked=True,
+                            results.update(dict(locked=True, saved=False, unlocked=True,
                                                 msg="Config Updated, Unable to Save, but Unlocked"))
                             module.fail_json(**results)
                 # do not attempt to save if unsuccessful move, but try to unlock before failing
                 elif status_code != 0 and module.params["lock"]:
                     unlock_status = self.unlock()
                     if unlock_status["result"][0]["status"]["code"] == 0:
-                        results.append(dict(locked=True, saved=False, unlocked=True,
+                        results.update(dict(locked=True, saved=False, unlocked=True,
                                             msg="Policy Move Failed, Did not Save, but Unlocked",
-                                            fortimanager_response=response))
+                                            fortimanager_response=response.json(), request_body=response.request.body))
                         module.fail_json(**results)
                     else:
-                        results.append(dict(locked=True, saved=False, unlocked=False,
+                        results.update(dict(locked=True, saved=False, unlocked=False,
                                             msg="Policy Move Failed, Did not Save and Unable to Unlock",
-                                            fortimanager_response=response))
+                                            fortimanager_response=response.json(), request_body=response.request.body))
                         module.fail_json(**results)
                 # fail module when move unsuccessful and not in lock mode
                 elif status_code != 0:
-                    results.append(dict(msg="Policy Move Failed", fortimanager_response=response))
+                    results.update(dict(msg="Policy Move Failed", fortimanager_response=response))
                     module.fail_json(**results)
 
             return move
@@ -1824,6 +1846,34 @@ class FMPolicy(FortiManager):
         response = self.make_request(body)
 
         return response.json()["result"][0].get("data", [])
+
+    def get_all_filters(self, filters):
+        """
+        This method is used to get all polices currently configured on the FortiManager that have configurations
+        matching the values provided in filters.
+
+        :param filters: Type dict.
+                        A dictionary where the keys match the config parameter from fortimanager, and the
+                        values match the value of the configured parameter.
+        :return: The list of matching policies. If no policies are matched, an empty list is returned.
+        """
+        # generate filter list (list of lists with "&&" between them) from match_filters dict, and pop the last "&&"
+        filter_list = []
+        for k, v in filters.items():
+            filter_list.append([k, "==", v])
+            filter_list.append("&&")
+
+        filter_list.pop()
+
+        body = dict(method="get", params=[{"url": self.pkg_url, "filter": filter_list}], verbose=1, session=self.session)
+        response = self.make_request(body)
+        response_data = response.json()["result"][0].get("data")
+
+        if response_data:
+            return response_data
+        else:
+            return []
+
 
     @staticmethod
     def get_diff_add(proposed, existing):
@@ -1949,26 +1999,26 @@ class FMPolicy(FortiManager):
         else:
             return {}
 
-    def get_item_name(self, name):
+    def get_item_from_name(self, name):
         """
-        This method is used to get a specific policy's ID currently configured on the FortiManager using the policy's
-        name.
+        This method is used to get a specific policy configured on the FortiManager using the policy's name.
 
         :param name: Type str.
                      The name of the policy to retrieve.
-        :return: The policy ID for the policy as an int. 0 is returned if a policy with the same name does not
-                 currently existing.
+        :return: Type dict
+                 The policy that has a name matching the name argument. If no policies are found, then an empty
+                 dict is returned.
         """
-        body = {"method": "get", "params": [{"url": self.pkg_url, "filter": ["name", "==", name]}],
-                "verbose": 1, "session": self.session}
+        body = dict(method="get", params=[{"url": self.pkg_url, "filter": ["name", "==", name]}],
+                verbose=1, session=self.session)
 
         response = self.make_request(body)
-        response_data = response.json()["result"][0].get("data", [{"policyid": 0}])
+        response_data = response.json()["result"][0]["data"]
 
         if response_data:
-            return response_data[0]["policyid"]
+            return response_data[0]
         else:
-            return 0
+            return {}
 
     def move_config(self, policy_id, direction, target):
         """
@@ -1989,6 +2039,44 @@ class FMPolicy(FortiManager):
         response = self.make_request(body)
 
         return response
+
+    @staticmethod
+    def param_normalizer(params):
+        """
+        This method is used to take a list of Ansible module param namess and return the list of their equivalent
+        fortimanager param names. This is useful for the get_all_filters() method.
+
+        :param params: Type list.
+                       The list of param names passed into the Ansible module.
+        :return: A list of the equivalent FortiManager parameter names.
+        """
+        param_dict = dict(
+            action="action",
+            comment="comments",
+            destination_address="dstaddr",
+            destination_intfc="dstintf",
+            global_label="global-label",
+            ip_pool="ippool",
+            label="label",
+            log_traffic="logtraffic",
+            log_traffic_start="logtraffic-start",
+            policy_name="name",
+            nat="nat",
+            nat_ip="natip",
+            permit_any_host="permit-any-host",
+            policy_id="policyid",
+            pool_name="poolname",
+            schedule="schedule",
+            service="service",
+            source_address="srcaddr",
+            source_intfc="srcintf",
+            status="status"
+        )
+        fm_list = []
+        for entry in params:
+            fm_list.append(param_dict[entry])
+
+        return fm_list
 
     def update_config(self, update_config):
         """
@@ -2012,6 +2100,9 @@ class FMPolicy(FortiManager):
 
         return response
 
+VALID_MATCH_FILTERS = ["all", "action", "comment", "destination_address", "destination_intfc", "global_label", "ip_pool",
+                       "label", "log_traffic", "log_traffic_start", "nat", "nat_ip", "permit_any_host", "pool_name",
+                       "schedule", "service", "source_address", "source_intfc"]
 
 def main():
     argument_spec = dict(
@@ -2036,6 +2127,8 @@ def main():
         label=dict(required=False, type="str"),
         log_traffic=dict(choices=["disable", "all", "utm"], required=False, type="str"),
         log_traffic_start=dict(choices=["enable", "disable"], required=False, type="str"),
+        match_filter=dict(required=False, type="bool"),
+        match_filters=dict(required=False, type="list"),
         nat=dict(choices=["enable", "disable"], required=False, type="str"),
         nat_ip=dict(required=False, type="list"),
         package=dict(required=False, type="str"),
@@ -2043,7 +2136,7 @@ def main():
         policy_id=dict(required=False, type="int"),
         policy_name=dict(required=False, type="str"),
         pool_name=dict(required=False, type="list"),
-        reference_policy_id=dict(required=False, type="str"),
+        reference_policy_id=dict(required=False, type="int"),
         reference_policy_name=dict(required=False, type="str"),
         schedule=dict(required=False, type="list"),
         service=dict(required=False, type="list"),
@@ -2093,18 +2186,25 @@ def main():
     if isinstance(destination_intfc, str):
         destination_intfc = [destination_intfc]
     direction = module.params["direction"]
+    match_filter = module.params["match_filter"]
+    match_filters = module.params["match_filters"]
+    if match_filter and match_filters is None:
+        match_filters = ["source_address", "source_intfc", "destination_address", "destination_intfc", "service"]
+    elif isinstance(match_filters, str):
+        match_filters = [match_filters]
     nat_ip = module.params["nat_ip"]
     if isinstance(nat_ip, str):
         nat_ip = [nat_ip]
     policy_id = module.params["policy_id"]
     if isinstance(policy_id, str):
         policy_id = int(policy_id)
+    policy_name = module.params["policy_name"]
     pool_name = module.params["pool_name"]
     if isinstance(pool_name, str):
         pool_name = [pool_name]
     reference_policy_id = module.params["reference_policy_id"]
-    if isinstance(reference_policy_id, int):
-        reference_policy_id = str(reference_policy_id)
+    if isinstance(reference_policy_id, str):
+        reference_policy_id = int(reference_policy_id)
     reference_policy_name = module.params["reference_policy_name"]
     schedule = module.params["schedule"]
     if isinstance(schedule, str):
@@ -2118,6 +2218,20 @@ def main():
     source_intfc = module.params["source_intfc"]
     if isinstance(source_intfc, str):
         source_intfc = [source_intfc]
+
+    # validate match_filters is not used with policy_name or policy_id
+    elif match_filters and not match_filter:
+        module.fail_json(msg="match_filter and match_filters must be used together; missing match_filter")
+    elif match_filter and policy_id:
+        module.fail_json(msg="match_filter and policy_id cannot be used together.")
+    elif match_filter and policy_name:
+        module.fail_json(msg="match_filter and policy_name cannot be used together.")
+
+    # validate match_filters are valid
+    if match_filters:
+        for filt in match_filters:
+            if filt not in VALID_MATCH_FILTERS:
+                module.fail_json(msg="{} is not a valid filter option".format(filt), valid_filters=VALID_MATCH_FILTERS)
 
     # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
     argument_check = dict(adom=adom, host=host, package=package)
@@ -2141,7 +2255,7 @@ def main():
         "label": module.params["label"],
         "logtraffic": module.params["log_traffic"],
         "logtraffic-start": module.params["log_traffic_start"],
-        "name": module.params["policy_name"],
+        "name": policy_name,
         "nat": module.params["nat"],
         "natip": nat_ip,
         "permit-any-host": module.params["permit_any_host"],
@@ -2166,13 +2280,35 @@ def main():
     if not session_id:
         session_login = session.login()
         if not session_login.json()["result"][0]["status"]["code"] == 0:
-            module.fail_json(msg="Unable to login")
+            module.fail_json(msg="Unable to login", fortimanager_response=session_login.json())
     else:
         session.session = session_id
 
-    # add policy id if only name is provided in the module arguments
-    if "name" in proposed and "policyid" not in proposed:
-        proposed["policyid"] = session.get_item_name(proposed["name"])
+    # add policy id if only name is provided in the module arguments or using match_filters
+    if policy_name and not policy_id:
+        policy = session.get_item_from_name(policy_name)
+        if policy:
+            proposed["policyid"] = policy["policyid"]
+    elif match_filters:
+        if "all" in match_filters:
+            fortimanager_filters = proposed.keys()
+        else:
+            fortimanager_filters = FMPolicy.param_normalizer(match_filters)
+
+        filters = {}
+        for filt in fortimanager_filters:
+            if filt not in proposed:
+                module.fail_json(msg="All match_filters entries must have a value passed to the module; missing {}".format(filt))
+            else:
+                filters[filt] = proposed[filt]
+
+        policies = session.get_all_filters(filters)
+
+        if len(policies) == 1:
+            proposed["policyid"] = policies[0]["policyid"]
+        elif len(policies) > 1:
+            module.fail_json(msg="Multiple polices were matched based on match_filters, please specify the policy_id or policy_name",
+                             matched_policies=policies)
 
     # get existing configuration from fortimanager and make necessary changes
     if "policyid" in proposed:
