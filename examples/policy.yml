@@ -1,0 +1,141 @@
+- name: Ensure Policies are in Desired State
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Explicit Deny Policy Exists
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        global_label: "Explicit Deny"
+        policy_name: "explicit_deny"
+        action: "deny"
+        log_traffic: "all"
+        destination_address: "all"
+        destination_intfc: "any"
+        schedule: "always"
+        service: "ALL"
+        source_address: "all"
+        source_intfc: "any"
+
+    - name: Ensure Policy Exists Before Explicit Deny Using Name
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        global_label: "Lab to Corp"
+        action: "accept"
+        destination_address: "corp_dns"
+        destination_intfc: "corp"
+        schedule: "always"
+        service: "dns"
+        source_address: "lab_servers"
+        source_intfc: "lab"
+        reference_policy_name: "explicit_deny"
+
+    - name: Ensure Policy Exists after an Existing Policy Using ID
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        global_label: "Corp to Lab"
+        policy_name: "lab_mgmt_access"
+        action: "accept"
+        log_traffic: "disable"
+        destination_address: "lab_mgmt_network"
+        destination_intfc: "lab"
+        schedule: "always"
+        service:
+          - "ssh"
+          - "https"
+        source_address: "admin_users"
+        source_intfc: "corp"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "corp_pat"
+        direction: "after"
+        reference_policy_id: 5
+      register: "policy1"
+
+    - name: Ensure Source Addresses are Present Using Policy ID
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: 5
+        source_address:
+          - "web_servers"
+          - "database_admins"
+
+    - name: Ensure Destination Addresses are Absent Using Policy ID
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_id: 17
+        destination_address:
+          - "data_center_east"
+          - "data_center_west"
+        state: "param_absent"
+
+    - name: Ensure Policy Exists Using Match Filters
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        action: "accept"
+        destination_address: "web_server_01"
+        destination_intfc: "lab"
+        schedule: "always"
+        service: "web"
+        source_address:
+          - "lab_admins"
+          - "app_developers"
+        source_intfc: "corp"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "corp_pat"
+        match_filter: true
+        match_filters: "all"
+
+    - name: Ensure Policy Exists Using Match Filters
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        action: "accept"
+        log_traffic: "all"
+        destination_address:
+          - "proxy_east"
+          - "proxy_west"
+        destination_intfc: "corp"
+        schedule: "always"
+        service: "https"
+        source_address: "lab_servers"
+        source_intfc: "lab"
+        nat: "enable"
+        ip_pool: "enable"
+        pool_name: "lab_pat"
+        match_filter: true
+        match_filters:
+          - "source_address"
+          - "destination_address"
+          - "service"
+
+    - name: Ensure Policy Does Not Exist
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        adom: "lab"
+        package: "lab"
+        policy_name: "lab_test"
+        state: "absent"
