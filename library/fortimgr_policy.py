@@ -1649,23 +1649,27 @@ class FMPolicy(FortiManager):
                 self.save()
             global_label = self.get_item_fields(policy_id, ["global-label"]).get("global-label", "")
 
+            # retreive reference policies id if not passed to module
             direction = module.params["direction"]
             if module.params["reference_policy_name"]:
                 reference_policy = self.get_item_from_name(module.params["reference_policy_name"])
                 if reference_policy:
-                    reference_id = reference_policy["policyid"]
+                    reference_id = str(reference_policy["policyid"])
                 else:
-                    results["msg"] = "Unable to Find Reference Policy Name"
+                    # fail if unable to find reference policy on fortimanager
+                    results["msg"] = "Unable to Find Reference Policy Name."
                     module.fail_json(**results)
             else:
                 reference_id = module.params["reference_policy_id"]
 
+            # validate both proposed and existing policies are found on fortimanager
             proposed_reference = self.get_item_fields(policy_id, ["policyid"])
-            existing_reference = self.get_item_fields(reference_id, ["policyid"])
+            existing_reference = self.get_item_fields(int(reference_id), ["policyid"])
             if not proposed_reference or not existing_reference:
                 results["msg"] = "Unable to Find the Policies; Please Verify the Policy Params."
                 module.fail_json(**results)
 
+            # retrieve proposed and existing policies' sequence number
             all_existing = self.get_all_fields(["policyid"])
             proposed_position = all_existing.index(proposed_reference)
             existing_position = all_existing.index(existing_reference)
@@ -1679,14 +1683,14 @@ class FMPolicy(FortiManager):
                 return {}
 
             obj_url = self.pkg_url + "/{}".format(str(policy_id))
-            move = {"method": "move", "params": [{"url": obj_url, "option": direction, "target": str(reference_id)}]}
+            move = {"method": "move", "params": [{"url": obj_url, "option": direction, "target": reference_id}]}
 
             if module.params["lock"]:
                 self.config_lock(module)
 
             # configure if not in check mode
             if not module.check_mode:
-                response = self.move_config(policy_id, direction, str(reference_id))
+                response = self.move_config(policy_id, direction, reference_id)
                 status_code = response.json()["result"][0]["status"]["code"]
                 if module.params["session_id"]:
                     self.save()
@@ -1737,7 +1741,7 @@ class FMPolicy(FortiManager):
                         module.fail_json(**results)
                 # fail module when move unsuccessful and not in lock mode
                 elif status_code != 0:
-                    results.update(dict(msg="Policy Move Failed", fortimanager_response=response))
+                    results.update(dict(msg="Policy Move Failed", fortimanager_response=response.json()))
                     module.fail_json(**results)
 
             return move
@@ -2136,7 +2140,7 @@ def main():
         policy_id=dict(required=False, type="int"),
         policy_name=dict(required=False, type="str"),
         pool_name=dict(required=False, type="list"),
-        reference_policy_id=dict(required=False, type="int"),
+        reference_policy_id=dict(required=False, type="str"),
         reference_policy_name=dict(required=False, type="str"),
         schedule=dict(required=False, type="list"),
         service=dict(required=False, type="list"),
@@ -2203,8 +2207,8 @@ def main():
     if isinstance(pool_name, str):
         pool_name = [pool_name]
     reference_policy_id = module.params["reference_policy_id"]
-    if isinstance(reference_policy_id, str):
-        reference_policy_id = int(reference_policy_id)
+    if isinstance(reference_policy_id, int):
+        reference_policy_id = str(reference_policy_id)
     reference_policy_name = module.params["reference_policy_name"]
     schedule = module.params["schedule"]
     if isinstance(schedule, str):
