@@ -1458,7 +1458,7 @@ def main():
     host = module.params["host"]
     lock = module.params["lock"]
     if lock is None:
-        module.params["lock"] = True
+        lock = True
     password = module.params["password"]
     port = module.params["port"]
     session_id = module.params["session_id"]
@@ -1500,7 +1500,7 @@ def main():
     # generate install preview if specified or module ran in check mode
     if state == "preview" or module.check_mode:
         install = session.preview_install(package, fortigate, [vdom], lock)
-        if "message" in install["result"][0]["data"]:
+        if install["result"][0]["status"]["code"] == 0 and "message" in install["result"][0]["data"]:
             # write preview to file if destination file specified
             if dst:
                 with open(dst, "w") as preview:
@@ -1555,7 +1555,7 @@ def main():
             proposed["flags"].append("auto_lock_ws")
 
         install = session.install_package(proposed)
-        if install["result"][0]["data"]["state"] == "done":
+        if install["result"][0]["status"]["code"] == 0 and install["result"][0]["data"]["state"] == "done":
             results = dict(install=install, changed=True)
         else:
             module.fail_json(**dict(status=install, msg="Install was NOT Sucessful; Please Check FortiManager Logs"))
