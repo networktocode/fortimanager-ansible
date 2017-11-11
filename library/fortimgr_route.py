@@ -60,8 +60,7 @@ options:
     type: int
   provider:
     description:
-      - Dictionary which acts as a collection of arguments used to define the characteristics
-        of how to connect to the device.
+      - Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.
       - Arguments hostname, username, and password must be specified in either provider or local param.
       - Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.
     required: false
@@ -93,7 +92,7 @@ options:
     type: str
   validate_certs:
     description:
-      - Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False).
+      - Determines whether to validate certs against a trusted certificate file C(True), or accept all certs C(False).
     required: false
     default: False
     type: bool
@@ -130,7 +129,7 @@ options:
     required: false
     type: str
   destination_object:
-    description
+    description:
       - The address or address-group object to use as the destination address
     required: false
     type: str

@@ -97,14 +97,13 @@ options:
       - This list will only be used if the fortigates or adoms parameters are passed.
     required: false
     type: list
-    choices: ["all", "route", "address", "address_group", "service", "service_group", "ip_pool", "vip", "vip_group",
-              "policy"]
+    choices: ["all", "route", "address", "address_group", "service", "service_group", "ip_pool", "vip", "vip_group", "policy"]
   fortigate_name:
     description:
       - The name to use as the config dictionary key when returning configuration data.
         This is only used when fortigates is all or a list of fortigate names.
-      - "device_id" will use the device ID that FortiManager has associated to the device.
-      - "hostname" will use the hostname of the device.
+      - C(device_id) will use the device ID that FortiManager has associated to the device.
+      - C(hostname) will use the hostname of the device.
     required: false
     choices: [device_id, hostname]
     default: device_id
