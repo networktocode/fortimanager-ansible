@@ -166,10 +166,10 @@ options:
       - The config parameters to match existing policies against for comparing module parameters against existing configurations.
         All fields passed into the list will be used to retrieve an exact match from existing policies.
         If multiple policies match on the parameters, the module will fail with the list of matching policies.
-      - "all" can be used to match all parameters that are passed to the module.
+      - C(all) can be used to match all parameters that are passed to the module.
     type: list
     default: ["source_address", "source_intfc", "destination_address", "destination_intfc", "service"]
-    options: All policy config parameters accepted by the module and the word "all"
+    options: All policy config parameters accepted by the module and the word all
   nat:
     description:
       - Setting the NAT to enable or disable.
