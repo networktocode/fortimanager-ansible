@@ -162,7 +162,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     service_name: "App01_Web"
-    protocol: TCP
+    protocol: "TCP"
     port_range:
       - "80"
       - "443"
@@ -175,6 +175,7 @@ EXAMPLES = '''
     password: "{{ password }}"
     adom: "lab"
     service_name: "App01_Web"
+    protocol: "TCP"
     port_range: "80"
     validate_certs: True
     state: "param_absent"

@@ -89,7 +89,7 @@ options:
     required: false
     type: bool
     default: False
-  save_config:
+  save:
     description:
       - Saves the config before unlocking a session.
       - True saves the configuration.
@@ -131,7 +131,7 @@ EXAMPLES = '''
     host: "{{ inventory_hostname }}"
     session_id: "{{ session_id }}"
     adom: "lab"
-    save_config: True
+    save: True
     unlock: True
 '''
 
