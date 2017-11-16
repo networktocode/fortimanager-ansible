@@ -172,7 +172,6 @@ EXAMPLES = '''
     adom: "lab"
     vip_name: "App01_VIP"
     external_intfc: "port2"
-    internal_intfc: "port1"
     validate_certs: True
     port: 8443
 - name: Delete VIP Object

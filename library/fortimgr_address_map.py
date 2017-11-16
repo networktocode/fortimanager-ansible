@@ -198,7 +198,7 @@ options:
 
 EXAMPLES = '''
 - name: Add iprange Address
-  fortimanager_address_map:
+  fortimgr_address_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -212,7 +212,7 @@ EXAMPLES = '''
     fortigate: "lab_fortigate"
     vdom: "root"
 - name: Modify iprange Address range
-  fortimanager_address_map:
+  fortimgr_address_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -226,7 +226,7 @@ EXAMPLES = '''
     fortigate: "lab_fortigate"
     vdom: "root"
 - name: Add ipmask Address
-  fortimanager_address_map:
+  fortimgr_address_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -240,7 +240,7 @@ EXAMPLES = '''
     fortigate: "new_lab_fortigate"
     vdom: "root"
 - name: Remove Fortigate Mapping
-  fortimanager_address_map:
+  fortimgr_address_map:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
