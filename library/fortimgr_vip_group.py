@@ -127,7 +127,7 @@ options:
 
 EXAMPLES = '''
 - name: Add VIP Group
-  fortimgr_address_group:
+  fortimgr_vip_group:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -140,7 +140,7 @@ EXAMPLES = '''
       - "App01_VIP02"
       - "App01_VIP03"
 - name: Remove Member VIP Group
-  fortimgr_address_group:
+  fortimgr_vip_group:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
@@ -149,7 +149,7 @@ EXAMPLES = '''
     members: "App01_VIP02"
     state: "param_absent"
 - name: Delete VIP Group
-  fortimgr_address_group:
+  fortimgr_vip_group:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
