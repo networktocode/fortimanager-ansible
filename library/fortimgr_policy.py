@@ -1652,7 +1652,7 @@ class FMPolicy(FortiManager):
             # retreive reference policies id if not passed to module
             direction = module.params["direction"]
             if module.params["reference_policy_name"]:
-                reference_policy = self.get_item_from_name(module.params["reference_policy_name"])
+                reference_policy = self.get_item_from_name(module.params["reference_policy_name"], module)
                 if reference_policy:
                     reference_id = str(reference_policy["policyid"])
                 else:
@@ -2004,12 +2004,13 @@ class FMPolicy(FortiManager):
         else:
             return {}
 
-    def get_item_from_name(self, name):
+    def get_item_from_name(self, name, module):
         """
         This method is used to get a specific policy configured on the FortiManager using the policy's name.
 
         :param name: Type str.
                      The name of the policy to retrieve.
+        :param module: The Ansible Module instance started by the task.
         :return: Type dict
                  The policy that has a name matching the name argument. If no policies are found, then an empty
                  dict is returned.
@@ -2018,7 +2019,12 @@ class FMPolicy(FortiManager):
                 verbose=1, session=self.session)
 
         response = self.make_request(body)
-        response_data = response.json()["result"][0]["data"]
+        response_json = response.json()
+
+        if response_json["result"][0]["status"]["code"] != 0:
+            module.fail_json(msg="This Fortimanager does not support policy names, please remove the policy_name parameter from task")
+
+        response_data = response_json["result"][0]["data"]
 
         if response_data:
             return response_data[0]
@@ -2291,7 +2297,7 @@ def main():
 
     # add policy id if only name is provided in the module arguments or using match_filters
     if policy_name and not policy_id:
-        policy = session.get_item_from_name(policy_name)
+        policy = session.get_item_from_name(policy_name, module)
         if policy:
             proposed["policyid"] = policy["policyid"]
     elif match_filters:
