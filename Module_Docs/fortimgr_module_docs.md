@@ -1,5 +1,4 @@
 # Fortinet FortiManager Modules
-### *Local copy of files modules*
 
 ---
 ### Requirements
