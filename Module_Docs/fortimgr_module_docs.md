@@ -1,4 +1,5 @@
 # Fortinet FortiManager Modules
+### *Local copy of files modules*
 
 ---
 ### Requirements
@@ -113,7 +114,9 @@ Manages FW Policy resources and attributes
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | ip_pool  |   no  |  | <ul> <li>enable</li>  <li>disable</li> </ul> |  Setting the IP Pool Nat feature to enable or disable.  |
 | permit_any_host  |   no  |  | <ul> <li>enable</li>  <li>disable</li> </ul> |  Setting the Permit Any Host to enable or disable.  |
+| match_filter  |   |  False  | |  Determines whether to use match_filters to retrieve existing policies.  True will use match_filters to retrieve a matching policy.  False will not use match_filters to retrieve a matching policy.  |
 | package  |   yes  |  | |  The policy package to add the policy to.  |
+| match_filters  |   |  [u'source_address', u'source_intfc', u'destination_address', u'destination_intfc', u'service']  | |  This is an alternative means of matching an existing policy when not using policy_id or policy_name.  The config parameters to match existing policies against for comparing module parameters against existing configurations. All fields passed into the list will be used to retrieve an exact match from existing policies. If multiple policies match on the parameters, the module will fail with the list of matching policies.  C(all) can be used to match all parameters that are passed to the module.  |
 | destination_intfc  |   no  |  | |  A list of interface destinations to use for policy matching.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
 | action  |   no  |  | <ul> <li>accept</li>  <li>deny</li>  <li>ipsec</li>  <li>ssl-vpn</li> </ul> |  The action the end device should take when the policy is matched.  |
@@ -202,7 +205,7 @@ Manages IP Pool mapped resources and attributes
 | start_ip  |   no  |  | |  The first address in the range of external addresses used to NAT internal addresses to.  |
 | password  |   no  |  | |  The password associated with the username account.  |
 | fortigate  |   no  |  | |  The name of the fortigate to map the configuration to.  |
-| vdom  |   no  |  root  | |  The vdom on the fortigate that the config should be associated to.  |
+| vdom  |   yes  |  | |  The vdom on the fortigate that the config should be associated to.  |
 | permit_any_host  |   no  |  | <ul> <li>enable</li>  <li>disable</li> </ul> |  Allows for the use fo full cone NAT.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
@@ -270,12 +273,14 @@ Manages Address mapped resources and attributes
 | allow_routing  |   no  |  | |  Determines if the address can be used in static routing configuration.  |
 | color  |   no  |  | |  A tag that can be used to group objects  |
 | lock  |   no  |  True  | |  True locks the ADOM, makes necessary configuration updates, saves the config, and unlocks the ADOM  |
-| fqdn  |   no  |  | |  The fully qualified domain name associated with an Address when the type is fqdn.  |
+| network_address  |   no  |  | |  The network address to use when address_type is ipmask.  The network_mask param must be used in conjuction with network_address.  Alternatively, the subnet param can be used for cidr notation.  |
+| wildcard_fqdn  |   no  |  | |  The wildcard FQDN associated with an Address when the type is wildcard-fqdn.  |
 | use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
 | port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
-| subnet  |   no  |  | |  The subnet associated with an Address when the type is ipmask or wildcard.  The first string in the list is the Network IP.  The last string in the list is the Subnet or Wildcard Mask.  |
+| subnet  |   no  |  | |  The subnet associated with an Address when the type is ipmask.  This supports sending a string as cidr notation or a two element list that would be returned from getting existing address objects.  Alternatively, the network_address and network_mask params can be used.  |
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete the mapping from the object if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will create configuration for the mapping correlating to the fortigate specified if needed.  |
 | end_ip  |   no  |  | |  The last IP associated with an Address when the type is iprange.  |
+| wildcard_mask  |   no  |  | |  The wildcard mask to use when address_type is wildcard.  The wildcard_address param must be used in conjuction with the wildcard_mask  Alternatively, the wildcard param can be used for cidr notation.  |
 | address_name  |   yes  |  | |  The name of the Address object.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | address_type  |   no  |  | <ul> <li>ipmask</li>  <li>iprange</li>  <li>fqdn</li>  <li>wildcard</li>  <li>wildcard-fqdn</li> </ul> |  The type of address the Address object is.  |
@@ -283,11 +288,14 @@ Manages Address mapped resources and attributes
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | start_ip  |   no  |  | |  The first IP associated with an Address when the type is iprange.  |
+| network_mask  |   no  |  | |  The netmask to use when address_type is ipmask.  The network_address param must be used in conjuction with network_mask.  Alternatively, the subnet param can be used for cidr notation.  |
 | password  |   no  |  | |  The password associated with the username account.  |
-| vdom  |   no  |  root  | |  The vdom on the fortigate that the config should be associated to.  |
-| wildcard_fqdn  |   no  |  | |  The wildcard FQDN associated with an Address when the type is wildcard-fqdn.  |
+| vdom  |   yes  |  | |  The vdom on the fortigate that the config should be associated to.  |
+| fqdn  |   no  |  | |  The fully qualified domain name associated with an Address when the type is fqdn.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
+| wildcard  |   no  |  | |  The wildcard associated with an Address when the type is wildcard.  This supports sending a string as cidr notation or a two element list that would be returned from getting existing address objects.  Alternatively, the wildcard_address and wildcard_mask params can be used.  |
 | validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False)  |
+| wildcard_address  |   no  |  | |  The wildcard address to use when address_type is wildcard.  The wildcard_mask param must be used in conjunction with the wildcard_address.  Alternatively, the wildcard param can be used for cidr notation.  |
 
 
  
@@ -318,8 +326,8 @@ Manages the VIP Group resources and attributes
 | vip_group_name  |   yes  |  | |  The name of the VIP Group.  |
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete the object if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will create the configuration if needed.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
-| member  |   no  |  | |  The list of VIP objects that should be associated to the VIP Group.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
+| members  |   no  |  | |  The list of VIP objects that should be associated to the VIP Group.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | interface  |   no  |  | |  The list of interfaces/zones associated with the VIP Group  |
 | use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
@@ -352,13 +360,15 @@ Manages Address resources and attributes
 | allow_routing  |   no  |  | |  Determines if the address can be used in static routing configuration.  |
 | color  |   no  |  | |  A tag that can be used to group objects  |
 | lock  |   no  |  True  | |  True locks the ADOM, makes necessary configuration updates, saves the config, and unlocks the ADOM  |
-| fqdn  |   no  |  | |  The fully qualified domain name associated with an Address when the type is fqdn.  |
+| network_address  |   no  |  | |  The network address to use when address_type is ipmask.  The network_mask param must be used in conjuction with network_address.  Alternatively, the subnet param can be used for cidr notation.  |
+| wildcard_fqdn  |   no  |  | |  The wildcard FQDN associated with an Address when the type is wildcard-fqdn.  |
 | use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
 | port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
-| subnet  |   no  |  | |  The subnet associated with an Address when the type is ipmask or wildcard.  The first string in the list is the Network IP.  The last string in the list is the Subnet or Wildcard Mask.  |
+| subnet  |   no  |  | |  The subnet associated with an Address when the type is ipmask.  This supports sending a string as cidr notation or a two element list that would be returned from getting existing address objects.  Alternatively, the network_address and network_mask params can be used.  |
 | associated_intfc  |   no  |  | |  The interface associated with the Address.  |
 | state  |   no  |  present  | <ul> <li>absent</li>  <li>param_absent</li>  <li>present</li> </ul> |  The desired state of the specified object.  absent will delete resource if it exists.  param_absent will remove passed params from the object config if necessary and possible.  present will update the configuration if needed.  |
 | end_ip  |   no  |  | |  The last IP associated with an Address when the type is iprange.  |
+| wildcard_mask  |   no  |  | |  The wildcard mask to use when address_type is wildcard.  The wildcard_address param must be used in conjuction with the wildcard_mask  Alternatively, the wildcard param can be used for cidr notation.  |
 | address_name  |   yes  |  | |  The name of the Address object.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | address_type  |   no  |  | <ul> <li>ipmask</li>  <li>iprange</li>  <li>fqdn</li>  <li>wildcard</li>  <li>wildcard-fqdn</li> </ul> |  The type of address the Address object is.  |
@@ -366,10 +376,13 @@ Manages Address resources and attributes
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | start_ip  |   no  |  | |  The first IP associated with an Address when the type is iprange.  |
+| network_mask  |   no  |  | |  The netmask to use when address_type is ipmask.  The network_address param must be used in conjuction with network_mask.  Alternatively, the subnet param can be used for cidr notation.  |
 | password  |   no  |  | |  The password associated with the username account.  |
-| wildcard_fqdn  |   no  |  | |  The wildcard FQDN associated with an Address when the type is wildcard-fqdn.  |
+| fqdn  |   no  |  | |  The fully qualified domain name associated with an Address when the type is fqdn.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
+| wildcard  |   no  |  | |  The wildcard associated with an Address when the type is wildcard.  This supports sending a string as cidr notation or a two element list that would be returned from getting existing address objects.  Alternatively, the wildcard_address and wildcard_mask params can be used.  |
 | validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False)  |
+| wildcard_address  |   no  |  | |  The wildcard address to use when address_type is wildcard.  The wildcard_mask param must be used in conjunction with the wildcard_address.  Alternatively, the wildcard param can be used for cidr notation.  |
 
 
  
@@ -393,10 +406,10 @@ Manages ADOM locking and unlocking
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
 | username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
+| save  |   no  |  False  | |  Saves the config before unlocking a session.  True saves the configuration.  False does not save the configuration and all changes in the session will be lost if unlocked.  |
 | adom  |   yes  |  | |  The ADOM the configuration should belong to.  |
-| lock  |   no  |  True  | |  Locks or Unlocks the ADOM in the FortiManager.  True ensures the ADOM is locked.  |
-| save_config  |   no  |  False  | |  Saves the config before unlocking a session.  True saves the configuration.  False does not save the configuration and all changes in the session will be lost if unlocked.  |
-| unlock  |   no  |  False  | |  Locks or Unlocks the ADOM in the FortiManager.  True ensures the ADOM is unlocked.  |
+| lock  |   no  |  False  | |  Locks the ADOM in the FortiManager.  True ensures the ADOM is locked.  |
+| unlock  |   no  |  False  | |  Unlocks the ADOM in the FortiManager.  True ensures the ADOM is unlocked and closes the current session with the FortiManager.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
@@ -552,7 +565,7 @@ Manages ADOM package installs
 | lock  |   no  |  True  | |  True locks the ADOM, makes necessary configuration updates, saves the config, and unlocks the ADOM  |
 | package  |   yes  |  | |  The policy package that should be pushed to the end devices.  |
 | adom_revision_comments  |   no  |  | |  Comments to add to the ADOM revision if creating a revision.  |
-| check_install  |   no  |  False  | |  Determines if the install will only be committed if the FortiGate is in sync and connected with the FortManager.  True performs the check.  False attempts the install regardless of device status.  |
+| check_install  |   no  |  | |  Determines if the install will only be committed if the FortiGate is in sync and connected with the FortManager.  True performs the check.  False attempts the install regardless of device status.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
 | fortigate_name  |   yes  |  | |  The name of FortiGate in consideration for package install.  |
 | install_flags  |   no  |  | <ul> <li>cp_all_objs</li>  <li>generate_rev</li>  <li>copy_assigned_pkg</li>  <li>unassign</li>  <li>ifpolicy_only</li>  <li>no_ifpolicy</li>  <li>objs_only</li>  <li>copy_only</li> </ul> |  Flags to send to the FortiManager identifying how the install should be done.  |
@@ -603,7 +616,7 @@ Manages VIP mapped resources and attributes
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | password  |   no  |  | |  The password associated with the username account.  |
 | fortigate  |   no  |  | |  The name of the fortigate to map the configuration to.  |
-| vdom  |   no  |  root  | |  The vdom on the fortigate that the config should be associated to.  |
+| vdom  |   yes  |  | |  The vdom on the fortigate that the config should be associated to.  |
 | external_intfc  |   no  |  | |  The associated external interface  |
 | external_ip  |   no  |  | |  The external IP or IP range that will be NAT'ed to the internal mapped IP.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
@@ -631,26 +644,30 @@ Manages Route configurations for FortiGate devices
 
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
-| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
 | comment  |   no  |  | |  A comment to add to the route.  |
 | weight  |   no  |  | |  The weight to assign to the route.  |
-| adom  |   no  |  | |  The ADOM the configuration should belong to.  |
 | lock  |   no  |  True  | |  True locks the ADOM, makes necessary configuration updates, saves the config, and unlocks the ADOM  |
-| destination  |   yes  |  | |  The destination subnet.  {u'List item of two': u'first item is the network address and the second is subnet mask'}  |
-| state  |   no  |  present  | <ul> <li>present</li>  <li>absent</li> </ul> |  The desired state of the route.  absent will remove the route if it exists.  present will update the configuration if needed.  |
-| session_id  |   no  |  | |  The session_id of an established and active session  |
+| use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
+| destination_netmask  |   no  |  | |  The netmask to use for the destination address.  The network param must be used in conjuction with netmask.  Alternatively, the destination param can be used for cidr notation.  |
+| destination_network  |   no  |  | |  The network address to use destination address.  The netmask param must be used in conjuction with network.  Alternatively, the destination param can be used for cidr notation.  |
 | gateway  |   yes  |  | |  The gateway address for which the destination can be reached.  |
+| destination  |   yes  |  | |  The destination subnet.  This supports sending a string as cidr notation or a two element list that would be returned from getting existing address objects.  Alternatively, the netmask and network params can be used.  |
+| port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
 | priority  |   no  |  | |  The priority to assign the route.  |
-| validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False).  |
-| host  |   yes  |  | |  The FortiManager's Address.  |
+| state  |   no  |  present  | <ul> <li>present</li>  <li>absent</li> </ul> |  The desired state of the route.  absent will remove the route if it exists.  present will update the configuration if needed.  |
 | intfc  |   no  |  | |  The interface used to reach the route.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
-| use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
+| adom  |   no  |  | |  The ADOM the configuration should belong to.  |
+| host  |   yes  |  | |  The FortiManager's Address.  |
 | password  |   no  |  | |  The password associated with the username account.  |
 | fortigate  |   yes  |  | |  The fortigate to apply the route to.  |
-| port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
-| vdom  |   |  root  | |  The vdom on the fortigate to add the route to.  |
+| vdom  |   yes  |  | |  The vdom on the fortigate to add the route to.  |
 | distance  |   no  |  | |  The distance metric to associate to the route.  |
+| destination_object  |   no  |  | |  The address or address-group object to use as the destination address  |
+| session_id  |   no  |  | |  The session_id of an established and active session  |
+| validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file C(True), or accept all certs C(False).  |
+| sequence_number  |   no  |  | |  The sequence number of the route in FortiManager  This is required in order to modify an existing route's interface, destination, and gateway.  |
 
 
  
@@ -674,16 +691,18 @@ Gathers facts from the FortiManager
 | Parameter     | required    | default  | choices    | comments |
 | ------------- |-------------| ---------|----------- |--------- |
 | username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
-| config_filter  |   no  |  | <ul> <li>all</li>  <li>route</li>  <li>address</li>  <li>address_group</li>  <li>service</li>  <li>service_group</li>  <li>ip_pool</li>  <li>vip</li>  <li>vip_group</li>  <li>policy</li> </ul> |  The list of configuration items to retrieve from the list of FortiGates managed by the FortiManager.  |
+| config_filter  |   no  |  | <ul> <li>all</li>  <li>route</li>  <li>address</li>  <li>address_group</li>  <li>service</li>  <li>service_group</li>  <li>ip_pool</li>  <li>vip</li>  <li>vip_group</li>  <li>policy</li> </ul> |  The list of configuration items to retrieve from the list of ADOMs and FortiGates managed by the FortiManager.  This list will only be used if the fortigates or adoms parameters are passed.  |
 | fortigates  |   no  |  | |  A list of FortiGates to retrieve device information for; "all" can be used to retrieve all devices managed by the FortiManger.  If config_filter is defined, this list will be used to determine what devices to retrieve configuration from.  If config_filter is defined, this list should be a list of dictionaries with "name" and "vdom" keys defining the mapping for fortigate and vdom.  |
 | adom  |   no  |  | |  The ADOM that should have package installed should belong to.  |
 | session_id  |   no  |  | |  The session_id of an established and active session  |
+| fortigate_name  |   no  |  device_id  | <ul> <li>device_id</li>  <li>hostname</li> </ul> |  The name to use as the config dictionary key when returning configuration data. This is only used when fortigates is all or a list of fortigate names.  C(device_id) will use the device ID that FortiManager has associated to the device.  C(hostname) will use the hostname of the device.  |
 | host  |   yes  |  | |  The FortiManager's Address.  |
 | provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
 | use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
 | password  |   no  |  | |  The password associated with the username account.  |
 | validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False).  |
 | port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
+| adoms  |   no  |  | |  A list of ADOMs for which configurations from FortiManager will be retrieved; "all" can be used to retrieve all ADOMs.  If "all" is used, or the value is a list of ADOM names (as strings), then all packages for each ADOM will be retrieved.  Passing a list of dictionaries with "name" and "package" keys can be used to limit the scope of policies retrieved. A key/value pair is required for each package (the dictionary values cannot be lists).  The objects and policy elements will be collected based on what is listed in the config_filter param.  |
 
 
  
@@ -695,4 +714,4 @@ Gathers facts from the FortiManager
 ---
 Created by Network to Code, LLC
 For:
-2017
+2015
