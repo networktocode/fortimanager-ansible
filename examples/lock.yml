@@ -32,7 +32,7 @@
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
         adom: "lab"
-        save_config: True
+        save: True
     
     - name: Make Change
       fortimgr_address:
@@ -48,5 +48,5 @@
         host: "{{ inventory_hostname }}"
         session_id: "{{ session_id }}"
         adom: "lab"
-        save_config: True
+        save: True
         unlock: True
