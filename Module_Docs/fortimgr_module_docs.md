@@ -710,6 +710,35 @@ Gathers facts from the FortiManager
 ---
 
 
+## fortimgr_jsonrpc_request
+Sends generic json-rpc FortiManager API requests
+
+  * Synopsis
+  * Options
+  * Examples
+
+#### Synopsis
+ Sends generic json-rpc FortiManager API requests
+
+#### Options
+
+| Parameter     | required    | default  | choices    | comments |
+| ------------- |-------------| ---------|----------- |--------- |
+| username  |   no  |  | |  The username used to authenticate with the FortiManager.  |
+| session_id  |   no  |  | |  The session_id of an established and active session  |
+| host  |   yes  |  | |  The FortiManager's Address.  |
+| provider  |   no  |  | |  Dictionary which acts as a collection of arguments used to define the characteristics of how to connect to the device.  Arguments hostname, username, and password must be specified in either provider or local param.  Local params take precedence, e.g. hostname is preferred to provider["hostname"] when both are specified.  |
+| use_ssl  |   no  |  True  | |  Determines whether to use HTTPS(True) or HTTP(False).  |
+| password  |   no  |  | |  The password associated with the username account.  |
+| validate_certs  |   no  |  False  | |  Determines whether to validate certs against a trusted certificate file (True), or accept all certs (False).  |
+| port  |   no  |  | |  The TCP port used to connect to the FortiManager if other than the default used by the transport method(http=80, https=443).  |
+| method  |   yes  |  | |  The json-rpc method to use (get, add, set, update, delete, move, clone, replace, exec).  |
+| params  |   yes  |  | |  The json-rpc request parameters. Refere to Fortimanager API doc for details.  |
+ 
+
+
+---
+
 ---
 Created by Network to Code, LLC
 For:

@@ -376,3 +376,51 @@ netscaler_lb01
         username: "{{ username }}"
         password: "{{ password }}"
 ```
+
+## FortiManager JSON-RPC request
+```
+---
+- name: ENSURE ADDRESS OBJECTS ARE IN DESIRED STATE
+  hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: ENSURE ADOM PRESENT
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/dvmdb/adom",
+            data: [{
+              name: "lab",
+              flags: "no_vpn_console",
+              mr: 2,
+              os_ver: "5.4",
+              restricted_prds: "fos"
+	        }]
+          }]
+      register: response
+      failed_when: response.status.code != 0 and response.status.code != 2
+      changed_when: response.status.code == 0
+
+    - name: ASSIGN DEVICE VDOM TO ADOM
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/dvmdb/adom/lab/object member",
+            data: [{ name: "Lab_FortiGate", vdom: "lab" }]
+          }]
+
+    - name: ENSURE POLICY-PACKAGE IN ADOM
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/pm/pkg/adom/lab",
+            data: [{name: "lab", "type": "pkg" }]
+          }]
+      register: response
+      failed_when: response.status.code != 0 and response.status.code != 2
+      changed_when: response.status.code == 0
+```
