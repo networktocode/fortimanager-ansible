@@ -222,10 +222,12 @@ class FortiManager(object):
         self.api_endpoint = api_endpoint
         self.adom = adom
         self.package = package
-        self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom)
-        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom, self.api_endpoint)
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package, self.api_endpoint)
-        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom)
+        self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom.replace('/', '\//'))
+        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom.replace('/', '\//'),
+                                                                   self.api_endpoint.replace('/', '\//'))
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package.replace('/', '\//'),
+                                                                      self.api_endpoint.replace('/', '\//'))
+        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom.replace('/', '\//'))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
             self.port = ""
@@ -418,7 +420,7 @@ class FortiManager(object):
             response = self.delete_config(name)
             self.config_response(module, response.json(), module.params["lock"])
 
-        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(name)}]}
+        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(name.replace('/','\//'))}]}
 
     def config_lock(self, module, msg="Unable to Lock the Configuration; Validate the ADOM is not Currently Locked."):
         """
@@ -637,7 +639,7 @@ class FortiManager(object):
                      The name of the object to be removed from the FortiManager.
         :return: The response from the API request to delete the configuration.
         """
-        item_url = self.obj_url + "/{}".format(name)
+        item_url = self.obj_url + "/{}".format(name.replace('/','\//'))
         body = {"method": "delete", "params": [{"url": item_url}], "session": self.session}
         response = self.make_request(body)
 
@@ -1103,7 +1105,7 @@ class FortiManager(object):
         :return: The configuration dictionary for the object. An empty dict is returned if the request does
                  not return any data.
         """
-        item_url = self.obj_url + "/{}".format(name)
+        item_url = self.obj_url + "/{}".format(name.replace('/','\//'))
         body = {"method": "get", "params": [{"url": item_url}], "verbose": 1, "session": self.session}
         response = self.make_request(body)
 

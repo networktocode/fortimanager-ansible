@@ -8,7 +8,10 @@
   tasks:
     - name: CREATE ADDRESS IPMASK LIST NOTATION - CHANGE
       fortimgr_address:
-        provider: "{{ fortimanager_provider }}"
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
         address_name: "addr1"
         address_type: "ipmask"
         allow_routing: "enable"
@@ -618,6 +621,56 @@
           wildcard_mask: "255.255.0.255"
       ignore_errors: true
 
+    - name: CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "10.1.2.2/32 addr12"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet: "10.1.2.2/32"
+        comment: "ipmask unit test"
+
+    - name: CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME AGAIN - NO CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "10.1.2.2/32 addr12"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port1"
+        color: 1
+        subnet: "10.1.2.2/32"
+        comment: "ipmask unit test"
+
+    - name: MODIFY ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "10.1.2.2/32 addr12"
+        address_type: "ipmask"
+        allow_routing: "enable"
+        associated_intfc: "port2"
+        color: 1
+        subnet: "10.1.2.2/32"
+        comment: "ipmask unit test"
+
+    - name: DELETE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+      fortimgr_address:
+        host: "{{ ansible_host }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        address_name: "10.1.2.2/32 addr12"
+        state: "absent"
 
 - name: CLEANUP FORTIMANAGER ADDRESSES
   hosts: fortimanager
@@ -646,4 +699,5 @@
         - "addr9"
         - "addr10"
         - "addr11"
+        - "10.1.2.2/32 addr12"
         - "provider_addr1"
