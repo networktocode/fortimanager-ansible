@@ -387,12 +387,12 @@ class FortiManager(object):
         self.api_endpoint = api_endpoint
         self.adom = adom
         self.package = package
-        self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom.replace('/', '\\/'))
-        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom.replace('/', '\\/'),
-                                                                   self.api_endpoint.replace('/', '\\/'))
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package.replace('/', '\\/'),
-                                                                      self.api_endpoint.replace('/', '\\/'))
-        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom.replace('/', '\\/'))
+        self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
+        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
+                                                                   self._escape_params_url(self.api_endpoint))
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self._escape_params_url(self.package),
+                                                                      self._escape_params_url(self.api_endpoint))
+        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
             self.port = ""
@@ -1562,6 +1562,21 @@ class FortiManager(object):
         response = self.make_request(body)
 
         return response
+
+    def _escape_params_url(self, url):
+        """
+        This private method is used to escape slash ("/") characters from a url string to be provided as a json-rpc request params.
+        Slash characters are escaped by prefixing with a backslash ("\").
+        If url is None, None is returned.
+
+        :param url: Type str.
+                        The url string to process.
+        :return: The url string with slash characters escaped with a backslash ("\") or None if url is None.
+        """
+        if url is not None:
+            return url.replace('/', '\\/')
+        else:
+            return None
 
 
 class FMPolicy(FortiManager):

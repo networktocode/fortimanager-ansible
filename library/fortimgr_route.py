@@ -1450,6 +1450,21 @@ class FortiManager(object):
 
         return response
 
+    def _escape_params_url(self, url):
+        """
+        This private method is used to escape slash ("/") characters from a url string to be provided as a json-rpc request params.
+        Slash characters are escaped by prefixing with a backslash ("\").
+        If url is None, None is returned.
+
+        :param url: Type str.
+                        The url string to process.
+        :return: The url string with slash characters escaped with a backslash ("\") or None if url is None.
+        """
+        if url is not None:
+            return url.replace('/', '\\/')
+        else:
+            return None
+
 
 class FMRoute(FortiManager):
     """
