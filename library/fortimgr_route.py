@@ -277,7 +277,7 @@ class FortiManager(object):
         self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom.replace('/', '\\/'))
         self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom.replace('/', '\\/'),
                                                                    self.api_endpoint.replace('/', '\\/'))
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package.replace('/', '\\/'),
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self.package.replace('/', '\\/'),
                                                                       self.api_endpoint.replace('/', '\\/'))
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom.replace('/', '\\/'))
         self.headers = {"Content-Type": "application/json"}
@@ -858,7 +858,7 @@ class FortiManager(object):
                  does not return any data.
         """
         if not self.adom:
-            dev_url = "/dvmdb/device/{}/ha_slave".format(self.adom, device)
+            dev_url = "/dvmdb/device/{}/ha_slave".format(self._escape_params_url(self.adom), device)
         else:
             dev_url = "{}device/{}/ha_slave".format(self.dvmdb_url, device)
         body = dict(method="get", params=[dict(url=dev_url)], verbose=1, session=self.session)

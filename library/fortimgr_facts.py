@@ -282,9 +282,9 @@ class FortiManager(object):
         self.package = package
         self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
         self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
-                                                                   self._escape_params_url(self.api_endpoint))
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self._escape_params_url(self.package),
-                                                                      self._escape_params_url(self.api_endpoint))
+                                                                   self.api_endpoint)
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self._escape_params_url(self.package),
+                                                                      self.api_endpoint)
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
@@ -864,7 +864,7 @@ class FortiManager(object):
                  does not return any data.
         """
         if not self.adom:
-            dev_url = "/dvmdb/device/{}/ha_slave".format(self.adom, device)
+            dev_url = "/dvmdb/device/{}/ha_slave".format(self._escape_params_url(self.adom), device)
         else:
             dev_url = "{}device/{}/ha_slave".format(self.dvmdb_url, device)
         body = dict(method="get", params=[dict(url=dev_url)], verbose=1, session=self.session)
