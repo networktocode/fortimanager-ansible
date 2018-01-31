@@ -24,7 +24,6 @@
         - "addr4"
         - "addr5"
         - "addr6"
-        - "10.1.1.1/32 addr7"
 
 - name: FORTIMANAGER ADDRESS GROUP UNITTESTS
   hosts: fortimanager
@@ -188,33 +187,6 @@
           - "addr3"
       ignore_errors: true
 
-    - name: CREATE ADDRESS GROUP SLASH IN NAME- CHANGE
-      fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        address_group_name: "addrgrp4/slash"
-        allow_routing: "enable"
-        members:
-          - "addr1"
-          - "10.1.1.1/32 addr7"
-        comment: "addrgroup unit test"
-        color: 3
-
-    - name: CREATE ADDRESS GROUP AGAIN - NO CHANGE
-      fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        address_group_name: "addrgrp4/slash"
-        allow_routing: "enable"
-        members:
-          - "addr1"
-          - "10.1.1.1/32 addr7"
-        comment: "addrgroup unit test"
-        color: "3"
 
 - name: CLEANUP FORTIMANAGER ADDRESS GROUPS FOR UNIT TESTES
   hosts: fortimanager
@@ -235,7 +207,6 @@
         - "addrgrp1"
         - "addrgrp2"
         - "addrgrp3"
-        - "addrgrp4/slash"
         - "provider_addrgrp1"
 
 
@@ -261,4 +232,3 @@
         - "addr4"
         - "addr5"
         - "addr6"
-        - "10.1.1.1/32 addr7"
