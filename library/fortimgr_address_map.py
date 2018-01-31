@@ -1219,7 +1219,7 @@ class FortiManager(object):
         :return: The configuration dictionary for the object. An empty dict is returned if the request does
                  not return any data.
         """
-        item_url = self.obj_url + "/{}".format(name.replace('/','\\/'))
+        item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "get", "params": [{"url": item_url}], "verbose": 1, "session": self.session}
         response = self.make_request(body)
 

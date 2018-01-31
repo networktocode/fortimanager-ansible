@@ -460,7 +460,7 @@ class FortiManager(object):
             response = self.delete_config(name)
             self.config_response(module, response.json(), module.params["lock"])
 
-        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(name.replace('/','\\/'))}]}
+        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(self._escape_params_url(name))}]}
 
     def config_lock(self, module, msg="Unable to Lock the Configuration; Validate the ADOM is not Currently Locked."):
         """
@@ -679,7 +679,7 @@ class FortiManager(object):
                      The name of the object to be removed from the FortiManager.
         :return: The response from the API request to delete the configuration.
         """
-        item_url = self.obj_url + "/{}".format(name.replace('/','\\/'))
+        item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "delete", "params": [{"url": item_url}], "session": self.session}
         response = self.make_request(body)
 
@@ -1145,7 +1145,7 @@ class FortiManager(object):
         :return: The configuration dictionary for the object. An empty dict is returned if the request does
                  not return any data.
         """
-        item_url = self.obj_url + "/{}".format(name.replace('/','\\/'))
+        item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "get", "params": [{"url": item_url}], "verbose": 1, "session": self.session}
         response = self.make_request(body)
 
