@@ -274,12 +274,12 @@ class FortiManager(object):
         self.api_endpoint = api_endpoint
         self.adom = adom
         self.package = package
-        self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom.replace('/', '\\/'))
-        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom.replace('/', '\\/'),
-                                                                   self.api_endpoint.replace('/', '\\/'))
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self.package.replace('/', '\\/'),
-                                                                      self.api_endpoint.replace('/', '\\/'))
-        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom.replace('/', '\\/'))
+        self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
+        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
+                                                                   self.api_endpoint)
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self._escape_params_url(self.package),
+                                                                      self.api_endpoint)
+        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
             self.port = ""
