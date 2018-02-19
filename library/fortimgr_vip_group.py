@@ -1421,7 +1421,7 @@ class FortiManager(object):
         :return: The url string with slash characters escaped with a backslash ("\") or None if url is None.
         """
         if url is not None:
-            return url.replace('/', '\\/')
+            return str(url).replace('/', '\\/')
         else:
             return None
 
