@@ -262,10 +262,12 @@ class FortiManager(object):
         self.api_endpoint = api_endpoint
         self.adom = adom
         self.package = package
-        self.dvmdb_url = "/dvmdb/adom/{}/".format(self.adom)
-        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self.adom, self.api_endpoint)
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self.adom, self.package, self.api_endpoint)
-        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self.adom)
+        self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
+        self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
+                                                                   self.api_endpoint)
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self._escape_params_url(self.package),
+                                                                      self.api_endpoint)
+        self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
             self.port = ""
@@ -458,7 +460,7 @@ class FortiManager(object):
             response = self.delete_config(name)
             self.config_response(module, response.json(), module.params["lock"])
 
-        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(name)}]}
+        return {"method": "delete", "params": [{"url": self.obj_url + "/{}".format(self._escape_params_url(name))}]}
 
     def config_lock(self, module, msg="Unable to Lock the Configuration; Validate the ADOM is not Currently Locked."):
         """
@@ -677,7 +679,7 @@ class FortiManager(object):
                      The name of the object to be removed from the FortiManager.
         :return: The response from the API request to delete the configuration.
         """
-        item_url = self.obj_url + "/{}".format(name)
+        item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "delete", "params": [{"url": item_url}], "session": self.session}
         response = self.make_request(body)
 
@@ -844,7 +846,7 @@ class FortiManager(object):
                  does not return any data.
         """
         if not self.adom:
-            dev_url = "/dvmdb/device/{}/ha_slave".format(self.adom, device)
+            dev_url = "/dvmdb/device/{}/ha_slave".format(self._escape_params_url(self.adom), device)
         else:
             dev_url = "{}device/{}/ha_slave".format(self.dvmdb_url, device)
         body = dict(method="get", params=[dict(url=dev_url)], verbose=1, session=self.session)
@@ -1143,7 +1145,7 @@ class FortiManager(object):
         :return: The configuration dictionary for the object. An empty dict is returned if the request does
                  not return any data.
         """
-        item_url = self.obj_url + "/{}".format(name)
+        item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "get", "params": [{"url": item_url}], "verbose": 1, "session": self.session}
         response = self.make_request(body)
 
@@ -1435,6 +1437,21 @@ class FortiManager(object):
         response = self.make_request(body)
 
         return response
+
+    def _escape_params_url(self, url):
+        """
+        This private method is used to escape slash ("/") characters from a url string to be provided as a json-rpc request params.
+        Slash characters are escaped by prefixing with a backslash ("\").
+        If url is None, None is returned.
+
+        :param url: Type str.
+                        The url string to process.
+        :return: The url string with slash characters escaped with a backslash ("\") or None if url is None.
+        """
+        if url is not None:
+            return str(url).replace('/', '\\/')
+        else:
+            return None
 
 
 class FMVIP(FortiManager):
