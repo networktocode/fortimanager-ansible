@@ -1579,12 +1579,12 @@ def main():
         else:
             module.fail_json(**dict(status=install, msg="Install was NOT Sucessful; Please Check FortiManager Logs"))
 
-        # logout, build in check for future logging capabilities
-        if not session_id:
-            session_logout = session.logout()
-            # if not session_logout.json()["result"][0]["status"]["code"] == 0:
-            #     results["msg"] = "Completed tasks, but unable to logout of FortiManager"
-            #     module.fail_json(**results)
+    # logout, build in check for future logging capabilities
+    if not session_id:
+        session_logout = session.logout()
+        # if not session_logout.json()["result"][0]["status"]["code"] == 0:
+        #     results["msg"] = "Completed tasks, but unable to logout of FortiManager"
+        #     module.fail_json(**results)
 
     return module.exit_json(**results)
 
