@@ -79,6 +79,11 @@ Here is a brief overview of all modules included in this repository.
   + Used to create, delete, or restore ADOM revisions.
   + Returns the results from the revision request.
   + Lock, Save, and Unlock status are returned when locking the ADOM is set.
+* **fortimgr_jsonrpc_request**
+  + Used to send generic FortiManager json-rpc API requests
+  + Returns the json-rpc response
+  + Returns the request status
+
 
 # Installation
 

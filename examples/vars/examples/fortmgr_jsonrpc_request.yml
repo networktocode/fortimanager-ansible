@@ -1,0 +1,42 @@
+---
+- name: ENSURE ADDRESS OBJECTS ARE IN DESIRED STATE
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: ENSURE ADOM PRESENT
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/dvmdb/adom",
+            data: [{
+              name: "lab",
+              desc: "lab adom"
+            }]
+          }]
+      register: response
+      failed_when: response.status.code != 0 and response.status.code != 2
+      changed_when: response.status.code == 0
+
+    - name: ASSIGN DEVICE VDOM TO ADOM
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/dvmdb/adom/lab/object member",
+            data: [{ name: "Lab_FortiGate", vdom: "lab" }]
+          }]
+
+    - name: ENSURE POLICY-PACKAGE IN ADOM
+      fortimgr_jsonrpc_request:
+        provider: "{{ fortimanager_provider }}"
+        method: add
+        params: [{
+            url: "/pm/pkg/adom/lab",
+            data: [{name: "lab", "type": "pkg" }]
+          }]
+      register: response
+      failed_when: response.status.code != 0 and response.status.code != 2
+      changed_when: response.status.code == 0

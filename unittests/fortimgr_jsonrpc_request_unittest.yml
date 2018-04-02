@@ -1,0 +1,63 @@
+---
+
+- name: FORTIMANAGER JSONRPC REQEUST UNITTESTS
+  hosts: fortimanager
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    - name: GET STATUS - NO CHANGE
+      fortimgr_jsonrpc_request:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        method: get
+        params: [{url: "/sys/status/"}]
+
+    - name: GET ADOM LIST - NO CHANGE
+      fortimgr_jsonrpc_request:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        method: get
+        params: [{url: "dvmdb/adom"}]
+
+
+    - name: CREATE ADOM - CHANGE
+      fortimgr_jsonrpc_request:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        method: add
+        params: [{
+            url: "/dvmdb/adom",
+            data: [{
+              name: "lab",
+              desc: "lab adom"
+            }]
+          }]
+
+    - name: DELETE ADOM - FAIL
+      fortimgr_jsonrpc_request:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        method: delete
+        params: [{url: "/dvmdb/adom/lab"}]
+      ignore_errors: true
+
+    - name: Lock ADOM Fortimanager
+      fortimgr_lock:
+        host: "{{ inventory_hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        adom: "lab"
+        lock: true
+      register: session
+
+    - name: DELETE ADOM - CHANGE
+      fortimgr_jsonrpc_request:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session.session_id }}"
+        method: delete
+        params: [{url: "/dvmdb/adom/lab"}]
