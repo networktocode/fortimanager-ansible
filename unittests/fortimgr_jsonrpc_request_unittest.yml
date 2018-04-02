@@ -34,7 +34,7 @@
             data: [{
               name: "lab",
               desc: "lab adom"
-	        }]
+            }]
           }]
 
     - name: DELETE ADOM - FAIL
