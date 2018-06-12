@@ -2362,13 +2362,14 @@ def main():
         locked = dict(locked=True, saved=True, unlocked=True)
         results.update(locked)
 
-    # get policy id to be used to move the policy to the correct order per module params
-    if "policyid" in proposed:
-        policy_id = proposed["policyid"]
-    else:
-        policy_id = results["config"]["id"]
 
     if state != "absent":
+        # get policy id to be used to move the policy to the correct order per module params
+        if "policyid" in proposed:
+            policy_id = proposed["policyid"]
+        else:
+            policy_id = results["config"]["id"]
+
         moved = session.config_move(module, policy_id, results)
 
         # if module has made it this far and lock set, then all related return values are true

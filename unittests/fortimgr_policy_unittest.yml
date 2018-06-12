@@ -127,6 +127,16 @@
   tags: policy
 
   tasks:
+    - name: DELETE NONEXISTENT POLICY - NO CHANGE
+      fortimgr_policy:
+        host: "{{ inventory_hostname }}"
+        session_id: "{{ session_id }}"
+        lock: false
+        adom: "lab"
+        package: "lab"
+        policy_name: "unittest_nonexistent_policy_name"
+        state: "absent"
+
     - name: CREATE DENY POLICY - CHANGE
       fortimgr_policy:
         host: "{{ inventory_hostname }}"
