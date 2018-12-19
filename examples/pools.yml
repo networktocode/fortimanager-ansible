@@ -1,11 +1,18 @@
 ---
-- name: Ensure IP Pools Are in Desired State
+- name: ENSURE IP POOLS ARE IN DESIRED STATE
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Ensure IP Pool Overload Exists
+    - name: CREATE PROVIDER
+      set_fact:
+        fortimanager_provider:
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+          adom: "lab"
+
+    - name: ENSURE IP POOL OVERLOAD EXISTS
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -17,7 +24,7 @@
         end_ip: "100.20.10.10"
         comment: "Lab Pool"
 
-    - name: Ensure IP Pool One-to-One Exists
+    - name: ENSURE IP POOL ONE-TO-ONE EXISTS
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -28,7 +35,7 @@
         start_ip: "100.20.10.20"
         end_ip: "100.20.10.20"
 
-    - name: Ensure IP Pool Fixed Port Range Exists
+    - name: ENSURE IP POOL FIXED PORT RANGE EXISTS
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -41,7 +48,7 @@
         source_start_ip: "10.0.0.0"
         source_end_ip: "10.255.255.255"
 
-    - name: Ensure IP Pool Fixed Port Range Exists Per Latest Need
+    - name: ENSURE IP POOL FIXED PORT RANGE EXISTS PER LATEST NEED
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -50,7 +57,7 @@
         pool_name: "lab_pool_03"
         end_ip: "100.20.10.38"
 
-    - name: Ensure IP Pool Mapping Exists
+    - name: ENSURE IP POOL MAPPING EXISTS
       fortimgr_ip_pool_map:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -71,7 +78,7 @@
           start: "100.10.20.40"
           end: "100.10.20.40"
 
-    - name: Ensure New IP Pool Mapping Exists
+    - name: ENSURE NEW IP POOL MAPPING EXISTS
       fortimgr_ip_pool_map:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -85,7 +92,7 @@
         end_ip: "100.10.30.40"
         comment: "Lab Pool"
 
-    - name: Ensure IP Pool Mapping Does Not Exist
+    - name: ENSURE IP POOL MAPPING DOES NOT EXIST
       fortimgr_ip_pool_map:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"
@@ -96,7 +103,7 @@
         pool_name: "lab_pool_04"
         state: "absent"
 
-    - name: Ensure IP Pool Does Not Exist
+    - name: ENSURE IP POOL DOES NOT EXIST
       fortimgr_ip_pool:
         host: "{{ inventory_hostname }}"
         username: "{{ username }}"

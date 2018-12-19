@@ -1,32 +1,33 @@
 ---
-- name: Demonstrate Revisions
+- name: DEMONSTRATE REVISIONS
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Create New Revision
+    - name: CREATE NEW REVISION
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         created_by: "user"
         description: "ADOM Revision"
         revision_name: "Lab Revision"
-    - name: Delete Revision
+
+    - name: DELETE REVISION
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         revision_name: "Lab Revision"
         state: "absent"
-    - name: Restore Revision
+
+    - name: RESTORE REVISION
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         created_by: "user"
         description: "ADOM Revert"

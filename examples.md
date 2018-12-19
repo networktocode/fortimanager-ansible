@@ -3,11 +3,12 @@
 ### Inventory File
 ```
 [all:vars]
-username=user
-password=secret
+ansible_python_interpreter=python
+ansible_user=username
+ansible_password=password
 
 [fortimanager]
-netscaler_lb01
+fortimanager1 ansible_host=10.1.1.1
 ```
 
 ### Playbook
@@ -21,9 +22,9 @@ netscaler_lb01
   tasks:
     - name: CONFIGURE ADDRESSES
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         address_name: "{{ item.name }}"
         associated_intfc: "{{ item.intfc }}"
@@ -40,9 +41,9 @@ netscaler_lb01
   tasks:
     - name: CONFIGURE ADDRESS MAPPINGS
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         fortigate: "{{ item.fg }}"
         vdom: "{{ item.vdom }}"
@@ -94,9 +95,9 @@ netscaler_lb01
     - name: CONFIGURE ADDRESS GROUPS
       fortimgr_address_group:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         address_group_name: "{{ item.name }}"
         members: "{{ item.members }}"
       with_items:
@@ -112,9 +113,9 @@ netscaler_lb01
     - name: CONFIGURE SERVICIES
       fortimgr_service:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         service_name: "{{ item.name }}"
         protocol: "{{ item.protocol }}"
         port_range: "{{ item.range }}"
@@ -134,9 +135,9 @@ netscaler_lb01
     - name: CONFIGURE SERVICE GROUPS
       fortimgr_service_group:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         service_group_name: "{{ item.name }}"
         members: "{{ item.members }}"
       with_items:
@@ -150,9 +151,9 @@ netscaler_lb01
     - name: CONFIGURE IP POOL MAPS
       fortimgr_ip_pool_map:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigate: "{{ item.fg }}"
         vdom: "{{ item.vdom }}"
         pool_name: "{{ item.name }}"
@@ -174,9 +175,9 @@ netscaler_lb01
     - name: CONFIGURE VIP MAPS
       fortimgr_ip_pool_map:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigate: "{{ item.fg }}"
         vdom: "{{ item.vdom }}"
         vip_name: "{{ item.name }}"
@@ -217,9 +218,9 @@ netscaler_lb01
     - name: CONFIGURE VIP GROUP
       fortimgr_vip_group:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         vip_group_name: "app01_vipgrp"
         members:
           - "app01_vip01"
@@ -228,9 +229,9 @@ netscaler_lb01
     - name: CONFIGURE APP POLICIES
       fortimgr_policy:
         adom: "dmz"
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         policy_name: "{{ item.name }}"
         global_label: "app01"
         action: "accept"
@@ -274,18 +275,19 @@ netscaler_lb01
   tasks:
     - name: CREATE ADOM REVISION
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         created_by: "automation"
         description: "Weekly ADOM Revision"
         revision_name: "Revision_MM/DD/YY"
+
     - name: RESTORE REVISION
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         created_by: "user"
         description: "ADOM Revert"
@@ -304,9 +306,9 @@ netscaler_lb01
   tasks:
     - name: PREVIEW INSTALL POLICY PACKAGE
       fortimgr_install:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         state: "preview"
         adom: "dmz"
         fortigate_name: "{{ item.fg }}"
@@ -320,11 +322,12 @@ netscaler_lb01
         - fg: "dr_dmz"
           vdom: "dr"
           filename: "/usr/fg/backup/dr_mm_dd_yyyy.txt"
+
     - name: INSTALL POLICY PACKAGE
       fortimgr_install:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         adom_revision_comments: "Weekly Policy Update for DMZ"
         adom_revision_name: "Revision_MM/DD/YY"
@@ -351,18 +354,18 @@ netscaler_lb01
   tasks:
     - name: GET ALL FACTS
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
       fortigates: "all"
       config_filter: "all"
 
     - name: GET SOME FACTS METHOD
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "dmz"
         fortigates:
           - name: "prod_dmz"
@@ -372,9 +375,9 @@ netscaler_lb01
 
     - name: GET ONLY SYSTEM FACTS
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
 ```
 
 ## FortiManager JSON-RPC request

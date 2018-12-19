@@ -1,5 +1,0 @@
-fortimanager_provider:
-  host: "{{ ansible_host }}"
-  username: "user"
-  password: "password"
-  adom: "lab"

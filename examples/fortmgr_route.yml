@@ -3,9 +3,16 @@
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Add Route
+    - name: CREATE PROVIDER
+      set_fact:
+        fortimanager_provider:
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+          adom: "lab"
+
+    - name: ADD ROUTE
       fortimgr_route:
         provider: "{{ fortimanager_provider }}"
         fortigate: "labfg"

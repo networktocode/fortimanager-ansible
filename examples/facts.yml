@@ -1,50 +1,49 @@
 ---
-- name: Demonstrate Locking
+- name: DEMONSTRATE LOCKING
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-   - name: Get Facts
+   - name: GET FACTS
      fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        adom: "lab"
 
-   - name: Get FortiGate Facts
+   - name: GET FORTIGATE FACTS
      fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        adom: "lab"
        fortigates: "lab"
 
-   - name: Get FortiGate Facts
+   - name: GET FORTIGATE FACTS
      fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        adom: "lab"
        fortigates:
          - "lab"
          - "prod"
          - "dmz"
 
-   - name: Get All Configs
+   - name: GET ALL CONFIGS
      fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        adom: "lab"
        fortigates: "all"
        config_filter: "all"
 
-   - name: Get Some Configs
+   - name: GET SOME CONFIGS
      fortimgr_facts:
-       host: "{{ inventory_hostname }}"
-       username: "{{ username }}"
-       password: "{{ password }}"
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_password }}"
        adom: "lab"
        fortigates:
          - name: "lab"

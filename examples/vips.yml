@@ -1,15 +1,14 @@
 ---
-- name: Ensure VIP Addresses Are in Desired State
+- name: ENSURE VIP ADDRESSES ARE IN DESIRED STATE
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Ensure VIP Static-NAT Exists
+    - name: ENSURE VIP STATIC-NAT EXISTS
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "lab_vip_01"
         type: "static-nat"
@@ -18,11 +17,11 @@
         external_intfc: "lab"
         comment: "Lab VIP"
 
-    - name: Ensure VIP Static-NAT Exists
+    - name: ENSURE VIP STATIC-NAT EXISTS
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "lab_vip_02"
         type: "static-nat"
@@ -31,33 +30,33 @@
         external_intfc: "lab"
         comment: "Lab VIP"
 
-    - name: Ensure VIP Group Exists
+    - name: ENSURE VIP GROUP EXISTS
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vip_grp_01"
         members:
           - "lab_vip_01"
           - "lab_vip_02"
 
-    - name: Ensure VIP Group Member Does Not Exist
+    - name: ENSURE VIP GROUP MEMBER DOES NOT EXIST
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vip_grp_01"
         members:
           - "lab_vip01"
         state: "param_absent"
 
-    - name: Ensure VIP Mappings Exist
+    - name: ENSURE VIP MAPPINGS EXIST
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -78,31 +77,31 @@
           map:
             - "10.1.2.3"
 
-    - name: Ensure VIP Mapping Does Not Exist
+    - name: ENSURE VIP MAPPING DOES NOT EXIST
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         vip_name: "lab_vip_03"
         state: "absent"
 
-    - name: Ensure VIP Group Does Not Exist
+    - name: ENSURE VIP GROUP DOES NOT EXIST
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "addr_grp_01"
         state: "absent"
 
-    - name: Ensure VIP Does Not Exist
+    - name: ENSURE VIP DOES NOT EXIST
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip_lab_01"
         state: "absent"
