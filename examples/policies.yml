@@ -3,13 +3,12 @@
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
     - name: ENSURE POLICIES EXIST WITHOUT NAT
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_username }}"
+        password: "{{ ansible_password }}"
         package: "lab"
         policy_name: "lab_policy_01"
         global_label: "lab_to_corp"
@@ -25,9 +24,9 @@
 
     - name: ENSURE POLICIES EXIST WITH NAT
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_username }}"
+        password: "{{ ansible_password }}"
         package: "lab"
         policy_name: "corp_policy_01"
         global_label: "corp_to_lab"
@@ -46,9 +45,9 @@
 
     - name: ENSURE POLICIES EXIST AT LOCATION 
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_username }}"
+        password: "{{ ansible_password }}"
         package: "lab"
         policy_name: "corp_policy_02"
         global_label: "corp_to_lab"

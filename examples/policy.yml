@@ -1,12 +1,24 @@
-- name: Ensure Policies are in Desired State
+- name: ENSURE POLICIES ARE IN DESIRED STATE
   hosts: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Ensure Explicit Deny Policy Exists
+    - name: LOCK THE LAB ADOM
+      fortimgr_lock:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        adom: "lab"
+        lock: True
+      register: session
+
+    - name: SET SESSION ID
+      set_fact:
+        session_id: "{{ session.session_id }}"
+
+    - name: ENSURE EXPLICIT DENY POLICY EXISTS
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -21,9 +33,9 @@
         source_address: "all"
         source_intfc: "any"
 
-    - name: Ensure Policy Exists Before Explicit Deny Using Name
+    - name: ENSURE POLICY EXISTS BEFORE EXPLICIT DENY USING NAME
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -37,9 +49,9 @@
         source_intfc: "lab"
         reference_policy_name: "explicit_deny"
 
-    - name: Ensure Policy Exists after an Existing Policy Using ID
+    - name: ENSURE POLICY EXISTS AFTER AN EXISTING POLICY USING ID
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -62,9 +74,9 @@
         reference_policy_id: 5
       register: "policy1"
 
-    - name: Ensure Source Addresses are Present Using Policy ID
+    - name: ENSURE SOURCE ADDRESSES ARE PRESENT USING POLICY ID
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -73,9 +85,9 @@
           - "web_servers"
           - "database_admins"
 
-    - name: Ensure Destination Addresses are Absent Using Policy ID
+    - name: ENSURE DESTINATION ADDRESSES ARE ABSENT USING POLICY ID
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -85,9 +97,9 @@
           - "data_center_west"
         state: "param_absent"
 
-    - name: Ensure Policy Exists Using Match Filters
+    - name: ENSURE POLICY EXISTS USING MATCH FILTERS
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -106,9 +118,9 @@
         match_filter: true
         match_filters: "all"
 
-    - name: Ensure Policy Exists Using Match Filters
+    - name: ENSURE POLICY EXISTS USING MATCH FILTERS
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -131,9 +143,9 @@
           - "destination_address"
           - "service"
 
-    - name: Ensure Policy Does Not Exist
+    - name: ENSURE POLICY DOES NOT EXIST
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"

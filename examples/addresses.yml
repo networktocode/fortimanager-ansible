@@ -1,26 +1,25 @@
 ---
-- name: Ensure Address Objects Are in Desired State
+- name: ENSURE ADDRESS OBJECTS ARE IN DESIRED STATE
   host: fortimanager
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Ensure Address Subnet Exists
+    - name: ENSURE ADDRESS SUBNET EXISTS
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "lab_svr_01"
         address_type: "ipmask"
         subnet: "10.1.1.1/32"
         comment: "Lab Server"
 
-    - name: Ensure Address Range Exists
+    - name: ENSURE ADDRESS RANGE EXISTS
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "lab_svr_02"
         address_type: "iprange"
@@ -28,20 +27,20 @@
         end_ip: "10.1.2.25"
         associated_intfc: "lab"
 
-    - name: Ensure Address Exists for Mapping
+    - name: ENSURE ADDRESS EXISTS FOR MAPPING
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "lab_svr_03"
         associated_intfc: "lab"
 
-    - name: Ensure Address Mappings Exist
+    - name: ENSURE ADDRESS MAPPINGS EXIST
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -57,62 +56,62 @@
           net: "10.4.4.0"
           mask: "255.255.255.0"
 
-    - name: Ensure Address Group Exists
+    - name: ENSURE ADDRESS GROUP EXISTS
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addr_grp_01"
         members: "lab_svr_01"
 
-    - name: Ensure Address Group Exists
+    - name: ENSURE ADDRESS GROUP EXISTS
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addr_grp_01"
         members:
           - "lab_svr_01"
           - "lab_svr_02"
 
-    - name: Ensure Address Group Member Does Not Exist
+    - name: ENSURE ADDRESS GROUP MEMBER DOES NOT EXIST
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addr_grp_01"
         members:
           - "lab_svr01"
         state: "param_absent"
 
-    - name: Ensure Address Group Does Not Exist
+    - name: ENSURE ADDRESS GROUP DOES NOT EXIST
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addr_grp_01"
         state: "absent"
 
-    - name: Ensure Address Mapping Does Not Exist"
+    - name: ENSURE ADDRESS MAPPING DOES NOT EXIST
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         address_name: "lab_web_svrs"
       state: "absent"
 
-    - name: Ensure Address Does Not Exist
+    - name: ENSURE ADDRESS DOES NOT EXIST
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addr_grp_01"
         state: "absent"

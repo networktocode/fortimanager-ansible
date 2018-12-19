@@ -1,0 +1,7 @@
+[all:vars]
+ansible_python_interpreter=python
+ansible_user=username
+ansible_password=password
+
+[fortimanager]
+fortimanager1 ansible_host=10.1.1.1
