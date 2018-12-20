@@ -93,18 +93,18 @@ options:
 EXAMPLES = '''
     - name: GET STATUS
       fortimgr_jsonrpc_request:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         method: get
         params: [{url: "/sys/status/"}]
       register: 
     
     - name: CREATE ADOM
       fortimgr_jsonrpc_request:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         method: add
         params: [{
             url: "/dvmdb/adom",

@@ -129,9 +129,9 @@ options:
 EXAMPLES = '''
 - name: Add Address Group
   fortimgr_address_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_group_name: "App01_Servers"
     comment: "App01 Servers"
@@ -141,17 +141,17 @@ EXAMPLES = '''
       - "Server03"
 - name: Add Address to Address Group
   fortimgr_address_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_group_name: "App01_Servers"
     members: "Server04"
 - name: Remove Address from Address Group
   fortimgr_address_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     port: 8443
     validate_certs: True
@@ -162,9 +162,9 @@ EXAMPLES = '''
       - "Server02"
 - name: Delete Address Group
   fortimgr_address_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     address_group_name: "App01_Servers"
