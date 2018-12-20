@@ -128,9 +128,9 @@ options:
 EXAMPLES = '''
 - name: Add VIP Group
   fortimgr_vip_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     vip_group_name: "App01_VIP_Group"
     interface:
@@ -141,18 +141,18 @@ EXAMPLES = '''
       - "App01_VIP03"
 - name: Remove Member VIP Group
   fortimgr_vip_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     vip_group_name: "App01_VIP_Group"
     members: "App01_VIP02"
     state: "param_absent"
 - name: Delete VIP Group
   fortimgr_vip_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     vip_group_name: "App01_VIP_Group"

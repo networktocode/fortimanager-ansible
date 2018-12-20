@@ -199,9 +199,9 @@ options:
 EXAMPLES = '''
 - name: Add iprange Address
   fortimanager_address:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_name: "server01"
     address_type: "iprange"
@@ -211,9 +211,9 @@ EXAMPLES = '''
     end_ip: "10.10.10.26"
 - name: Modify iprange Address range
   fortimanager_address:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_name: "server01"
     address_type: "iprange"
@@ -223,9 +223,9 @@ EXAMPLES = '''
     end_ip: "10.10.10.32"
 - name: Add ipmask Address
   fortimanager_address:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     port: 8443
     validate_certs: True
@@ -235,9 +235,9 @@ EXAMPLES = '''
     subnet: "10.20.30.0/24"
 - name: Add ipmask Address
   fortimanager_address:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     port: 8443
     validate_certs: True
@@ -248,9 +248,9 @@ EXAMPLES = '''
     mask: "255.255.255.0"
 - name: Delete Address
   fortimanager_address:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     address_name: "server02"

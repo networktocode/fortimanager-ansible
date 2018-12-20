@@ -174,9 +174,9 @@ options:
 EXAMPLES = '''
 - name: Add Route
   fortimgr_route:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     state: "present"
     adom: "lab"
     fortigate: "lab_fg"
@@ -186,9 +186,9 @@ EXAMPLES = '''
     intfc: "port1"
 - name: Remove Route
   fortimgr_route:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     state: "absent"
     adom: "lab"
     fortigate: "lab_fg"

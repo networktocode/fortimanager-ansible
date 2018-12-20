@@ -129,9 +129,9 @@ options:
 EXAMPLES = '''
 - name: Add Service Group
   fortimgr_service_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     service_group_name: "App01_Web_Services"
     members:
@@ -140,18 +140,18 @@ EXAMPLES = '''
     comment: "App01 Web Services"
 - name: Remove Service from Service Group
   fortimgr_service_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     service_group_name: "App01_Web_Services"
     members: "HTTP"
     state: "param_absent"
 - name: Delete Service
   fortimgr_service_group:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     service_group_name: "App01_Web_Services"

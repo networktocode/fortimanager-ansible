@@ -126,26 +126,26 @@ options:
 EXAMPLES = '''
 - name: Add Revision
   fortimgr_revision:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     created_by: "user"
     description: "ADOM Revision"
     revision_name: "Lab Revision"
 - name: Delete Revision
   fortimgr_revision:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     revision_name: "Lab Revision"
     state: "absent"
 - name: Restore Revision
   fortimgr_revision:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     created_by: "user"
     description: "ADOM Revert"

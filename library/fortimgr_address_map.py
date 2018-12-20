@@ -199,9 +199,9 @@ options:
 EXAMPLES = '''
 - name: Add iprange Address
   fortimgr_address_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_name: "server01"
     address_type: "iprange"
@@ -213,9 +213,9 @@ EXAMPLES = '''
     vdom: "root"
 - name: Modify iprange Address range
   fortimgr_address_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     address_name: "server01"
     address_type: "iprange"
@@ -227,9 +227,9 @@ EXAMPLES = '''
     vdom: "root"
 - name: Add ipmask Address
   fortimgr_address_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     port: 8443
     validate_certs: True
@@ -241,9 +241,9 @@ EXAMPLES = '''
     vdom: "root"
 - name: Remove Fortigate Mapping
   fortimgr_address_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     address_name: "server01"

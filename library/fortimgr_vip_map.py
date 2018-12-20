@@ -159,9 +159,9 @@ options:
 EXAMPLES = '''
 - name: Add VIP With Mapping
   fortimgr_vip_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "Prod"
     vdom: "root"
@@ -172,9 +172,9 @@ EXAMPLES = '''
     comment: "App02 VIP"
 - name: Modify VIP
   fortimgr_vip_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "Prod"
     vdom: "root"
@@ -184,9 +184,9 @@ EXAMPLES = '''
     port: 8443
 - name: Add Mapping to VIP
   fortimgr_vip_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "DR"
     vdom: "lab"
@@ -199,9 +199,9 @@ EXAMPLES = '''
     comment: "App02 VIP"
 - name: Remove Mapping from VIP
   fortimgr_vip_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     fortigate: "DR"

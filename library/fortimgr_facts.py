@@ -122,15 +122,15 @@ options:
 EXAMPLES = '''
 - name: Get Facts
   fortimgr_facts:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
 - name: Get FortiGates
   fortimgr_facts:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigates:
       - "lab"
@@ -138,9 +138,9 @@ EXAMPLES = '''
       - "dmz"
 - name: Get Fortigate Configs
   fortimgr_facts:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigates:
       - name: "lab"
@@ -156,17 +156,17 @@ EXAMPLES = '''
       - "policy"
 - name: Get All Fortigate Configs
   fortimgr_facts:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigates: "all"
     config_filter: "all"
 - name: Get FortiManager Configs
   fortimanager_facts:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adoms:
       name: "lab"
       package: "lab"

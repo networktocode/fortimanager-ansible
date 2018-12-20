@@ -166,9 +166,9 @@ options:
 EXAMPLES = '''
 - name: Add IP Pool Map
   fortimgr_ip_pool_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "{{ item.fg }}"
     vdom: "root"
@@ -186,9 +186,9 @@ EXAMPLES = '''
       end: "100.10.12.10"
 - name: Modify IP Pool Map
   fortimgr_ip_pool_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "{{ item.fg }}"
     vdom: root
@@ -203,9 +203,9 @@ EXAMPLES = '''
       end: "100.10.12.11"
 - name: Add Mapping to IP Pool
   fortimgr_ip_pool_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "lab03_fortigate"
     vdom: "root"
@@ -214,9 +214,9 @@ EXAMPLES = '''
     end_ip: "100.10.14.11"
 - name: Remove Mapping from IP Pool
   fortimgr_ip_pool_map:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     fortigate: "lab01_fortigate"
     vdom: "root"
