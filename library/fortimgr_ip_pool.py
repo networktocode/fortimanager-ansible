@@ -156,9 +156,9 @@ options:
 EXAMPLES = '''
 - name: Add IP Pool Object
   fortimgr_ip_pool:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     pool_name: "App01_Pool"
     type: "overload"
@@ -167,9 +167,9 @@ EXAMPLES = '''
     comment: "App01 Pool"
 - name: Modify IP Pool
   fortimgr_ip_pool:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     validate_certs: True
     port: 8443
@@ -177,9 +177,9 @@ EXAMPLES = '''
     end_ip: "100.1.1.2"
 - name: Delete IP Pool Object
   fortimgr_ip_pool:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     pool_name: "App01_Pool"

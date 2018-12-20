@@ -109,9 +109,9 @@ options:
 EXAMPLES = '''
 - name: Lock the lab ADOM
   fortimgr_lock:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     lock: True
   register: session
@@ -120,7 +120,7 @@ EXAMPLES = '''
     session_id: "{{ session.session_id }}"
 - name: Make Change
   fortimgr_address:
-    host: "{{ inventory_hostname }}"
+    host: "{{ ansible_host }}"
     session_id: "{{ session_id }}"
     adom: "lab"
     address_name: "Server01"
@@ -128,7 +128,7 @@ EXAMPLES = '''
     subnet: "10.1.1.1/32"
 - name: Save and Unlock the ADOM
   fortimgr_lock:
-    host: "{{ inventory_hostname }}"
+    host: "{{ ansible_host }}"
     session_id: "{{ session_id }}"
     adom: "lab"
     save: True

@@ -250,9 +250,9 @@ options:
 EXAMPLES = '''
 - name: Add Policy
   fortimgr_policy:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "prod"
     package: "prod"
     action: "accept"
@@ -270,18 +270,18 @@ EXAMPLES = '''
     status: "enable"
 - name: Modify Policy
   fortimgr_policy:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "prod"
     package: "prod"
     policy_name: "Permit_Outbound_Web"
     service: "File_Transfer_Services"
 - name: Move Policy
   fortimgr_policy:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     package: "prod"
@@ -290,9 +290,9 @@ EXAMPLES = '''
     reference_policy_id: "1"
 - name: Delete Policy
   fortimgr_policy:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     package: "prod"

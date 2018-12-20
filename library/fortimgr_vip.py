@@ -155,9 +155,9 @@ options:
 EXAMPLES = '''
 - name: Add VIP Object
   fortimgr_vip:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     vip_name: "App01_VIP"
     type: "static-nat"
@@ -166,9 +166,9 @@ EXAMPLES = '''
     comment: "App01 Web Services"
 - name: Modify VIP
   fortimgr_vip:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     vip_name: "App01_VIP"
     external_intfc: "port2"
@@ -176,9 +176,9 @@ EXAMPLES = '''
     port: 8443
 - name: Delete VIP Object
   fortimgr_vip:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     vip_name: "App01_VIP"

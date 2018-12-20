@@ -157,9 +157,9 @@ options:
 EXAMPLES = '''
 - name: Add Service Object
   fortimgr_service:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     service_name: "App01_Web"
     protocol: "TCP"
@@ -170,9 +170,9 @@ EXAMPLES = '''
     comment: "App01 Web Services"
 - name: Remove Port from Service
   fortimgr_service:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     service_name: "App01_Web"
     protocol: "TCP"
@@ -181,9 +181,9 @@ EXAMPLES = '''
     state: "param_absent"
 - name: Add ICMP Service Object
   fortimgr_service:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     adom: "lab"
     service_name: "ICMP_Echo"
     protocol: "ICMP"
@@ -191,9 +191,9 @@ EXAMPLES = '''
     icmp_type: 8
 - name: Delete Service Object
   fortimgr_service:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
     use_ssl: False
     adom: "lab"
     service_name: "App01_Web"
