@@ -118,7 +118,7 @@ Add a path for `library` that exists in this repository - this will become your 
 ### Clone the repo in your search path
 
 ```
-$ git clone https://github.com/networktocode/fortimgr-ansible
+$ git clone https://github.com/networktocode/fortimanager-ansible
 ```
 
 As a quick test and sanity use `ansible-doc` on one of the modules before trying to use them in a playbook.  For example, try this:
