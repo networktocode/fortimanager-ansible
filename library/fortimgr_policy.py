@@ -344,7 +344,8 @@ unlocked:
 
 import time
 import requests
-from ansible.module_utils.basic import AnsibleModule, env_fallback, return_values
+from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.fortimgr_return_values import return_values
 
 requests.packages.urllib3.disable_warnings()
 
