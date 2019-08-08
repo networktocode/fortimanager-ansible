@@ -243,6 +243,7 @@ if float(ansible_version[:3]) < 2.4:
     raise ImportError("Ansible versions below 2.4 are not supported")
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 
+
 requests.packages.urllib3.disable_warnings()
 
 
