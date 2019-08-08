@@ -1467,7 +1467,6 @@ def main():
         lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
-        provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
         state=dict(choices=["absent", "param_absent", "present"], type="str"),
         use_ssl=dict(required=False, type="bool"),
@@ -1480,7 +1479,7 @@ def main():
         members=dict(required=False, type="list")
     )
     argument_spec = base_argument_spec
-    argument_spec["provider"] = dict(required=False, type="dict", options=base_argument_spce)
+    argument_spec["provider"] = dict(required=False, type="dict", options=base_argument_spec)
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
     provider = module.params["provider"] or {}

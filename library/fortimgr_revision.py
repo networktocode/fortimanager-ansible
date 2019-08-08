@@ -1431,7 +1431,6 @@ def main():
         host=dict(required=False, type="str"),
         lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
-        provider=dict(required=False, type="dict"),
         port=dict(required=False, type="int"),
         session_id=dict(required=False, type="str"),
         state=dict(choices=["absent", "present", "restore"], type="str"),

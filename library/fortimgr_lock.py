@@ -1417,7 +1417,6 @@ def main():
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         use_ssl=dict(required=False, type="bool"),
         validate_certs=dict(required=False, type="bool"),
-        provider=dict(required=False, type="dict"),
         save=dict(required=False, type="bool"),
         session_id=dict(required=False, type="str"),
         lock=dict(required=False, type="bool"),
