@@ -1721,7 +1721,7 @@ class FMVIP(FortiManager):
 
 
 def main():
-    argument_spec = dict(
+    base_argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
         lock=dict(required=False, type="bool"),

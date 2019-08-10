@@ -1444,7 +1444,7 @@ def main():
         revision_name=dict(required=False, type="list")
     )
     argument_spec = base_argument_spec
-    arguemnt_spec["provider"] = dict(required=False, type="dict", options=base_argument_spec)
+    argument_spec["provider"] = dict(required=False, type="dict", options=base_argument_spec)
 
     module = AnsibleModule(argument_spec, supports_check_mode=False,
                            required_if=[["state", "restore", ["restore_name"]]])
