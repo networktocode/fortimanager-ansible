@@ -1,16 +1,15 @@
 ---
 
-- name: FORTIMANAGER ADDRESS MAP UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER ADDRESS MAP UNITTESTS"
+  hosts: "fortimanager"
+  connection: "local"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS MAP IPMASK LIST NOTATION - CHANGE
+    - name: "CREATE ADDRESS MAP IPMASK LIST NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -20,7 +19,7 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet:
             - "10.10.10.10"
@@ -29,12 +28,17 @@
           subnet:
             - "10.10.20.10"
             - "255.255.255.255"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK AGAIN LIST NOTATION - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK AGAIN LIST NOTATION - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -44,7 +48,7 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet:
             - "10.10.10.10"
@@ -53,13 +57,18 @@
           subnet:
             - "10.10.20.10"
             - "255.255.255.255"
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -70,11 +79,15 @@
           subnet: "10.10.10.10/32"
           comment: "ipmask unit test"
 
-    - name: CREATE ADDRESS MAP IPMASK WITH PROVIDER - NO CHANGE
+    - name: "CREATE ADDRESS MAP IPMASK WITH PROVIDER - NO CHANGE"
       fortimgr_address_map:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS MAP IPMASK OVERRIDE PROVIDER - CHANGE"
       fortimgr_address_map:
         provider: "{{ provider }}"
         fortigate: "lab2"
@@ -84,12 +97,16 @@
         color: 3
         subnet: "10.10.10.8/30"
         comment: "provider ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK CIDR NOTATION - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS MAP IPMASK CIDR NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -99,17 +116,22 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet: "10.20.10.10/32"
         - fg: "lab2"
           subnet: "10.20.20.10/32"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK CIDR NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK CIDR NOTATION AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -119,17 +141,22 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet: "10.20.10.10/32"
         - fg: "lab2"
           subnet: "10.20.20.10/32"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK CIDR NOTATION BAD MASK - FAIL
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK CIDR NOTATION BAD MASK - FAIL"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -139,18 +166,23 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet: "10.10.10.10/33"
         - fg: "lab2"
           subnet: "10.10.20.10/33"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK HOST NOTATION - CHANGE
+    - assert:
+        that: "item['failed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK HOST NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -160,17 +192,22 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet: "10.20.10.15"
         - fg: "lab2"
           subnet: "10.20.20.15"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK HOST NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK HOST NOTATION AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -180,17 +217,22 @@
         color: 1
         subnet: "{{ item.subnet }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           subnet: "10.20.10.15"
         - fg: "lab2"
           subnet: "10.20.20.15"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION - CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -201,19 +243,24 @@
         network_address: "{{ item.network }}"
         network_mask: "{{ item.mask }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           network: "10.30.10.10"
           mask: "255.255.255.255"
         - fg: "lab2"
           network: "10.30.20.10"
           mask: "255.255.255.255"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPMASK NET AND MASK NOTATION AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -224,19 +271,24 @@
         network_address: "{{ item.network }}"
         network_mask: "{{ item.mask }}"
         comment: "ipmask unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           network: "10.30.10.10"
           mask: "255.255.255.255"
         - fg: "lab2"
           network: "10.30.20.10"
           mask: "255.255.255.255"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPRANGE - CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPRANGE - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -247,19 +299,24 @@
         start_ip: "{{ item.start }}"
         end_ip: "{{ item.end }}"
         comment: "iprange unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           start: "10.10.10.11"
           end: "10.10.10.14"
         - fg: "lab2"
           start: "10.10.20.11"
           end: "10.10.20.14"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPRANGE AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP IPRANGE AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -270,19 +327,24 @@
         start_ip: "{{ item.start }}"
         end_ip: "{{ item.end }}"
         comment: "iprange unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           start: "10.10.10.11"
           end: "10.10.10.14"
         - fg: "lab2"
           start: "10.10.20.11"
           end: "10.10.20.14"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD LIST NOTATION - CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD LIST NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -290,7 +352,7 @@
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           wildcard:
             - "10.0.10.0"
@@ -299,12 +361,17 @@
           wildcard:
             - "10.0.20.0"
             - "0.255.0.255"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD LIST NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD LIST NOTATION AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -312,7 +379,7 @@
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           wildcard:
             - "10.0.10.0"
@@ -321,12 +388,17 @@
           wildcard:
             - "10.0.20.0"
             - "0.255.0.255"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD CIDR NOTATION - CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD CIDR NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -334,17 +406,22 @@
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           wildcard: "10.0.10.0/15"
         - fg: "lab2"
           wildcard: "10.0.20.0/15"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD CIDR NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD CIDR NOTATION AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -352,17 +429,22 @@
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           wildcard: "10.0.10.0/15"
         - fg: "lab2"
           wildcard: "10.0.20.0/15"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD CIDR NOTATION BAD MASK - FAIL
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD CIDR NOTATION BAD MASK - FAIL"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -370,18 +452,23 @@
         address_type: "wildcard"
         wildcard: "{{ item.wildcard }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           wildcard: "10.0.10.0/33"
         - fg: "lab2"
           wildcard: "10.0.20.0/33"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD WILCARD AND MASK NOTATION - CHANGE
+    - assert:
+        that: "item['failed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD WILCARD AND MASK NOTATION - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -390,19 +477,24 @@
         wildcard_address: "{{ item.address }}"
         wildcard_mask: "{{ item.mask }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           address: "10.0.10.0"
           mask: "0.0.255.0"
         - fg: "lab2"
           address: "10.0.20.0"
           mask: "0.0.255.0"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP WILDCARD WILCARD AND MASK NOTATION - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE ADDRESS MAP WILDCARD WILCARD AND MASK NOTATION - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -411,19 +503,24 @@
         wildcard_address: "{{ item.address }}"
         wildcard_mask: "{{ item.mask }}"
         comment: "wildcard unit test"
-      with_items:
+      loop:
         - fg: "lab1"
           address: "10.0.10.0"
           mask: "0.0.255.0"
         - fg: "lab2"
           address: "10.0.20.0"
           mask: "0.0.255.0"
+      register: "fmg_results"
 
-    - name: DELETE MAPPING FROM ADDRESS MAP - CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "DELETE MAPPING FROM ADDRESS MAP - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
@@ -432,12 +529,16 @@
         allow_routing: "enable"
         comment: "ipmask unit test"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE MAPPING FROM ADDRESS MAP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE MAPPING FROM ADDRESS MAP AGAIN - NO CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
@@ -446,12 +547,16 @@
         allow_routing: "enable"
         comment: "ipmask unit test"
         state: "absent"
+      register: "fmg_results"
 
-    - name: ADD MAPPING FOR ADDRESS MAP - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "ADD MAPPING FOR ADDRESS MAP - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
@@ -462,82 +567,104 @@
           - "10.10.20.10"
           - "255.255.255.255"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: DELETE ALL MAPPINGS FROM ADDRESS MAP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ALL MAPPINGS FROM ADDRESS MAP - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item }}"
         vdom: "root"
         address_name: "addr1"
         state: "absent"
-      with_items:
+      loop:
         - "lab1"
         - "lab2"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP IPMASK NO ADOM - FAIL
-      fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        fortigate: "lab1"
-        vdom: "root"
-        address_name: "addr11"
-        address_type: "ipmask"
-        subnet:
-          - "10.1.1.1"
-          - "255.255.255.255"
-      ignore_errors: true
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
 
-    - name: CREATE ADDRESS MAP IPMASK NO FORTIGATE - FAIL
-      fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        vdom: "root"
-        address_name: "addr11"
-        address_type: "ipmask"
-        subnet:
-          - "10.1.1.1"
-          - "255.255.255.255"
-      ignore_errors: true
-
-    - name: CREATE ADDRESS MAP IPMASK NO VDOM - FAIL
-      fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        fortigate: "lab1"
-        address_name: "addr11"
-        address_type: "ipmask"
-        subnet:
-          - "10.1.1.1"
-          - "255.255.255.255"
-      ignore_errors: true
-
-    - name: CREATE ADDRESS IPMASK NO NAME - FAIL
-      fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
-        adom: "lab"
-        fortigate: "lab1"
-        vdom: "root"
-        address_type: "ipmask"
-        subnet:
-          - "10.1.1.1"
-          - "255.255.255.255"
-      ignore_errors: true
-
-    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL
+    - name: "CREATE ADDRESS MAP IPMASK NO ADOM - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        fortigate: "lab1"
+        vdom: "root"
+        address_name: "addr11"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS MAP IPMASK NO FORTIGATE - FAIL"
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        adom: "lab"
+        vdom: "root"
+        address_name: "addr11"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS MAP IPMASK NO VDOM - FAIL"
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        address_name: "addr11"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NO NAME - FAIL"
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        adom: "lab"
+        fortigate: "lab1"
+        vdom: "root"
+        address_type: "ipmask"
+        subnet:
+          - "10.1.1.1"
+          - "255.255.255.255"
+      ignore_errors: true
+
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL"
+      fortimgr_address_map:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -547,12 +674,15 @@
         network_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -562,11 +692,14 @@
           network_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -576,12 +709,15 @@
         wildcard_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -591,11 +727,14 @@
           wildcard_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -604,12 +743,15 @@
         network_address: "10.1.1.1"
       ignore_errors: true
 
-    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -618,11 +760,14 @@
           network_address: "10.1.1.1"
       ignore_errors: true
 
-    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -631,12 +776,15 @@
         network_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -645,11 +793,14 @@
           network_mask: "255.255.255.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -658,12 +809,15 @@
         wildcard_address: "10.1.1.1"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -672,11 +826,14 @@
           wildcard_address: "10.1.1.1"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL"
       fortimgr_address_map:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -685,12 +842,15 @@
         wildcard_mask: "255.255.0.255"
       ignore_errors: true
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address_map:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -699,23 +859,26 @@
           wildcard_mask: "255.255.0.255"
       ignore_errors: true
 
+    - assert:
+        that: "fmg_results['failed']"
 
-- name: CLEANUP FORTIMANAGER ADDRESSES
-  hosts: fortimanager
+
+- name: "CLEANUP FORTIMANAGER ADDRESSES"
+  hosts: "fortimanager"
   connection: local
   gather_facts: false
-  tags: cleanup
+  tags: "cleanup"
   
   tasks:
-    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+    - name: "CLEANUP ADDRESS OBJECTS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "addr1"
         - "addr2"
         - "addr3"
@@ -728,3 +891,4 @@
         - "addr10"
         - "addr11"
         - "provider_addr1"
+

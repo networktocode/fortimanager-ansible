@@ -1,33 +1,29 @@
 ---
-- name: CREATE SESSION ID FOR UNIT TESTS
-  hosts: fortimanager
-  connection: local
+- name: "CREATE SESSION ID FOR UNIT TESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: policy, cleanup
-  
+  tags: "policy, cleanup"
   tasks:
-    - name: FORTIMANAGER LOCK - CHANGE
+    - name: "FORTIMANAGER LOCK - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         lock: true
       register: session
 
-    - name: SET SESSION ID
+    - name: "SET SESSION ID"
       set_fact:
         session_id: "{{ session.session_id }}"
 
-- name: CREATE FORTIMANAGER OBJECTS FOR UNIT TESTS
-  hosts: fortimanager
-  connection: local
+- name: "CREATE FORTIMANAGER OBJECTS FOR UNIT TESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS OBJECTS - CHANGE
+    - name: "CREATE ADDRESS OBJECTS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -36,7 +32,7 @@
         subnet:
           - "{{ item.ip }}"
           - "255.255.255.255"
-      with_items:
+      loop:
         - name: "srcaddr1"
           ip: "10.1.1.1"
         - name: "srcaddr2"
@@ -50,9 +46,9 @@
         - name: "srcaddr6"
           ip: "10.1.1.6"
 
-    - name: CREATE SERVICE - CHANGE
+    - name: "CREATE SERVICE - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -60,7 +56,7 @@
         protocol: TCP
         port_range:
           - "{ item.port }}"
-      with_items:
+      loop:
         - name: "svc1"
           port: 1
         - name: "svc2"
@@ -68,9 +64,9 @@
         - name: "svc3"
           port: 3
 
-    - name: CREATE IP POOL - CHANGE
+    - name: "CREATE IP POOL - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -78,7 +74,7 @@
         type: "overload"
         start_ip: "{{ item.start }}"
         end_ip: "{{ item. end }}"
-      with_items:
+      loop:
         - name: "pool1"
           start: "200.1.1.1"
           end: "200.1.1.1"
@@ -89,9 +85,9 @@
           start: "200.1.1.3"
           end: "200.1.1.3"
 
-    - name: CREATE VIP - CHANGE
+    - name: "CREATE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -101,7 +97,7 @@
           - "{{ item.ext }}"
         mapped_ip:
           - "{{ item.map }}"
-      with_items:
+      loop:
         - name: "vip1"
           ext: "100.10.10.10"
           map: "10.10.10.10"
@@ -112,34 +108,36 @@
           ext: "100.10.10.12"
           map: "10.10.10.12"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
 
 
-- name: FORTIMANAGER POLICY UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER POLICY UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: policy
-
+  tags: "policy"
   tasks:
-    - name: DELETE NONEXISTENT POLICY - NO CHANGE
+    - name: "DELETE NONEXISTENT POLICY - NO CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         package: "lab"
         policy_name: "unittest_nonexistent_policy_name"
         state: "absent"
+      register: "fmg_results"
 
-    - name: CREATE DENY POLICY - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE DENY POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -159,10 +157,14 @@
           - "all"
         source_intfc:
           - "any"
+      register: "fmg_results"
 
-    - name: CREATE POLICY - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -189,13 +191,16 @@
         reference_policy_name: "unittest_explicit_deny"
       register: "policy1"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy1['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         first_policy_id: "{{ policy1.config.params[0].data.policyid }}"
 
-    - name: CREATE POLICY AGAIN - NO CHANGE
+    - name: "CREATE POLICY AGAIN - NO CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -221,11 +226,15 @@
         pool_name: "pool1"
         direction: "before"
         reference_policy_name: "unittest_explicit_deny"
+      register: "fmg_results"
 
-    - name: CREATE POLICY WITH PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE POLICY WITH PROVIDER - NO CHANGE"
       fortimgr_policy:
         provider:
-          host: "{{ inventory_hostname }}"
+          host: "{{ ansible_host }}"
           session_id: "{{ session_id }}"
           lock: false
           adom: "lab"
@@ -245,11 +254,15 @@
           pool_name: "pool1"
           direction: "before"
           reference_policy_name: "unittest_explicit_deny"
+      register: "fmg_results"
 
-    - name: CREATE POLICY OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE POLICY OVERRIDE PROVIDER - CHANGE"
       fortimgr_policy:
         provider:
-          host: "{{ inventory_hostname }}"
+          host: "{{ ansible_host }}"
           session_id: "{{ session_id }}"
           lock: false
           adom: "lab"
@@ -281,10 +294,14 @@
         nat: "enable"
         ip_pool: "enable"
         pool_name: "pool2"
+      register: "fmg_results"
 
-    - name: MODIFY POLICY ADD - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY POLICY ADD - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -309,17 +326,25 @@
           - "any"
         nat: disable
         ip_pool: "disable"
+      register: "fmg_results"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: MODIFY POLICY REMOVE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY POLICY REMOVE - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -337,17 +362,25 @@
           - "srcaddr1"
           - "srcaddr2"
         state: "param_absent"
+      register: "fmg_results"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -375,71 +408,102 @@
         reference_policy_id: "{{ first_policy_id }}"
       register: "policy2"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy2['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         second_policy_id: "{{ policy2.config.params[0].data.policyid }}"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: MODIFY POLICY DISABLE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY POLICY DISABLE - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
         status: "disable"
+      register: "fmg_results"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: MODIFY POLICY DISABLE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY POLICY DISABLE AGAIN - NO CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
         status: "disable"
+      register: "fmg_results"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: MODIFY POLICY ENABLE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY POLICY ENABLE - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ second_policy_id }}"
         status: "enable"
+      register: "fmg_results"
 
-    - name: FORTIMANAGER SAVE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "FORTIMANAGER SAVE - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS ALL - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS ALL - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -466,13 +530,16 @@
         reference_policy_name: "unittest_explicit_deny"
       register: "policy3"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy3['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         third_policy_id: "{{ policy3.config.params[0].data.policyid }}"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS ALL AGAIN - NO CHANGE
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS ALL AGAIN - NO CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -497,10 +564,14 @@
         pool_name: "pool1"
         direction: "before"
         reference_policy_name: "unittest_explicit_deny"
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS NULL - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS NULL - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -525,13 +596,16 @@
         reference_policy_name: "unittest_explicit_deny"
       register: "policy4"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy4['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         fourth_policy_id: "{{ policy4.config.params[0].data.policyid }}"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS NULL AGAIN - NO CHANGE
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS NULL AGAIN - NO CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -554,10 +628,14 @@
         pool_name: "pool1"
         direction: "before"
         reference_policy_name: "unittest_explicit_deny"
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS LIST MODIFY POLICY - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS LIST MODIFY POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -583,10 +661,14 @@
         pool_name: "pool1"
         direction: "before"
         reference_policy_name: "unittest_explicit_deny"
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS LARGER LIST NEW POLICY - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS LARGER LIST NEW POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -613,13 +695,16 @@
         reference_policy_name: "unittest_explicit_deny"
       register: "policy5"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy5['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         fifth_policy_id: "{{ policy5.config.params[0].data.policyid }}"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS PARTIAL MATCH DOESN'T COUNT NEW POLICY - CHANGE
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS PARTIAL MATCH DOESN'T COUNT NEW POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -644,13 +729,16 @@
         reference_policy_name: "unittest_explicit_deny"
       register: "policy6"
 
-    - name: SET POLICY ID
+    - assert:
+        that: "policy6['changed']"
+
+    - name: "SET POLICY ID"
       set_fact:
         sixth_policy_id: "{{ policy6.config.params[0].data.policyid }}"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS NO MATCH_FILTER - FAIL
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS NO MATCH_FILTER - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -665,10 +753,14 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_ID - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_ID - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -685,10 +777,14 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_NAME - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS AND POLICY_NAME - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -705,10 +801,14 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS INVALID FILTER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS INVALID FILTER - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -724,10 +824,14 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS FILTER NOT IN PARAM - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS FILTER NOT IN PARAM - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -743,10 +847,14 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE POLICY USING MATCH MATCH FILTERS MULTIPLE POLICIES MATCHED - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE POLICY USING MATCH MATCH FILTERS MULTIPLE POLICIES MATCHED - FAIL"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -762,25 +870,27 @@
         source_address: "srcaddr4"
         source_intfc: "any"
       ignore_errors: true
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['failed']"
 
 
-- name: CLEANUP FORTIMANAGER ADDRESSES
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER ADDRESSES"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP POLICY - CHANGE
+    - name: "CLEANUP POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         package: "lab"
         policy_id: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "{{ first_policy_id }}"
         - "{{ second_policy_id }}"
         - "{{ third_policy_id }}"
@@ -788,9 +898,9 @@
         - "{{ fifth_policy_id }}"
         - "{{ sixth_policy_id }}"
 
-    - name: CLEANUP POLICY - CHANGE
+    - name: "CLEANUP POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -798,9 +908,9 @@
         policy_name: "unittest_explicit_deny"
         state: "absent"
 
-    - name: CLEANUP POLICY - CHANGE
+    - name: "CLEANUP POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
@@ -808,15 +918,15 @@
         policy_name: "provider_policy1"
         state: "absent"
 
-    - name: CLEANUP ADDRESSES - CHANGE
+    - name: "CLEANUP ADDRESSES - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "srcaddr1"
         - "srcaddr2"
         - "srcaddr3"
@@ -824,50 +934,50 @@
         - "srcaddr5"
         - "srcaddr6"
 
-    - name: CLEANUP SERVICE - CHANGE
+    - name: "CLEANUP SERVICE - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         service_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "svc1"
         - "svc2"
         - "svc3"
 
-    - name: CLEANUP IP POOL - CHANGE
+    - name: "CLEANUP IP POOL - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         pool_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "pool1"
         - "pool2"
         - "pool3"
 
-    - name: CLEANUP VIP - CHANGE
+    - name: "CLEANUP VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         lock: false
         adom: "lab"
         vip_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "vip1"
         - "vip2"
         - "vip3"
 
-    - name: FORTIMANAGER SAVE AND UNLOCK - CHANGE
+    - name: "FORTIMANAGER SAVE AND UNLOCK - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
         unlock: true
-      tags: unlock
+      tags: "unlock"

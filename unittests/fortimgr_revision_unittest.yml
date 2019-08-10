@@ -1,37 +1,34 @@
 ---
-
-- name: FORTIMANAGER ADDRESS UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER ADDRESS UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE REVISION - CHANGE
+    - name: "CREATE REVISION - CHANGE"
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         created_by: "ansible"
         description: "revision unittest 1"
         revision_name: "unittest1"
 
-    - name: CREATE ANOTHER REVISION WITH PROVIDER - CHANGE
+    - name: "CREATE ANOTHER REVISION WITH PROVIDER - CHANGE"
       fortimgr_revision:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           created_by: "ansible"
           description: "revision unittest 2"
           revision_name: "unittest2"
 
-    - name: RESTORE REVISION - CHANGE
+    - name: "RESTORE REVISION - CHANGE"
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         state: "restore"
         created_by: "ansible"
@@ -39,16 +36,16 @@
         revision_name: "unittest1"
         restore_name: "unittest_restore"
 
-    - name: DELETE REVISION - CHANGE
+    - name: "DELETE REVISION - CHANGE"
       fortimgr_revision:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         created_by: "ansible"
         description: "revision unittest 1"
         revision_name: "unittest1"
-      with_items:
+      loop:
         - "unittest1"
         - "unittest2"
         - "unittest_restore"

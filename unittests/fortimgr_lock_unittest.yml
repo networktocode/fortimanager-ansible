@@ -1,27 +1,24 @@
 ---
-
-- name: FORTIMANAGER LOCK UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER LOCK UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: FORTIMANAGER LOCK - CHANGE
+    - name: "FORTIMANAGER LOCK - CHANGE"
       fortimgr_lock:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         lock: true
       register: session
 
-    - name: SET SESSION ID
+    - name: "SET SESSION ID"
       set_fact:
         session_id: "{{ session.session_id }}"
 
-    - name: CREATE ADDRESS - CHANGE
+    - name: "CREATE ADDRESS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         address_name: "addr1"
@@ -30,10 +27,14 @@
           - "10.1.1.1"
           - "255.255.255.255"
         lock: false
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS MAP - CHANGE
+    - assert:
+        that: "fmg_results['unlocked'] is not defined"
+
+    - name: "CREATE ADDRESS MAP - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -45,9 +46,9 @@
           - "255.255.255.255"
         lock: false
 
-    - name: CREATE ADDRESS GROUP - CHANGE
+    - name: "CREATE ADDRESS GROUP - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         address_group_name: "addrgrp1"
@@ -55,9 +56,9 @@
           - "addr1"
         lock: false
 
-    - name: CREATE SERVICE - CHANGE
+    - name: "CREATE SERVICE - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         service_name: "svc1"
@@ -66,9 +67,9 @@
           - 80
         lock: false
 
-    - name: CREATE SERVICE GROUP - CHANGE
+    - name: "CREATE SERVICE GROUP - CHANGE"
       fortimgr_service_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         service_group_name: "svcgrp1"
@@ -76,9 +77,9 @@
           - "svc1"
         lock: false
 
-    - name: CREATE IP POOL - CHANGE
+    - name: "CREATE IP POOL - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         pool_name: "pool1"
@@ -87,9 +88,9 @@
         end_ip: "10.10.10.10"
         lock: false
 
-    - name: CREATE IP POOL MAP - CHANGE
+    - name: "CREATE IP POOL MAP - CHANGE"
       fortimgr_ip_pool_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -100,9 +101,9 @@
         end_ip: "10.10.10.11"
         lock: false
 
-    - name: CREATE VIP - CHANGE
+    - name: "CREATE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         vip_name: "vip1"
@@ -113,9 +114,9 @@
           - "10.10.10.12"
         lock: false
 
-    - name: CREATE VIP MAP - CHANGE
+    - name: "CREATE VIP MAP - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -128,9 +129,9 @@
           - "10.10.10.13"
         lock: false
 
-    - name: CREATE VIP GROUP - CHANGE
+    - name: "CREATE VIP GROUP - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
@@ -138,9 +139,9 @@
           - "vip1"
         lock: false
 
-    - name: CREATE POLICY - CHANGE
+    - name: "CREATE POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -160,41 +161,41 @@
           - "any"
         lock: false
 
-    - name: FORTIMANAGER SAVE OVERRIDE PROVIDER - CHANGE
+    - name: "FORTIMANAGER SAVE OVERRIDE PROVIDER - CHANGE"
       fortimgr_lock:
         provider:
           adom: "FAKE"
           save: false
           lock: true
           unlock: true
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         save: true
         lock: false
         unlock: false
 
-    - name: DELETE ADDRESS GROUP - CHANGE
+    - name: "DELETE ADDRESS GROUP - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         state: "absent"
         lock: false
 
-    - name: DELETE ADDRESS - CHANGE
+    - name: "DELETE ADDRESS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         address_name: "addr1"
         state: "absent"
         lock: false
 
-    - name: DELETE ADDRESS MAP - CHANGE
+    - name: "DELETE ADDRESS MAP - CHANGE"
       fortimgr_address_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -203,45 +204,45 @@
         state: "absent"
         lock: false
 
-    - name: DELETE ADDRESS - CHANGE
+    - name: "DELETE ADDRESS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         address_name: "addr2"
         state: "absent"
         lock: false
 
-    - name: DELETE SERVICE GROUP - CHANGE
+    - name: "DELETE SERVICE GROUP - CHANGE"
       fortimgr_service_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         service_group_name: "svcgrp1"
         state: "absent"
         lock: false
 
-    - name: DELETE SERVICE - CHANGE
+    - name: "DELETE SERVICE - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         service_name: "svc1"
         state: "absent"
         lock: false
 
-    - name: DELETE IP POOL - CHANGE
+    - name: "DELETE IP POOL - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         pool_name: "pool1"
         state: "absent"
         lock: false
 
-    - name: DELETE IP POOL MAP - CHANGE
+    - name: "DELETE IP POOL MAP - CHANGE"
       fortimgr_ip_pool_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -250,36 +251,36 @@
         state: "absent"
         lock: false
 
-    - name: DELETE IP POOL - CHANGE
+    - name: "DELETE IP POOL - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         pool_name: "pool2"
         state: "absent"
         lock: false
 
-    - name: DELETE VIP GROUP - CHANGE
+    - name: "DELETE VIP GROUP - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         state: "absent"
         lock: false
 
-    - name: DELETE VIP - CHANGE
+    - name: "DELETE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         vip_name: "vip1"
         state: "absent"
         lock: false
 
-    - name: DELETE VIP MAP - CHANGE
+    - name: "DELETE VIP MAP - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         fortigate: "lab1"
@@ -288,18 +289,18 @@
         state: "absent"
         lock: false
 
-    - name: DELETE VIP - CHANGE
+    - name: "DELETE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         vip_name: "vip2"
         state: "absent"
         lock: false
 
-    - name: DELETE POLICY - CHANGE
+    - name: "DELETE POLICY - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
+        host: "{{ ansible_host }}"
         session_id: "{{ session_id }}"
         adom: "lab"
         package: "lab"
@@ -307,12 +308,16 @@
         state: "absent"
         lock: false
 
-    - name: FORTIMANAGER SAVE AND UNLOCK WITH PROVIDER - CHANGE
+    - name: "FORTIMANAGER SAVE AND UNLOCK WITH PROVIDER - CHANGE"
       fortimgr_lock:
         provider:
-          host: "{{ inventory_hostname }}"
+          host: "{{ ansible_host }}"
           session_id: "{{ session_id }}"
           adom: "lab"
           save: true
           unlock: true
-      tags: unlock
+      tags: "unlock"
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['unlocked']"

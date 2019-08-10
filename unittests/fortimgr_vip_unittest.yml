@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER VIP UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER VIP UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE VIP - CHANGE
+    - name: "CREATE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip1"
         type: "static-nat"
@@ -22,12 +19,16 @@
         external_intfc: "port1"
         comment: "vip unit test"
         color: 2
+      register: "fmg_results"
 
-    - name: CREATE VIP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE VIP AGAIN - NO CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip1"
         type: "static-nat"
@@ -39,13 +40,17 @@
         external_intfc: "port1"
         comment: "vip unit test"
         color: 2
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           vip_name: "vip1"
           type: "static-nat"
@@ -56,11 +61,15 @@
           comment: "vip unit test"
           color: "2"
 
-    - name: CREATE VIP WITH PROVIDER - NO CHANGE
+    - name: "CREATE VIP WITH PROVIDER - NO CHANGE"
       fortimgr_vip:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE VIP OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE VIP OVERRIDE PROVIDER - CHANGE"
       fortimgr_vip:
         provider: "{{ provider }}"
         vip_name: "vip2"
@@ -71,12 +80,16 @@
         external_intfc: "port2"
         comment: "vip unit test provider"
         color: "5"
+      register: "fmg_results"
 
-    - name: MODIFY VIP CHANGE EXTERNAL IP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP CHANGE EXTERNAL IP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip1"
         type: "static-nat"
@@ -84,41 +97,51 @@
         external_ip:
           - "100.10.10.11"
         comment: "vip unit test"
+      register: "fmg_results"
 
-    - name: DELETE VIP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE VIP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE VIP AGAIN - NO CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "vip1"
         state: "absent"
+      register: "fmg_results"
+
+    - assert:
+        that: "not fmg_results['changed']"
 
 
-- name: CLEANUP FORTIMANAGER VIP UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER VIP UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP
+    - name: "CLEANUP"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "vip1"
         - "vip2"

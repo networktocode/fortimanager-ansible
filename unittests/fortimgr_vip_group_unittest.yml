@@ -1,16 +1,14 @@
 ---
 
-- name: CREATE FORTIMANAGER VIPS FOR UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "CREATE FORTIMANAGER VIPS FOR UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE VIP - CHANGE
+    - name: "CREATE VIP - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "{{ item.name }}"
         type: "static-nat"
@@ -18,7 +16,7 @@
           - "{{ item.ext }}"
         mapped_ip:
           - "{{ item.map }}"
-      with_items:
+      loop:
         - name: "vip1"
           ext: "100.10.10.10"
           map: "10.10.10.10"
@@ -32,17 +30,15 @@
           ext: "100.10.10.13"
           map: "10.10.10.13"
 
-- name: FORTIMANAGER VIP GROUP UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER VIP GROUP UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE VIP GROUP - CHANGE
+    - name: "CREATE VIP GROUP - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         interface:
@@ -52,12 +48,16 @@
           - "vip2"
         comment: "vip group unit test"
         color: 10
+      register: "fmg_results"
 
-    - name: CREATE VIP GROUP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE VIP GROUP AGAIN - NO CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         interface:
@@ -67,13 +67,17 @@
           - "vip2"
         comment: "vip group unit test"
         color: 10
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           vip_group_name: "vipgrp1"
           interface: "port1"
@@ -82,12 +86,20 @@
             - "vip2"
           comment: "vip group unit test"
           color: 10
+      register: "fmg_results"
 
-    - name: CREATE VIP GROUP WITH PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE VIP GROUP WITH PROVIDER - NO CHANGE"
       fortimgr_vip_group:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE VIP GROUP OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE VIP GROUP OVERRIDE PROVIDER - CHANGE"
       fortimgr_vip_group:
         provider: "{{ provider }}"
         vip_group_name: "provider_vipgrp1"
@@ -95,34 +107,46 @@
         members: "vip3"
         comment: "provider vip group unit test"
         color: 15
+      register: "fmg_results"
 
-    - name: MODIFY VIP GROUP CHANGE INTERFACE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP GROUP CHANGE INTERFACE - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         interface:
           - "port2"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: MODIFY VIP GROUP ADD MEMBER - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP GROUP ADD MEMBER - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         members:
           - "vip3"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: MODIFY VIP GROUP DELETE MEMBER - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP GROUP DELETE MEMBER - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         members:
@@ -130,12 +154,16 @@
           - "vip2"
         state: "param_absent"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: MODIFY VIP GROUP DELETE MEMBER AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP GROUP DELETE MEMBER AGAIN - NO CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         members:
@@ -143,54 +171,64 @@
           - "vip2"
         state: "param_absent"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: DELETE VIP GROUP - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE VIP GROUP - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE VIP GROUP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE VIP GROUP AGAIN - NO CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "vipgrp1"
         state: "absent"
+      register: "fmg_results"
+
+    - assert:
+        that: "not fmg_results['changed']"
 
 
-- name: CLEANUP FORTIMANAGER VIPs
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER VIPs"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP VIP GROUPS - CHANGE
+    - name: "CLEANUP VIP GROUPS - CHANGE"
       fortimgr_vip_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_group_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "vipgrp1"
         - "provider_vipgrp1"
 
-    - name: CLEANUP VIPS - CHANGE
+    - name: "CLEANUP VIPS - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "vip1"
         - "vip2"
         - "vip3"

@@ -1,16 +1,14 @@
 ---
 
-- name: CREATE FORTIMANAGER ADDRESS FOR UNIT TESTS
-  hosts: fortimanager
-  connection: local
+- name: "CREATE FORTIMANAGER ADDRESS FOR UNIT TESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS OBJECT - CHANGE
+    - name: "CREATE ADDRESS OBJECT - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "route_unittest"
         address_type: "ipmask"
@@ -19,17 +17,15 @@
           - "255.255.255.255"
         allow_routing: "enable"
 
-- name: FORTIMANAGER ROUTE UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER ROUTE UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ROUTE LIST NOTATION - CHANGE
+    - name: "CREATE ROUTE LIST NOTATION - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination:
@@ -38,12 +34,16 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         vdom: "root"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE AGAIN LIST NOTATION - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ROUTE AGAIN LIST NOTATION - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -52,12 +52,16 @@
           - "255.255.255.0"
         gateway: "10.1.1.1"
         intfc: "port1"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE CIDR NOTATION - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ROUTE CIDR NOTATION - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination: "10.20.10.0/24"
@@ -66,72 +70,99 @@
         vdom: "root"
       register: config_results
 
-    - name: CREATE ROUTE CIDR NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "config_results['changed']"
+
+    - name: "CREATE ROUTE CIDR NOTATION AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         destination: "10.20.10.0/24"
         gateway: "10.1.1.1"
         intfc: "port1"
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           destination: "10.20.10.0/24"
           gateway: "10.1.1.1"
           intfc: "port1"
           vdom: "root"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE WITH PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ROUTE WITH PROVIDER - NO CHANGE"
       fortimgr_route:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ROUTE OVERRIDE PROVIDER - CHANGE"
       fortimgr_route:
         provider: "{{ provider }}"
         fortigate: "lab2"
         destination: "10.20.11.0/24"
         gateway: "10.1.1.2"
         intfc: "port2"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE HOST NOTATION - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ROUTE HOST NOTATION - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination: "10.20.16.16"
         gateway: "10.1.1.1"
         intfc: "port1"
         vdom: "root"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE HOST NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ROUTE HOST NOTATION AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         destination: "10.20.16.16"
         gateway: "10.1.1.1"
         intfc: "port1"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE NET AND MASK NOTATION - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ROUTE NET AND MASK NOTATION - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination_network: "10.30.10.0"
@@ -139,12 +170,16 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         vdom: "root"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE NET AND MASK NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ROUTE NET AND MASK NOTATION AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -152,12 +187,16 @@
         destination_netmask: "255.255.255.0"
         gateway: "10.1.1.1"
         intfc: "port1"
+      register: "fmg_results"
 
-    - name: CREATE ROUTE ADDRESS OBJECT - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ROUTE ADDRESS OBJECT - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination_object: "route_unittest"
@@ -166,11 +205,11 @@
         vdom: "root"
       ignore_errors: true
 
-    - name: CREATE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE
+    - name: "CREATE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -179,11 +218,11 @@
         intfc: "port1"
       ignore_errors: true
 
-    - name: DELETE ROUTE ADDRESS OBJECT - CHANGE
+    - name: "DELETE ROUTE ADDRESS OBJECT - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination_object: "route_unittest"
@@ -191,12 +230,13 @@
         intfc: "port1"
         vdom: "root"
         state: "absent"
+      ignore_errors: true
 
-    - name: DELETE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE
+    - name: "DELETE ROUTE ADDRESS OBJECT AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         destination_object: "route_unittest"
@@ -204,12 +244,13 @@
         intfc: "port1"
         vdom: "root"
         state: "absent"
+      ignore_errors: true
 
-    - name: ADD ROUTE TO DIFFERENT GATEWAY - CHANGE
+    - name: "ADD ROUTE TO DIFFERENT GATEWAY - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -218,23 +259,31 @@
           - "255.255.255.0"
         gateway: "10.1.1.2"
         intfc: "port1"
+      register: "fmg_results"
 
-    - name: MODIFY ROUTE'S INTERFACE USING SEQUENCE NUMBER - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ROUTE'S INTERFACE USING SEQUENCE NUMBER - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         sequence_number: "{{ config_results.config.params[0].data.get('seq-num') }}"
         intfc: "port2"
+      register: "fmg_results"
 
-    - name: ADD ROUTE THROUGH DIFFERENT INTERFACE - FAIL
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "ADD ROUTE THROUGH DIFFERENT INTERFACE - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -244,12 +293,16 @@
         gateway: "10.1.1.2"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE MISSING GATEWAY - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE MISSING GATEWAY - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -258,24 +311,32 @@
           - "255.255.255.0"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE MISSING DESTINATION - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE MISSING DESTINATION - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         gateway: "10.1.1.1"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION ADDRESS AND OBJECT - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION ADDRESS AND OBJECT - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -285,12 +346,16 @@
         destination_object: "route_unittest"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION ADDRESS AND OBJECT PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION ADDRESS AND OBJECT PROVIDER - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -301,12 +366,16 @@
           destination_object: "route_unittest"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETMASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETMASK - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -316,12 +385,16 @@
         destination_netmask: "255.255.255.0"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETWORK/DESTINATION_NETMASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION ADDRESS AND DESTINATION_NETWORK/DESTINATION_NETMASK PROVIDER - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -332,24 +405,32 @@
           destination_netmask: "255.255.255.0"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
         destination_network: "10.10.10.0"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "ADD ROUTE DESTINATION_NETWORK W/O DESTINATION_NETMASK PROVIDER - FAIL"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -357,12 +438,16 @@
           destination_network: "10.10.10.0"
         intfc: "port2"
       ignore_errors: True
+      register: "fmg_results"
 
-    - name: DELETE ROUTE - CHANGE
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "DELETE ROUTE - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -372,16 +457,20 @@
         gateway: "{{ item }}"
         intfc: "port1"
         state: "absent"
-      with_items:
+      loop:
         - "10.1.1.1"
         - "10.1.1.2"
-      tags: cleanup
+      tags: "cleanup"
+      register: "fmg_results"
 
-    - name: DELETE ROUTE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ROUTE AGAIN - NO CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -391,12 +480,16 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ROUTE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE ROUTE - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -404,17 +497,21 @@
         gateway: "10.1.1.1"
         intfc: "port1"
         state: "absent"
-      with_items:
+      loop:
         - "10.20.10.0/24"
         - "10.30.10.0/24"
         - "10.20.16.16"
-      tags: cleanup
+      tags: "cleanup"
+      register: "fmg_results"
 
-    - name: DELETE ROUTE FROM OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ROUTE FROM OVERRIDE PROVIDER - CHANGE"
       fortimgr_route:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
@@ -422,20 +519,24 @@
         gateway: "10.1.1.2"
         intfc: "port2"
         state: "absent"
-      tags: cleanup
+      tags: "cleanup"
+      register: "fmg_results"
 
-- name: DELETE FORTIMANAGER ADDRESS FOR UNIT TESTS
-  hosts: fortimanager
-  connection: local
+    - assert:
+        that: "fmg_results['changed']"
+      register: "fmg_results"
+
+
+- name: "DELETE FORTIMANAGER ADDRESS FOR UNIT TESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: DELETE ADDRESS OBJECT - CHANGE
+    - name: "DELETE ADDRESS OBJECT - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "route_unittest"
         address_type: "ipmask"

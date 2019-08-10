@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER IP POOL UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER IP POOL UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-
   tasks:
-    - name: CREATE IP POOL OVERLOAD PERMIT ANY - CHANGE
+    - name: "CREATE IP POOL OVERLOAD PERMIT ANY - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool1"
         type: "overload"
@@ -18,12 +15,16 @@
         start_ip: "100.10.10.1"
         end_ip: "100.10.10.1"
         comment: "pool unit test"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL OVERLOAD AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE IP POOL OVERLOAD AGAIN - NO CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool1"
         type: "overload"
@@ -31,13 +32,17 @@
         start_ip: "100.10.10.1"
         end_ip: "100.10.10.1"
         comment: "pool unit test"
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           pool_name: "pool1"
           type: "overload"
@@ -45,12 +50,20 @@
           start_ip: "100.10.10.1"
           end_ip: "100.10.10.1"
           comment: "pool unit test"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL OVERLOAD PERMIT ANY WITH PROVIDER- NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE IP POOL OVERLOAD PERMIT ANY WITH PROVIDER- NO CHANGE"
       fortimgr_ip_pool:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL OVERLOAD PERMIT ANY OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE IP POOL OVERLOAD PERMIT ANY OVERRIDE PROVIDER - CHANGE"
       fortimgr_ip_pool:
         provider: "{{ provider }}"
         pool_name: "provider_pool1"
@@ -59,43 +72,59 @@
         start_ip: "100.10.10.2"
         end_ip: "100.10.10.2"
         comment: "provider pool unit test"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL OVERLOAD INCREASE POOL RANGE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE IP POOL OVERLOAD INCREASE POOL RANGE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool1"
         end_ip: "100.10.10.2"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL ONE-TO-ONE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE IP POOL ONE-TO-ONE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool2"
         type: "one-to-one"
         start_ip: "100.10.21.1"
         end_ip: "100.10.21.1"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL ONE-TO-ONE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE IP POOL ONE-TO-ONE AGAIN - NO CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool2"
         type: "one-to-one"
         start_ip: "100.10.21.1"
         end_ip: "100.10.21.1"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool3"
         type: "fixed-port-range"
@@ -105,12 +134,16 @@
         source_start_ip: "10.10.30.1"
         source_end_ip: "10.10.30.10"
         comment: "pool unit test"
+      register: "fmg_results"
 
-    - name: CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE IP POOL FIXED-PORT-RANGE RESTRICT SOURCE AGAIN - NO CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool3"
         type: "fixed-port-range"
@@ -120,22 +153,30 @@
         source_start_ip: "10.10.30.1"
         source_end_ip: "10.10.30.10"
         comment: "pool unit test"
+      register: "not fmg_results"
 
-    - name: MODIFY IP POOL FIXED-PORT-RANGE SOURCE RANGE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY IP POOL FIXED-PORT-RANGE SOURCE RANGE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool3"
         source_end_ip: "10.10.30.20"
         comment: "pool unit test"
+      register: "fmg_results"
 
-    - name: DELETE IP POOL OVERLOAD PERMIT ANY - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE IP POOL OVERLOAD PERMIT ANY - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool1"
         type: "overload"
@@ -144,12 +185,16 @@
         end_ip: "100.10.10.1"
         comment: "pool unit test"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE IP POOL OVERLOAD PERMIT ANY AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE IP POOL OVERLOAD PERMIT ANY AGAIN - NO CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool1"
         type: "overload"
@@ -158,43 +203,54 @@
         end_ip: "100.10.10.1"
         comment: "pool unit test"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE IP POOL ONE-TO-ONE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE IP POOL ONE-TO-ONE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool2"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE IP POOL ONE-TO-ONE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE IP POOL ONE-TO-ONE - CHANGE"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "pool3"
         state: "absent"
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['changed']"
 
 
-- name: CLEANUP FORTIMANAGER IP POOLS
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER IP POOLS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP IP POOL ENTRIES
+    - name: "CLEANUP IP POOL ENTRIES"
       fortimgr_ip_pool:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         pool_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "pool1"
         - "pool2"
         - "pool3"
         - "provider_pool1"
+

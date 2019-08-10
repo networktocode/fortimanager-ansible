@@ -988,11 +988,13 @@ class FortiManager(object):
             proposed_field = proposed[field]
             existing_field = existing.get(field)
             if existing_field and proposed_field != existing_field:
-                if isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
-                    config[field] = list(set(proposed_field).union(existing_field))
+                if isinstance(existing_field, list):
+                    proposed_field = set(proposed_field)
+                    if not proposed_field.issubset(existing_field):
+                        config[field] = list(proposed_field.union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -1035,11 +1037,13 @@ class FortiManager(object):
                         existing_field = mapping.get(field)
                         # only consider relevant fields that have a difference
                         if existing_field and proposed_field != existing_field:
-                            if isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
-                                updated_map[field] = list(set(proposed_field).union(existing_field))
+                            if isinstance(existing_field, list):
+                                proposed_field = set(proposed_field)
+                                if not proposed_field.issubset(existing_field):
+                                    updated_map[field] = list(proposed_field.union(existing_field))
                             elif isinstance(existing_field, dict):
                                 updated_map[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                            elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
+                            elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
                                 updated_map[field] = proposed_field
                         elif field not in mapping:
                             updated_map[field] = proposed_field
@@ -1111,9 +1115,10 @@ class FortiManager(object):
             proposed_field = proposed[field]
             existing_field = existing.get(field)
             if existing_field and isinstance(existing_field, list):
-                diff = list(set(existing_field).difference(proposed_field))
+                existing_field = set(existing_field)
+                diff = existing_field.difference(proposed_field)
                 if diff != existing_field:
-                    config[field] = diff
+                    config[field] = list(diff)
             elif existing_field and isinstance(existing_field, dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing_field:
@@ -1157,9 +1162,10 @@ class FortiManager(object):
                         proposed_field = proposed_map[field]
                         existing_field = mapping.get(field)
                         if existing_field and isinstance(existing_field, list):
-                            diff = list(set(existing_field).difference(proposed_field))
+                            existing_field = set(existing_field)
+                            diff = existing_field.difference(proposed_field)
                             if diff != existing_field:
-                                updated_map[field] = diff
+                                updated_map[field] = list(diff)
                         elif existing_field and isinstance(existing_field, dict):
                             diff = dict(set(proposed_map.items()).difference(mapping.items()))
                             if diff != existing_field:
@@ -1562,11 +1568,13 @@ class FMAddress(FortiManager):
                 # check for lists that need to be replaced instead of appended.
                 if field in replace:
                     config[field] = proposed_field
-                elif isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
-                    config[field] = list(set(proposed_field).union(existing_field))
+                elif isinstance(existing_field, list):
+                    proposed_field = set(proposed_field)
+                    if not proposed_field.issubset(existing_field):
+                        config[field] = list(proposed_field.union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -1613,11 +1621,13 @@ class FMAddress(FortiManager):
                             # check for lists that need to be replaced instead of appended.
                             if field in replace:
                                 updated_map[field] = proposed_field
-                            elif isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
-                                updated_map[field] = list(set(proposed_field).union(existing_field))
+                            elif isinstance(existing_field, list):
+                                proposed_field = set(proposed_field)
+                                if not porposed_field.issubset(existing_field):
+                                    updated_map[field] = list(proposed_field.union(existing_field))
                             elif isinstance(existing_field, dict):
                                 updated_map[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                            elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
+                            elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
                                 updated_map[field] = proposed_field
                         elif field not in mapping:
                             updated_map[field] = proposed_field
@@ -1667,9 +1677,10 @@ class FMAddress(FortiManager):
             if field in ignore:
                 pass
             elif existing_field and isinstance(existing_field, list):
-                diff = list(set(existing_field).difference(proposed_field))
+                existing_field = set(existing_field)
+                diff = existing_field.difference(proposed_field)
                 if diff != existing_field:
-                    config[field] = diff
+                    config[field] = list(diff)
             elif existing_field and isinstance(existing_field, dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing_field:
@@ -1716,9 +1727,10 @@ class FMAddress(FortiManager):
                         if field in ignore:
                             pass
                         elif existing_field and isinstance(existing_field, list):
-                            diff = list(set(existing_field).difference(proposed_field))
+                            existing_field = set(existing_field)
+                            diff = existing_field.difference(proposed_field)
                             if diff != existing_field:
-                                updated_map[field] = diff
+                                updated_map[field] = list(diff)
                         elif existing_field and isinstance(existing_field, dict):
                             diff = dict(set(proposed_map.items()).difference(mapping.items()))
                             if diff != existing_field:

@@ -1,37 +1,34 @@
 ---
-
-- name: FORTIMANAGER FACTS UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER FACTS UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: GET BASIC FACTS
+    - name: "GET BASIC FACTS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
 
-    - name: GET FORTIGATE FACTS
+    - name: "GET FORTIGATE FACTS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates:
           - "lab1"
 
-    - name: GET ALL FORTIGATE FACTS
+    - name: "GET ALL FORTIGATE FACTS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates: "all"
 
-    - name: GET FORTIGATE FACTS and SOME CONFIGS
+    - name: "GET FORTIGATE FACTS and SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates:
           - name: "lab1"
             vdom: "root"
@@ -40,57 +37,57 @@
           - "policy"
           - "route"
 
-    - name: GET ALL FORTIGATE FACTS AND SOME CONFIGS
+    - name: "GET ALL FORTIGATE FACTS AND SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates: "all"
         config_filter:
           - "address"
           - "service"
 
-    - name: GET ALL FORTIGATE FACTS AND ALL CONFIGS
+    - name: "GET ALL FORTIGATE FACTS AND ALL CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates: "all"
         config_filter: "all"
 
-    - name: GET ALL FORTIMANAGER FACTS AND ALL CONFIGS
+    - name: "GET ALL FORTIMANAGER FACTS AND ALL CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adoms: "all"
         config_filter: "all"
 
-    - name: GET ALL FORTIMANAGER FACTS AND SOME CONFIGS
+    - name: "GET ALL FORTIMANAGER FACTS AND SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adoms: "all"
         config_filter:
           - "address"
           - "policy"
 
-    - name: GET SOME FORTIMANAGER FACTS (LIST) AND SOME CONFIGS
+    - name: "GET SOME FORTIMANAGER FACTS (LIST) AND SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adoms: "lab"
         config_filter:
           - "vip"
           - "policy"
 
-    - name: GET SOME FORTIMANAGER FACTS (DICT) AND SOME CONFIGS
+    - name: "GET SOME FORTIMANAGER FACTS (DICT) AND SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adoms:
           - name: "lab"
             package: "lab"
@@ -98,11 +95,11 @@
           - "ip_pool"
           - "policy"
 
-    - name: GET SOME FORTIGATE FACTS, SOME FORTIMANAGER FACTS, AND SOME CONFIGS
+    - name: "GET SOME FORTIGATE FACTS, SOME FORTIMANAGER FACTS, AND SOME CONFIGS"
       fortimgr_facts:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         fortigates:
           - name: "lab1"
             vdom: "root"
