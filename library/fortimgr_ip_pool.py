@@ -219,8 +219,13 @@ unlocked:
 '''
 
 import time
+
 import requests
-from ansible.module_utils.basic import AnsibleModule, env_fallback, return_values
+from ansible import __version__ as ansible_version
+if float(ansible_version[:3]) < 2.4:
+    raise ImportError("Ansible versions below 2.4 are not supported")
+from ansible.module_utils.basic import AnsibleModule, env_fallback
+
 
 requests.packages.urllib3.disable_warnings()
 
@@ -1512,7 +1517,7 @@ class FMPool(FortiManager):
 
 
 def main():
-    argument_spec = dict(
+    base_argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
         lock=dict(required=False, type="bool"),
@@ -1520,7 +1525,6 @@ def main():
         session_id=dict(required=False, type="str"),
         state=dict(choices=["absent", "param_absent", "present"], type="str"),
         port=dict(required=False, type="int"),
-        provider=dict(required=False, type="dict"),
         use_ssl=dict(required=False, type="bool"),
         username=dict(fallback=(env_fallback, ["ANSIBLE_NET_USERNAME"])),
         validate_certs=dict(required=False, type="bool"),
@@ -1536,15 +1540,11 @@ def main():
         type=dict(choices=["overload", "one-to-one", "fixed-port-range", "port-block-allocation"],
                   required=False, type="str")
     )
+    argument_spec = base_argument_spec
+    argument_spec["provider"] = dict(required=False, type="dict", options=base_argument_spec)
 
     module = AnsibleModule(argument_spec, supports_check_mode=True)
     provider = module.params["provider"] or {}
-
-    # prevent secret params in provider from logging
-    no_log = ["password"]
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
 
     # allow local params to override provider
     for param, pvalue in provider.items():
@@ -1636,3 +1636,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

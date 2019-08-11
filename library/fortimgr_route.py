@@ -230,8 +230,13 @@ unlocked:
 '''
 
 import time
+
 import requests
-from ansible.module_utils.basic import AnsibleModule, env_fallback, return_values
+from ansible import __version__ as ansible_version
+if float(ansible_version[:3]) < 2.4:
+    raise ImportError("Ansible versions below 2.4 are not supported")
+from ansible.module_utils.basic import AnsibleModule, env_fallback
+
 
 requests.packages.urllib3.disable_warnings()
 
@@ -1735,13 +1740,12 @@ class FMRoute(FortiManager):
 
 
 def main():
-    argument_spec = dict(
+    base_argument_spec = dict(
         adom=dict(required=False, type="str"),
         host=dict(required=False, type="str"),
         lock=dict(required=False, type="bool"),
         password=dict(fallback=(env_fallback, ["ANSIBLE_NET_PASSWORD"]), no_log=True),
         port=dict(required=False, type="int"),
-        provider=dict(required=False, type="dict"),
         session_id=dict(required=False, type="str"),
         state=dict(choices=["absent", "present"], type="str"),
         use_ssl=dict(required=False, type="bool"),
@@ -1761,17 +1765,13 @@ def main():
         vdom=dict(required=False, type="str"),
         weight=dict(required=False, type="int")
     )
+    argument_spec = base_argument_spec
+    argument_spec["provider"] = dict(required=False, type="dict", options=base_argument_spec)
 
     module = AnsibleModule(argument_spec, supports_check_mode=True,
                            required_together=[["destination_network", "destination_netmask"]],
                            mutually_exclusive=[["destination", "destination_network"]])
     provider = module.params["provider"] or {}
-
-    # prevent secret params in provider from logging
-    no_log = ["password"]
-    for param in no_log:
-        if provider.get(param):
-            module.no_log_values.update(return_values(provider[param]))
 
     # allow local params to override provider
     for param, pvalue in provider.items():
@@ -1910,3 +1910,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
