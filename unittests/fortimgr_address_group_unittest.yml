@@ -1,23 +1,21 @@
 ---
-
-- name: CREATE FORTIMANAGER ADDRESSES FOR UNIT TESTS
-  hosts: fortimanager
-  connection: local
+- name: "CREATE FORTIMANAGER ADDRESSES FOR UNIT TESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS OBJECTS - CHANGE
+    - name: "CREATE ADDRESS OBJECTS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "{{ item }}"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
           - "255.255.255.255"
-      with_items:
+      register: "fmg_response"
+      loop:
         - "addr1"
         - "addr2"
         - "addr3"
@@ -26,17 +24,16 @@
         - "addr6"
         - "10.1.1.1/32 addr7"
 
-- name: FORTIMANAGER ADDRESS GROUP UNITTESTS
-  hosts: fortimanager
-  connection: local
+
+- name: "FORTIMANAGER ADDRESS GROUP UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS GROUP - CHANGE
+    - name: "CREATE ADDRESS GROUP - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         allow_routing: "enable"
@@ -45,12 +42,16 @@
           - "addr2"
         comment: "addrgroup unit test"
         color: 3
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS GROUP AGAIN - NO CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         allow_routing: "enable"
@@ -59,13 +60,17 @@
           - "addr2"
         comment: "addrgroup unit test"
         color: "3"
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_group_name: "addrgrp1"
           allow_routing: "enable"
@@ -73,11 +78,15 @@
           comment: "addrgroup unit test"
           color: "3"
 
-    - name: CREATE ADDRESS GROUP WITH PROVIDER - NO CHANGE
+    - name: "CREATE ADDRESS GROUP WITH PROVIDER - NO CHANGE"
       fortimgr_address_group:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS GROUP OVERRIDE PROVIDER - CHANGE"
       fortimgr_address_group:
         provider: "{{ provider }}"
         address_group_name: "provider_addrgrp1"
@@ -86,113 +95,153 @@
           - "addr3"
         comment: "addrgroup unit test"
         color: 4
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS GROUP ROUTING - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS GROUP ROUTING - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         allow_routing: "disable"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr3"
           - "addr4"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS GROUP ADD MEMBERS W/O EXISTING AGAIN - NO CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr3"
           - "addr4"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS GROUP DELETE SOME MEMBERS - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS GROUP DELETE SOME MEMBERS - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr2"
           - "addr3"
         state: "param_absent"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS GROUP DELETE SOME MEMBERS AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS GROUP DELETE SOME MEMBERS AGAIN - NO CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr2"
           - "addr3"
         state: "param_absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS GROUP - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE ADDRESS GROUP - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr2"
           - "addr3"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS GROUP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS GROUP AGAIN - NO CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp1"
         members:
           - "addr2"
           - "addr3"
         state: "absent"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP NO ADOM - FAIL
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS GROUP NO ADOM - FAIL"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         address_group_name: "addrgrp2"
         members:
           - "addr2"
           - "addr3"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP NO NAME - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS GROUP NO NAME - FAIL"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         members:
           - "addr2"
           - "addr3"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP SLASH IN NAME- CHANGE
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS GROUP SLASH IN NAME- CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp4/slash"
         allow_routing: "enable"
@@ -201,12 +250,16 @@
           - "10.1.1.1/32 addr7"
         comment: "addrgroup unit test"
         color: 3
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS GROUP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS GROUP AGAIN - NO CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "addrgrp4/slash"
         allow_routing: "enable"
@@ -215,23 +268,25 @@
           - "10.1.1.1/32 addr7"
         comment: "addrgroup unit test"
         color: "3"
+      register: "fmg_results"
 
-- name: CLEANUP FORTIMANAGER ADDRESS GROUPS FOR UNIT TESTES
-  hosts: fortimanager
-  connection: local
+    - assert:
+        that: "not fmg_results['changed']"
+
+- name: "CLEANUP FORTIMANAGER ADDRESS GROUPS FOR UNIT TESTES"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP ADDRESS GROUPS - CHANGE
+    - name: "CLEANUP ADDRESS GROUPS - CHANGE"
       fortimgr_address_group:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_group_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "addrgrp1"
         - "addrgrp2"
         - "addrgrp3"
@@ -239,22 +294,20 @@
         - "provider_addrgrp1"
 
 
-- name: CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER ADDRESSES FOR UNIT TESTES"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+    - name: "CLEANUP ADDRESS OBJECTS - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "addr1"
         - "addr2"
         - "addr3"
@@ -262,3 +315,4 @@
         - "addr5"
         - "addr6"
         - "10.1.1.1/32 addr7"
+

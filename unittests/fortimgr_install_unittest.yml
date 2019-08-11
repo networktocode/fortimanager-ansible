@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER GENERATE INSTALL DATA
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER GENERATE INSTALL DATA"
+  hosts: "fortimanager"
   gather_facts: false
-
   tasks:
-    - name: CREATE ADDRESS IPMASK - CHANGE
+    - name: "CREATE ADDRESS IPMASK - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         address_type: "ipmask"
@@ -19,11 +16,11 @@
           - "255.255.255.255"
         comment: "ipmask unit test"
 
-    - name: CREATE POLICY THAT USES ADDRESS - CHANGE
+    - name: "CREATE POLICY THAT USES ADDRESS - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         package: "lab"
         action: "accept"
@@ -41,17 +38,15 @@
         source_intfc:
           - "any"
 
-- name: FORTIMANAGER POLICY INSTALL UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER POLICY INSTALL UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: PREVIEW POLICY PACKAGE - CHANGE
+    - name: "PREVIEW POLICY PACKAGE - CHANGE"
       fortimgr_install:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         state: "preview"
         dst_file:
@@ -60,11 +55,11 @@
         vdom: "root"
       ignore_errors: true
 
-    - name: INSTAL POLICY PACKAGE - CHANGE
+    - name: "INSTAL POLICY PACKAGE - CHANGE"
       fortimgr_install:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         state: "preview"
         adom_revision_comments: "Install Unit Test"
@@ -80,28 +75,27 @@
       ignore_errors: true
 
 
-- name: FORTIMANAGER CLEANUP INSTALL DATA
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER CLEANUP INSTALL DATA"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP POLICY THAT USES ADDRESS - CHANGE
+    - name: "CLEANUP POLICY THAT USES ADDRESS - CHANGE"
       fortimgr_policy:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         package: "lab"
         policy_name: "InstallTest"
         state: "absent"
 
-    - name: CLEANUP ADDRESS IPMASK - CHANGE
+    - name: "CLEANUP ADDRESS IPMASK - CHANGE"
       fortimgr_address:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         state: "absent"
+

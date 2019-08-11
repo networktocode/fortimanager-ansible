@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER ADDRESS UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER ADDRESS UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE ADDRESS IPMASK LIST NOTATION - CHANGE
+    - name: "CREATE ADDRESS IPMASK LIST NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         address_type: "ipmask"
@@ -22,12 +19,16 @@
           - "255.255.255.255"
         port: "443"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK LIST NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK LIST NOTATION AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         address_type: "ipmask"
@@ -38,13 +39,17 @@
           - "10.1.1.1"
           - "255.255.255.255"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr1"
           address_type: "ipmask"
@@ -53,12 +58,16 @@
           color: "1"
           subnet: "10.1.1.1/32"
           comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK LIST NOTATION WITH PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK LIST NOTATION WITH PROVIDER - NO CHANGE"
       fortimgr_address:
         provider: "{{ provider }}"
 
-    - name: CREATE ADDRESS IPMASK LIST NOTATION OVERRIDE PROVIDER - CHANGE
+    - name: "CREATE ADDRESS IPMASK LIST NOTATION OVERRIDE PROVIDER - CHANGE"
       fortimgr_address:
         provider: "{{ provider }}"
         address_name: "provider_addr1"
@@ -68,12 +77,16 @@
         color: 2
         subnet: "10.1.2.0/27"
         comment: "provider ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK CIDR NOTATION - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK CIDR NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr2"
         address_type: "ipmask"
@@ -82,12 +95,16 @@
         color: 1
         subnet: "10.1.2.1/32"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK CIDR NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK CIDR NOTATION AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr2"
         address_type: "ipmask"
@@ -96,12 +113,16 @@
         color: 1
         subnet: "10.1.2.1/32"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK CIDR NOTATION BAD MASK - FAIL
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK CIDR NOTATION BAD MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr3"
         address_type: "ipmask"
@@ -111,12 +132,16 @@
         subnet: "10.1.2.1/33"
         comment: "ipmask unit test"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK HOST NOTATION - CHANGE
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK HOST NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr4"
         address_type: "ipmask"
@@ -125,12 +150,16 @@
         color: 1
         subnet: "10.2.2.1"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK HOST NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK HOST NOTATION AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr4"
         address_type: "ipmask"
@@ -139,12 +168,16 @@
         color: 1
         subnet: "10.2.2.1"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NET AND MASK NOTATION - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK NET AND MASK NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr5"
         address_type: "ipmask"
@@ -154,12 +187,16 @@
         network_address: "10.1.3.1"
         network_mask: "255.255.255.255"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NET AND MASK NOTATION AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK NET AND MASK NOTATION AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr5"
         address_type: "ipmask"
@@ -169,12 +206,16 @@
         network_address: "10.1.3.1"
         network_mask: "255.255.255.255"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS RANGE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS RANGE - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr6"
         address_type: "iprange"
@@ -184,12 +225,16 @@
         start_ip: "10.1.1.3"
         end_ip: "10.1.1.7"
         comment: "iprange unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS RANGE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS RANGE AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr6"
         address_type: "iprange"
@@ -199,12 +244,16 @@
         start_ip: "10.1.1.3"
         end_ip: "10.1.1.7"
         comment: "iprange unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD LIST NOTATION - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD LIST NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
@@ -215,12 +264,16 @@
           - "10.0.0.0"
           - "0.255.0.255"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD AGAIN LIST NOTATION - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD AGAIN LIST NOTATION - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
@@ -231,12 +284,16 @@
           - "10.0.0.0"
           - "0.255.0.255"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD CIDR NOTATION - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD CIDR NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr8"
         address_type: "wildcard"
@@ -245,12 +302,16 @@
         color: 3
         wildcard: "10.0.0.0/8"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD AGAIN CIDR NOTATION - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD AGAIN CIDR NOTATION - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr8"
         address_type: "wildcard"
@@ -259,12 +320,16 @@
         color: 3
         wildcard: "10.0.0.0/8"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS WILDCARD CIDR NOTATION BAD MASK - FAIL
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS WILDCARD CIDR NOTATION BAD MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr8"
         address_type: "wildcard"
@@ -274,12 +339,16 @@
         wildcard: "10.0.0.0/33"
         comment: "wildcard unit test"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD AND MASK NOTATION - CHANGE
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD AND MASK NOTATION - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr9"
         address_type: "wildcard"
@@ -289,12 +358,16 @@
         wildcard_address: "10.0.0.0"
         wildcard_mask: "0.255.255.255"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD AGAIN WILDCARD AND MASK NOTATION - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD AGAIN WILDCARD AND MASK NOTATION - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr9"
         address_type: "wildcard"
@@ -304,12 +377,16 @@
         wildcard_address: "10.0.0.0"
         wildcard_mask: "0.255.255.255"
         comment: "wildcard unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS FQDN - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS FQDN - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr10"
         address_type: "fqdn"
@@ -318,12 +395,16 @@
         color: 4
         fqdn: "www.lab.com"
         comment: "fqdn unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS FQDN AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS FQDN AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr10"
         address_type: "fqdn"
@@ -332,12 +413,16 @@
         color: 4
         fqdn: "www.lab.com"
         comment: "fqdn unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD FQDN - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD FQDN - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr11"
         address_type: "wildcard-fqdn"
@@ -346,12 +431,16 @@
         color: 5
         wildcard_fqdn: "*lab.com"
         comment: "wildcard fqdn unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD FQDN AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS WILDCARD FQDN AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr11"
         address_type: "wildcard-fqdn"
@@ -360,71 +449,99 @@
         color: 5
         wildcard_fqdn: "*lab.com"
         comment: "wildcard fqdn unit test"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS PORT - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS PORT - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         associated_intfc: "port2"
         comment: "wildcard fqdn unit test"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS TYPE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS TYPE - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         address_type: "iprange"
         start_ip: "10.2.2.3"
         end_ip: "10.2.2.5"
         comment: "ipmask is now an iprange"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS RANGE - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS RANGE - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr6"
         start_ip: "10.1.1.4"
         end_ip: "10.1.1.9"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS IPMASK1 - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS IPMASK1 - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS IPMASK1 AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS IPMASK1 AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS RANGE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE ADDRESS RANGE - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr6"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS WILDCARD WITH CONFIG PARAMS - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS WILDCARD WITH CONFIG PARAMS - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
@@ -436,196 +553,264 @@
           - "0.0.255.255"
         comment: "wildcard unit test"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS FQDN - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS FQDN - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr10"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS WILDCARD FQDN - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS WILDCARD FQDN - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr11"
         state: "absent"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NO ADOM - FAIL
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK NO ADOM - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         address_name: "addr7"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
           - "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NO NAME - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NO NAME - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_type: "ipmask"
         subnet:
           - "10.1.1.1"
           - "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "ipmask"
         subnet: "10.1.1.1/32"
         network_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK SUBNET AND NETWORK_MASK PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "ipmask"
           subnet: "10.1.1.1/32"
           network_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
         wildcard: "10.1.1.1/32"
         wildcard_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD AND WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "wildcard"
           wildcard: "10.1.1.1/32"
           wildcard_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "ipmask"
         network_address: "10.1.1.1"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_ADDRESS W/O NETWORK_MASK PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "ipmask"
           network_address: "10.1.1.1"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "ipmask"
         network_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK NETWORK_MASK W/O NETWORK_ADDRESS PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "ipmask"
           network_mask: "255.255.255.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
         wildcard_address: "10.1.1.1"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "wildcard"
           wildcard_address: "10.1.1.1"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK - FAIL"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "addr7"
         address_type: "wildcard"
         wildcard_mask: "255.255.0.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS WILDCARD WILDCARD_ADDRESS W/O WILDCARD_MASK PROVIDER - FAIL"
       fortimgr_address:
         provider:
           host: "{{ ansible_host }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           address_name: "addr7"
           address_type: "wildcard"
           wildcard_mask: "255.255.0.255"
       ignore_errors: true
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+    - assert:
+        that: "fmg_results['failed']"
+
+    - name: "CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "10.1.2.2/32 addr12"
         address_type: "ipmask"
@@ -634,12 +819,16 @@
         color: 1
         subnet: "10.1.2.2/32"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME AGAIN - NO CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "10.1.2.2/32 addr12"
         address_type: "ipmask"
@@ -648,12 +837,16 @@
         color: 1
         subnet: "10.1.2.2/32"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: MODIFY ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "MODIFY ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "10.1.2.2/32 addr12"
         address_type: "ipmask"
@@ -662,32 +855,38 @@
         color: 1
         subnet: "10.1.2.2/32"
         comment: "ipmask unit test"
+      register: "fmg_results"
 
-    - name: DELETE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ADDRESS IPMASK CIDR NOTATION WITH SLASH IN NAME - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "10.1.2.2/32 addr12"
         state: "absent"
+      register: "fmg_results"
 
-- name: CLEANUP FORTIMANAGER ADDRESSES
-  hosts: fortimanager
-  connection: local
+    - assert:
+        that: "fmg_results['changed']"
+
+- name: "CLEANUP FORTIMANAGER ADDRESSES"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP ADDRESS OBJECTS - CHANGE
+    - name: "CLEANUP ADDRESS OBJECTS - CHANGE"
       fortimgr_address:
         host: "{{ ansible_host }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         address_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "addr1"
         - "addr2"
         - "addr3"
@@ -701,3 +900,4 @@
         - "addr11"
         - "10.1.2.2/32 addr12"
         - "provider_addr1"
+

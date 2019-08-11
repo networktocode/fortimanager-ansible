@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER VIP UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER VIP UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE VIP MAP - CHANGE
+    - name: "CREATE VIP MAP - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -24,19 +21,24 @@
         external_intfc: "port1"
         comment: "vip group unit test"
         color: 6
-      with_items:
+      loop:
         - fg: "lab1"
           ext: "100.1.1.1"
           map: "10.1.1.1"
         - fg: "lab2"
           ext: "100.1.20.1"
           map: "10.1.20.1"
+      register: "fmg_results"
 
-    - name: CREATE VIP MAP AGAIN - NO CHANGE
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "CREATE VIP MAP AGAIN - NO CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item.fg }}"
         vdom: "root"
@@ -50,20 +52,25 @@
         external_intfc: "port1"
         comment: "vip group unit test"
         color: 6
-      with_items:
+      loop:
         - fg: "lab1"
           ext: "100.1.1.1"
           map: "10.1.1.1"
         - fg: "lab2"
           ext: "100.1.20.1"
           map: "10.1.20.1" 
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not item['changed']"
+      loop: "{{ fmg_results['results'] }}"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           fortigate: "lab1"
           vdom: "root"
@@ -76,11 +83,15 @@
           comment: "vip group unit test"
           color: 12
 
-    - name: CREATE VIP MAP WITH PROVIDER - NO CHANGE
+    - name: "CREATE VIP MAP WITH PROVIDER - CHANGE"
       fortimgr_vip_map:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE VIP MAP OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE VIP MAP OVERRIDE PROVIDER - CHANGE"
       fortimgr_vip_map:
         provider: "{{ provider }}"
         fortigate: "lab2"
@@ -91,12 +102,16 @@
         mapped_ip: "10.1.21.1"
         external_intfc: "port2"
         comment: "vip group unit test provider" 
-    
-    - name: MODIFY VIP MAP CHANGE EXTERNAL IP AND ARP REPLY - CHANGE
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY VIP MAP CHANGE EXTERNAL IP AND ARP REPLY - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab1"
         vdom: "root"
@@ -106,34 +121,46 @@
         external_ip:
           - "100.1.1.2"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: DELETE VIP MAP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE VIP MAP - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
         vip_name: "vip1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE VIP MAP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE VIP MAP AGAIN - NO CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
         vip_name: "vip1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: CREATE VIP MAP - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE VIP MAP - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "lab2"
         vdom: "root"
@@ -146,37 +173,44 @@
           - "10.1.20.1"
         external_intfc: "port1"
         comment: "vip group unit test"
+      register: "fmg_results"
 
-    - name: DELETE ALL VIP MAPS - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE ALL VIP MAPS - CHANGE"
       fortimgr_vip_map:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         fortigate: "{{ item }}"
         vdom: "root"
         vip_name: "vip1"
         state: "absent"
-      with_items:
+      loop:
         - "lab1"
         - "lab2"
+      register: "fmg_results"
+
+    - assert:
+        that: "item['changed']"
+      loop: "{{ fmg_results['results'] }}"
 
 
-- name: CLEANUP FORTIMANAGER VIPS
-  hosts: fortimanager
-  connection: local
+- name: "CLEANUP FORTIMANAGER VIPS"
+  hosts: "fortimanager"
   gather_facts: false
-  tags: cleanup
-  
+  tags: "cleanup"
   tasks:
-    - name: CLEANUP VIPS - CHANGE
+    - name: "CLEANUP VIPS - CHANGE"
       fortimgr_vip:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         vip_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "vip1"
         - "provider_vip1"

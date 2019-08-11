@@ -1,16 +1,13 @@
 ---
-
-- name: FORTIMANAGER SERVICE UNITTESTS
-  hosts: fortimanager
-  connection: local
+- name: "FORTIMANAGER SERVICE UNITTESTS"
+  hosts: "fortimanager"
   gather_facts: false
-  
   tasks:
-    - name: CREATE SERVICE TCP - CHANGE
+    - name: "CREATE SERVICE TCP - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         protocol: "TCP"
@@ -19,12 +16,16 @@
           - "443"
         comment: "service unit test"
         color: "18"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE TCP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE TCP AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         protocol: "TCP"
@@ -33,25 +34,37 @@
           - "443"
         comment: "service unit test"
         color: 18
+      register: "fmg_results"
 
-    - name: SET PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "SET PROVIDER - NO CHANGE"
       set_fact:
         provider:
-          host: "{{ inventory_hostname }}"
-          username: "{{ username }}"
-          password: "{{ password }}"
+          host: "{{ ansible_host }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
           adom: "lab"
           service_name: "svc1"
           protocol: "TCP"
           port_range: 80
           comment: "service unit test"
           color: 18
+      register: "fmg_results"
 
-    - name: CREATE SERVICE TCP WITH PROVIDER - NO CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE SERVICE TCP WITH PROVIDER - NO CHANGE"
       fortimgr_service:
         provider: "{{ provider }}"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE TCP OVERRIDE PROVIDER - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE SERVICE TCP OVERRIDE PROVIDER - CHANGE"
       fortimgr_service:
         provider: "{{ provider }}"
         service_name: "provider_svc1"
@@ -61,24 +74,32 @@
           - "443"
         comment: "provider service unit test"
         color: "20"
+      register: "fmg_results"
 
-    - name: MODIFY SERVICE TCP ADD PORT - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY SERVICE TCP ADD PORT - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         protocol: "tcp"
         port_range:
           - "8443"
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: MODIFY SERVICE TCP DELETE PORT - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY SERVICE TCP DELETE PORT - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         protocol: "TCP"
@@ -86,156 +107,208 @@
           - "80"
         comment: "service unit test"
         state: "param_absent"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE UDP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE UDP - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc2"
         protocol: "UDP"
         port_range:
           - "161"
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE UDP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE UDP AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc2"
         protocol: "UDP"
         port_range:
           - "161"
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE ICMP - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE SERVICE ICMP - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc3"
         protocol: "ICMP"
         icmp_code: 1
         icmp_type: 1
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE ICMP AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE ICMP AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc3"
         protocol: "ICMP"
         icmp_code: 1
         icmp_type: 1
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE ICMP TYPE 0 CODE 0 - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "CREATE SERVICE ICMP TYPE 0 CODE 0 - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc4"
         protocol: "ICMP"
         icmp_type: 0
         icmp_code: 0
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE ICMP TYPE 0 CODE 0 AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE ICMP TYPE 0 CODE 0 AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc4"
         protocol: "ICMP"
         icmp_type: 0
         icmp_code: 0
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: MODIFY SERVICE ICMP TYPE 0 TO 4 CODE 0 TO 4 - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "MODIFY SERVICE ICMP TYPE 0 TO 4 CODE 0 TO 4 - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc4"
         protocol: "ICMP"
         icmp_type: 4
         icmp_code: 4
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: MODIFY SERVICE ICMP TYPE 4 TO 0 CODE 4 TO 0 - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "MODIFY SERVICE ICMP TYPE 4 TO 0 CODE 4 TO 0 - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc4"
         protocol: "ICMP"
         icmp_type: 0
         icmp_code: 0
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: CREATE SERVICE IP - CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "CREATE SERVICE IP - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc5"
         protocol: "IP"
         protocol_number: 51
         comment: "service unit test"
 
-    - name: CREATE SERVICE IP AGAIN - NO CHANGE
+    - name: "CREATE SERVICE IP AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc5"
         protocol: "IP"
         protocol_number: 51
         comment: "service unit test"
+      register: "fmg_results"
 
-    - name: DELETE SERVICE - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE SERVICE - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE SERVICE AGAIN - NO CHANGE
+    - assert:
+        that: "fmg_results['changed']"
+
+    - name: "DELETE SERVICE AGAIN - NO CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "svc1"
         state: "absent"
+      register: "fmg_results"
 
-    - name: DELETE SERVICES - CHANGE
+    - assert:
+        that: "not fmg_results['changed']"
+
+    - name: "DELETE SERVICES - CHANGE"
       fortimgr_service:
-        host: "{{ inventory_hostname }}"
-        username: "{{ username }}"
-        password: "{{ password }}"
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
         adom: "lab"
         service_name: "{{ item }}"
         state: "absent"
-      with_items:
+      loop:
         - "svc1"
         - "svc2"
         - "svc3"
         - "svc4"
         - "svc5"
         - "provider_svc1"
-      tags: cleanup
+      tags: "cleanup"
+      register: "fmg_results"
+
+    - assert:
+        that: "fmg_results['changed']"
