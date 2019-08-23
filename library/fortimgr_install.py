@@ -122,8 +122,17 @@ options:
   fortigate_name:
     description:
       - The name of FortiGate in consideration for package install.
-    required: True
+      - This is required if fortigate_vdom_pairs is not provided.
+      - This and fortigate_vdom_pairs are mutually exclusive.
+    required: False
     type: str
+  fortigate_vdom_pairs:
+    description:
+      - The list of the fortigate and vdom names that should have packages installed.
+      - This is required if fortigate_name is not provided.
+      - This and fortigate_name are mutualy exclusive.
+    required: False
+    type: list
   fortigate_revision_comments:
     description:
       - Comments to add to the FortiGate revision.
@@ -175,21 +184,74 @@ EXAMPLES = '''
     install_flags: "generate_rev"
     package: "lab"
     vdom: "lab"
+- name: Install Multiple FortiGates
+  fortimgr_install:
+    host: "{{ ansible_host }}"
+    username: "{{ ansible_user }}"
+    password: "{{ ansible_password }}"
+    state: "present"
+    adom: "lab"
+    adom_revision_comments: "Update Policy for Lab"
+    adom_revision_name: "Lab_Update_20"
+    check_install: True
+    fortigate_vdom_pairs:
+      - name: "devfw01"
+        vdom: "b2b"
+      - name: "devfw02"
+        vdom: "b2b"
+    fortigate_revision_comments: "Update Lab Policy"
+    install_flags: "generate_rev"
+    package: "lab"
+    vdom: "lab"
 '''
 
 RETURN = '''
 install:
-    description: The json results from install request.
-    returned: Always
-    type: dict
-    sample: {"id": 4, "result": [{"data": {"message": "next\nend\nconfig firewall address\nedit \"newer_iprange\"\nset
-             uuid 0ce2d578-48af-51e7-3247-9fff5f6f32ee\nset type iprange\nset comment \"create new_obj\"\nset start-ip
-             10.10.10.31\nset end-ip 10.10.10.35\nnext\nend\nconfig endpoint-control profile\nedit \"default\"\nconfig
-             forticlient-winmac-settings\nset forticlient-wf-profile \"default\"\nend\nnext\nend\nconfig firewall policy
-             \nedit 2\nset name \"v\"\nset uuid 88957e6c-48b1-51e7-6531-42a5e4339bd1\nset srcintf \"any\"\nset dstintf
-             \"any\"\nset srcaddr \"all\"\nset dstaddr \"newer_iprange\"\nset schedule \"always\"\nset service \"ALL\"\n
-             set logtraffic all\nnext\nend\n"}, "status": {"code": 0, "message": "OK"},
-             "url": "/securityconsole/preview/result"}]}
+  description: The json results from install request.
+  returned: Always
+  type: dict
+  sample: 
+    id: 4,
+    result:
+      - data:
+        message": |
+          next
+          end
+          config firewall address
+          edit "newer_iprange"
+          set uuid 0ce2d578-48af-51e7-3247-9fff5f6f32ee
+          set type iprange
+          set comment "create new_obj"
+          set start-ip
+          10.10.10.31
+          set end-ip 10.10.10.35
+          next
+          end
+          config endpoint-control profile
+          edit "default"
+          config forticlient-winmac-settings
+          set forticlient-wf-profile "default"
+          end
+          next
+          end
+          config firewall policy
+          
+          edit 2
+          set name "v"
+          set uuid 88957e6c-48b1-51e7-6531-42a5e4339bd1
+          set srcintf "any"
+          set dstintf "any"
+          set srcaddr "all"
+          set dstaddr "newer_iprange"
+          set schedule "always"
+          set service "ALL"
+          set logtraffic all
+          next
+          end
+        status:
+          code: 0
+          message: "OK"
+        url: "/securityconsole/preview/result"
 '''
 
 import time
@@ -263,7 +325,6 @@ class FortiManager(object):
         """
         This method is used to submit a configuration request to the FortiManager. Only the object configuration details
         need to be provided; all other parameters that make up the API request body will be handled by the method.
-
         :param new_config: Type list.
                            The "data" portion of the configuration to be submitted to the FortiManager.
         :return: The response from the API request to add the configuration.
@@ -396,7 +457,6 @@ class FortiManager(object):
         This function is used to determine the appropriate configuration to remove from the FortiManager when the
         "state" parameter is set to "absent" and to collect the dictionary data that will be returned by the Ansible
         Module.
-
         :param module: The AnsibleModule instance.
         :param proposed: The proposed config to send to the FortiManager.
         :param existing: The existing configuration for the item on the FortiManager (using the "name" key to get item).
@@ -424,7 +484,6 @@ class FortiManager(object):
         name is provided as input into the Ansible Module. The config_lock is used to lock the configuration if the lock
         param is set to True. The config_response method is used to handle the logic from the response to delete the
         object.
-
         :param module: The Ansible Module instance started by the task.
         :param name: Type str.
                      The name of the object to be removed from the FortiManager.
@@ -446,7 +505,6 @@ class FortiManager(object):
         """
         This method is used to handle the logic for Ansible modules for locking the ADOM when "lock" is set to True. The
         lock method is used to make the request to the FortiManager.
-
         :param module: The Ansible Module instance started by the task.
         :param msg: Type str.
                     A message for the module to return upon failure.
@@ -466,7 +524,6 @@ class FortiManager(object):
         not currently an object of the same type with the same name. The config_lock is used to lock the configuration
         if the lock param is set to True. The config_response method is used to handle the logic from the response to
         create the object.
-
         :param module: The Ansible Module instance started by the task.
         :param new_config: Type dict.
                            The config dictionary with the objects configuration to send to the FortiManager API. This
@@ -490,7 +547,6 @@ class FortiManager(object):
         This function is used to determine the appropriate configuration to remove from the FortiManager when the
         "state" parameter is set to "param_absent" and to collect the dictionary data that will be returned by the
         Ansible Module.
-
         :param module: The AnsibleModule instance.
         :param proposed: The proposed config to send to the FortiManager.
         :param existing: The existing configuration for the item on the FortiManager (using the "name" key to get item).
@@ -517,7 +573,6 @@ class FortiManager(object):
         This function is used to determine the appropriate configuration to send to the FortiManager API when the
         "state" parameter is set to "present" and to collect the dictionary data that will be returned by the Ansible
         Module.
-
         :param module: The AnsibleModule instance.
         :param proposed: The proposed config to send to the FortiManager.
         :param existing: The existing configuration for the item on the FortiManager (using the "name" key to get item).
@@ -549,7 +604,6 @@ class FortiManager(object):
         save the configuration and unlock the ADOM session. If the lock parameter is set to true and the config was
         unsuccessful, the config_unlock method is used to attempt to unlock the ADOM session before failing. If the lock
         parameter is set to False and the configuration is unsuccessful, the module will fail with the json response.
-
         :param module: The Ansible Module instance started by the task.
         :param json_response: Type dict.
                               The json response from the requests module's configuration request.
@@ -575,7 +629,6 @@ class FortiManager(object):
         This method is used to handle the logic for Ansible modules for saving a config when "lock" is set to True. The
         save method is used to make the request to the FortiManager. If the save is unsuccessful, the module will use
         the config_unlock method to attempt to unlock before failing.
-
         :param module: The Ansible Module instance started by the task.
         :param msg: Type str.
                     A message for the module to return upon failure.
@@ -595,7 +648,6 @@ class FortiManager(object):
         This method is used to handle the logic for Ansible modules for locking the ADOM when "lock" is set to True. The
         config_lock is used to lock the configuration if the lock param is set to True. The unlock method is used to
         make the request to the FortiManager.
-
         :param module: The Ansible Module instance started by the task.
         :param msg: Type str.
                     A message for the module to return upon failure.
@@ -616,7 +668,6 @@ class FortiManager(object):
         This method is used to handle the logic for Ansible modules when the "state" is set to "present" and their is
         not currently an object of the same type with the same name. The config_response method is used to handle the
         logic from the response to update the object.
-
         :param module: The Ansible Module instance started by the task.
         :param update_config: Type dict.
                               The config dictionary with the objects configuration to send to the FortiManager API. Only
@@ -640,7 +691,6 @@ class FortiManager(object):
         """
         This method is used to create an ADOM revision on the FortiManager. The make_request method is used to make the
         API request to add the revision.
-
         :param proposed: Type list.
                          The data portion of the API Request.
         :return: The json response data from the request to make a revision.
@@ -654,7 +704,6 @@ class FortiManager(object):
     def delete_config(self, name):
         """
         This method is used to submit a configuration request to delete an object from the FortiManager.
-
         :param name: Type str.
                      The name of the object to be removed from the FortiManager.
         :return: The response from the API request to delete the configuration.
@@ -669,7 +718,6 @@ class FortiManager(object):
         """
         This method is used to delete an ADOM revision from the FortiManager. The make_request method is used to submit
         the request to the FortiManager.
-
         :param version: Type str.
                         The version number corresponding to the revision to delete.
         :return: The json response data from the request to delete the revision.
@@ -684,7 +732,6 @@ class FortiManager(object):
         """
         This method is used to get all adoms currently configured on the FortiManager. A list of fields can be passed
         in to limit the scope of what data is returned for the ADOM.
-
         :param adom: Type str.
                      The name of the ADOM to retrieve the configuration for.
         :param fields: Type list.
@@ -702,7 +749,6 @@ class FortiManager(object):
         """
         This method is used to get all adoms currently configured on the FortiManager. A list of fields can be passed
         in to limit the scope of what data is returned per ADOM.
-
         :param fields: Type list.
                        A list of fields to retrieve for each ADOM.
         :return: The json response from the request to retrieve the configured ADOMs. An empty list is returned if the
@@ -716,7 +762,6 @@ class FortiManager(object):
     def get_all(self):
         """
         This method is used to get all objects currently configured on the FortiManager for the ADOM and API Endpoint.
-
         :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
                  not return any data.
         """
@@ -728,7 +773,6 @@ class FortiManager(object):
     def get_all_custom(self, url):
         """
         This method is used to get all objects currently configured for the specified URL.
-
         :param url: Type str.
                     The URL of the endpoint to retrieve configurations from.
         :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
@@ -743,7 +787,6 @@ class FortiManager(object):
         """
         This method is used to get all objects currently configured on the FortiManager for the ADOM and API Endpoint.
         The configuration fields retrieved are limited to the list defined in the fields variable.
-
         :param fields: Type list.
                        The list of fields to return for each object.
         :return: The list of configuration dictionaries for each object. An empty list is returned if the request does
@@ -758,7 +801,6 @@ class FortiManager(object):
     def get_all_packages(self, adom):
         """
         This method is used to get all packages associated with an ADOM.
-
         :param adom: Type str.
                      The ADOM from which to retrieve packages.
         :return: A list of package names associated with the ADOM. If the ADOM is not found or does not have any
@@ -778,7 +820,6 @@ class FortiManager(object):
     def get_device_config(self, device, vdom, config_url, fields=[]):
         """
         This method is used to retrieve the configurations from the managed device.
-
         :param device: Type str.
                        The device to retrieve the configuration from.
         :param vdom: Type str.
@@ -803,7 +844,6 @@ class FortiManager(object):
         """
         This method is used to retrieve information about a managed device from FortiManager. A list of fields can be
         passed int o limit the scope of what data is returned for the device.
-
         :param device: Type str.
                        The name of the device to retrieve information for.
         :param fields: Type list.
@@ -820,7 +860,6 @@ class FortiManager(object):
     def get_device_ha(self, device):
         """
         This method is used to get HA information for a device managed by FortiManager.
-
         :param device: The device to retrieve the HA status from.
         :return: The json response from the request to retrieve the HA status. An empty list is returned if the request
                  does not return any data.
@@ -837,7 +876,6 @@ class FortiManager(object):
     def get_device_vdoms(self, device):
         """
         This method is used to retrieve the VDOMs associated with a device managed by FortiManager.
-
         :param device: The device to retrieve the HA status from.
         :return: The json response from the request to retrieve the HA status. An empty list is returned if the request
                  does not return any data.
@@ -855,7 +893,6 @@ class FortiManager(object):
         """
         This method is used to retrieve information about a managed devices from FortiManager. A list of fields can be
         passed int o limit the scope of what data is returned for each the device.
-
         :param fields: Type list.
                        A list of fields to retrieve for the device.
         :param dev_filter: Type list.
@@ -881,7 +918,6 @@ class FortiManager(object):
         of configuration items that should exist in the configuration for the object in the FortiManager. Either the
         get_item or get_item_fields methods should be used to obtain the "existing" variable; if either of those methods
         return an empty dict, then you should use the add_config method to add the new object.
-
         :param proposed: Type dict.
                          The configuration that should not exist for the object on the FortiManager.
         :param existing: Type dict.
@@ -894,13 +930,11 @@ class FortiManager(object):
             proposed_field = proposed[field]
             existing_field = existing.get(field)
             if existing_field and proposed_field != existing_field:
-                if isinstance(existing_field, list):
-                    proposed_field = set(proposed_field)
-                    if not proposed_field.issubset(existing_field):
-                        config[field] = list(proposed_field.union(existing_field))
+                if isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
+                    config[field] = list(set(proposed_field).union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -917,7 +951,6 @@ class FortiManager(object):
         configuration is a dict of configuration items that should exist in the configuration for the object in the
         FortiManager. Either the get_item or get_item_fields method should be used to obtain the "existing" variable; if
         either of those methods return an empty dict, then you should use the add_config method to add the new object.
-
         :param proposed: Type dict.
                          The configuration that should exist for the object on the FortiManager.
         :param existing: Type dict.
@@ -943,13 +976,11 @@ class FortiManager(object):
                         existing_field = mapping.get(field)
                         # only consider relevant fields that have a difference
                         if existing_field and proposed_field != existing_field:
-                            if isinstance(existing_field, list):
-                                proposed_field = set(proposed_field)
-                                if not proposed_field.issubset(existing_field):
-                                    updated_map[field] = list(proposed_field.union(existing_field))
+                            if isinstance(existing_field, list) and not set(proposed_field).issubset(existing_field):
+                                updated_map[field] = list(set(proposed_field).union(existing_field))
                             elif isinstance(existing_field, dict):
                                 updated_map[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                            elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                            elif isinstance(existing_field, str) or isinstance(existing_field, unicode):
                                 updated_map[field] = proposed_field
                         elif field not in mapping:
                             updated_map[field] = proposed_field
@@ -1008,7 +1039,6 @@ class FortiManager(object):
         of configuration items that should not exist in the configuration for the object in the FortiManager. Either the
         get_item or get_item_fields methods should be used to obtain the "existing" variable; if either of those methods
         return an empty dict, then the object does not exist and there is no configuration to remove.
-
         :param proposed: Type dict.
                          The configuration that should not exist for the object on the FortiManager.
         :param existing: Type dict.
@@ -1021,10 +1051,9 @@ class FortiManager(object):
             proposed_field = proposed[field]
             existing_field = existing.get(field)
             if existing_field and isinstance(existing_field, list):
-                existing_field = set(existing_field)
-                diff = existing_field.difference(proposed_field)
+                diff = list(set(existing_field).difference(proposed_field))
                 if diff != existing_field:
-                    config[field] = list(diff)
+                    config[field] = diff
             elif existing_field and isinstance(existing_field, dict):
                 diff = dict(set(proposed.items()).difference(existing.items()))
                 if diff != existing_field:
@@ -1043,7 +1072,6 @@ class FortiManager(object):
         FortiManager. Either the get_item or get_item_fields method should be used to obtain the "existing" variable; if
         either of those methods return an empty dict, then the object does not exist and there is no configuration to
         remove.
-
         :param proposed: Type dict.
                          The configuration that should not exist for the object on the FortiManager.
         :param existing: Type dict.
@@ -1068,10 +1096,9 @@ class FortiManager(object):
                         proposed_field = proposed_map[field]
                         existing_field = mapping.get(field)
                         if existing_field and isinstance(existing_field, list):
-                            existing_field = set(existing_field)
-                            diff = existing_field.difference(proposed_field)
+                            diff = list(set(existing_field).difference(proposed_field))
                             if diff != existing_field:
-                                updated_map[field] = list(diff)
+                                updated_map[field] = diff
                         elif existing_field and isinstance(existing_field, dict):
                             diff = dict(set(proposed_map.items()).difference(mapping.items()))
                             if diff != existing_field:
@@ -1098,7 +1125,6 @@ class FortiManager(object):
     def get_ha(self):
         """
         This method is used to retrieve the HA status of the FortiManager.
-
         :return: The json response data from the request to retrieve the HA status.
         """
         body = dict(method="get", params=[dict(url="/cli/global/system/ha")], verbose=1, session=self.session)
@@ -1109,7 +1135,6 @@ class FortiManager(object):
     def get_install_status(self, name):
         """
         This method is used to get the config and connection status of the specified FortiGate.
-
         :param name: Type str.
                      The name of the FortiGate from which to retrieve the current status.
         :return: The json response data from the request to retrieve device status.
@@ -1125,7 +1150,6 @@ class FortiManager(object):
         """
         This method is used to get a specific object currently configured on the FortiManager for the ADOM and API
         Endpoint.
-
         :param name: Type str.
                      The name of the object to retrieve.
         :return: The configuration dictionary for the object. An empty dict is returned if the request does
@@ -1141,7 +1165,6 @@ class FortiManager(object):
         """
         This method is used to get a specific object currently configured on the FortiManager for the ADOM and API
         Endpoint. The configuration fields retrieved are limited to the list defined in the fields variable.
-
         :param name: Type str.
                      The name of the object to retrieve.
         :param fields: Type list.
@@ -1163,7 +1186,6 @@ class FortiManager(object):
         """
         This method is used to retrieve ADOM revisions from the FortiManager. If name is not specified, all revisions
         will be returned.
-
         :param name: Type str.
                      The name of the revision to retrieve.
         :return: The json response data from the request to retrieve the revision.
@@ -1181,7 +1203,6 @@ class FortiManager(object):
     def get_status(self):
         """
         This method is used to retrieve the status of the FortiManager.
-
         :return: The json response data from the request to retrieve system status.
         """
         body = dict(method="get", params=[dict(url="/sys/status")], verbose=1, session=self.session)
@@ -1192,7 +1213,6 @@ class FortiManager(object):
     def get_task(self, task, wait):
         """
         This method is used to get the status of a task.
-
         :param task: Type str.
                      The task id to retrieve
         :param wait: Type int.
@@ -1222,13 +1242,21 @@ class FortiManager(object):
     def install_package(self, proposed):
         """
         This method is used to install a package to the end devices.
-
         :param proposed: Type list.
                          The data portion of the API Request.
         :return: The json result data from the task associated with request to make install the package.
         """
-        body = {"method": "exec", "params": [{"url": "/securityconsole/install/package", "data": proposed, "id": 1,
-                                              "session": self.session}]}
+        body = {
+            "method": "exec",
+            "params": [
+                {
+                    "url": "/securityconsole/install/package",
+                    "data": proposed,
+                    "id": 1,
+                    "session": self.session
+                }
+            ]
+        }
 
         response = self.make_request(body).json()
 
@@ -1247,7 +1275,6 @@ class FortiManager(object):
         """
         The lock method is used to lock the ADOM to enable configurations to be sent to the FortiManager when it has
         workspace mode enabled.
-
         :return: The JSON response from the request to lock the session.
         """
         body = {"method": "exec", "params": [{"url": self.wsp_url + "lock"}], "session": self.session}
@@ -1259,7 +1286,6 @@ class FortiManager(object):
         """
         The login method is used to establish a session with the FortiManager. All necessary parameters need to be
         established at class instantiation.
-
         :return: The response from the login request. The instance session is also set, and defaults to None if the
         login was not successful
         """
@@ -1275,7 +1301,6 @@ class FortiManager(object):
         """
         The login method is used to establish a session with the FortiManager. All necessary parameters need to be
         established at class instantiation.
-
         :return: The response from the login request. The instance session is also set, and defaults to None if the
         login was not successful
         """
@@ -1288,7 +1313,6 @@ class FortiManager(object):
         """
         This method is used to make a request to the FortiManager API. All requests to FortiManager use the POST method
         to the same URL.
-
         :param body: Type dict.
                      The JSON body with the necessary request params.
         :return: The response from the API request.
@@ -1297,7 +1321,7 @@ class FortiManager(object):
 
         return response
 
-    def preview_install(self, package, device, vdoms, lock):
+    def preview_install(self, package, scope, lock):
         """
         This method is used to preview what changes will be pushed to the end device when the package is installed. The
         Fortimanager requires the install process be started with the preview flag in order for policy updates to be
@@ -1307,12 +1331,10 @@ class FortiManager(object):
         returns the ID in the response. If the module returns early, then the "id" field can be used to determine where
         the failure occurred.
 
-        :param package: Type str.
+        :param package: Type str
                         The name of the package in consideration for install.
-        :param device: Type str.
-                       The FortiNet to preview install.
-        :param vdoms: Type list.
-                      The list of vdoms associated with the vdom to preview install
+        :param scope: Type list
+                      The list of firewall/vdom mappings to preview the install.
         :param lock: Type bool
                      Determines whether the package install preview will use the auto lock field.
         :return: The json response data from the request to preview install the package.
@@ -1322,51 +1344,75 @@ class FortiManager(object):
         if lock:
             flags.append("auto_lock_ws")
 
-        proposed = [{"adom": self.adom, "flags": flags, "pkg": package, "scope": [device]}]
+        proposed = [{"adom": self.adom, "flags": flags, "pkg": package, "scope": scope}]
         response = self.install_package(proposed)
 
         if response["result"][0].get("data", {"state": "error"}).get("state") == "done":
             # generate preview request
-            proposed = [{"adom": self.adom, "device": device, "vdoms": vdoms}]
-            body = {"method": "exec", "params": [{"url": "/securityconsole/install/preview", "data": proposed}],
-                    "id": 2, "session": self.session}
-            response = self.make_request(body).json()
+            preview_files = []
+            for fw in scope:
+                fortigate, vdom = fw["name"], fw.get("vdom")
+                proposed = {"adom": self.adom, "device": fortigate}
+                if vdom is not None:
+                    proposed["vdoms"] = [vdom]
+                body = {
+                    "method": "exec",
+                    "params": [
+                        {
+                            "url": "/securityconsole/install/preview",
+                            "data": [proposed],
+                        },
+                    ],
+                    "id": 2,
+                    "session": self.session,
+                }
+                response = self.make_request(body).json()
+
+                # collect task id
+                if response["result"][0]["status"]["code"] == 0:
+                    task = response["result"][0]["data"]["task"]
+                else:
+                    return response
+
+                task_status = self.get_task(task, 5)
+                if task_status["result"][0]["data"]["percent"] == 100:
+                    # cancel install task
+                    url = "/securityconsole/package/cancel/install"
+                    params = [{"url": url, "data": [{"adom": self.adom, "device": fortigate}]}]
+                    body = {"method": "exec", "params": params, "id": 3, "session": self.session}
+                    response = self.make_request(body).json()
+                else:
+                    task_status.update({"id": 2})
+                    return task_status
+
+                if response["result"][0]["status"]["code"] == 0:
+                    # get preview result
+                    params = [
+                        {
+                            "url": "/securityconsole/preview/result",
+                            "data": [
+                                {
+                                    "adom": self.adom,
+                                    "device": fortigate
+                                }
+                            ]
+                        }
+                    ]
+                    body = {"method": "exec", "params": params, "id": 4, "session": self.session}
+                    response = self.make_request(body).json()
+                    preview_files.append({"name": fortigate, "vdom": vdom, "response": response})
+                else:
+                    return response
+
         else:
             response.update({"id": 1})
             return response
 
-        # collect task id
-        if response["result"][0]["status"]["code"] == 0:
-            task = response["result"][0]["data"]["task"]
-        else:
-            return response
-
-        task_status = self.get_task(task, 5)
-        if task_status["result"][0]["data"]["percent"] == 100:
-            # cancel install task
-            url = "/securityconsole/package/cancel/install"
-            params = [{"url": url, "data": [{"adom": self.adom, "device": device}]}]
-            body = {"method": "exec", "params": params, "id": 3, "session": self.session}
-            response = self.make_request(body).json()
-        else:
-            task_status.update({"id": 2})
-            return task_status
-
-        if response["result"][0]["status"]["code"] == 0:
-            # get preview result
-            params = [{"url": "/securityconsole/preview/result", "data": [{"adom": self.adom, "device": device}]}]
-            body = {"method": "exec", "params": params, "id": 4,
-                    "session": self.session}
-            response = self.make_request(body).json()
-        else:
-            return response
-
-        return response
+        return preview_files
 
     def restore_revision(self, version, proposed):
         """
         This method is used to restore an ADOM to a previous revision.
-
         :param version: Type str.
                         The version number corresponding to the revision to delete.
         :param proposed: Type list.
@@ -1382,7 +1428,6 @@ class FortiManager(object):
     def save(self):
         """
         The save method is used to save the ADOM configurations during a locked session.
-
         :return: The JSON response from the request to save the session.
         """
         body = {"method": "exec", "params": [{"url": self.wsp_url + "commit"}], "session": self.session}
@@ -1394,7 +1439,6 @@ class FortiManager(object):
         """
         The unlock method is used to lock the ADOM to enable configurations to be sent to the FortiManager when it has
         workspace mode enabled.
-
         :return: The JSON response from the request to unlock the session.
         """
         body = {"method": "exec", "params": [{"url": self.wsp_url + "unlock"}], "session": self.session}
@@ -1414,7 +1458,6 @@ class FortiManager(object):
         configuration, this method should be used, and the item to be removed should be left off the respective list
         (EX: removing an address from an address group that has ["svr01", "svr02", "svr03"] should have a "member" list
         like ["svr01", "svr02"] with the final state of the address group containing only svr01 and svr02).
-
         :param update_config: Type list.
                            The "data" portion of the configuration to be submitted to the FortiManager.
         :return: The response from the API request to add the configuration.
@@ -1429,7 +1472,6 @@ class FortiManager(object):
         This private method is used to escape slash ("/") characters from a url string to be provided as a json-rpc request params.
         Slash characters are escaped by prefixing with a backslash ("\").
         If url is None, None is returned.
-
         :param url: Type str.
                         The url string to process.
         :return: The url string with slash characters escaped with a backslash ("\") or None if url is None.
@@ -1439,7 +1481,6 @@ class FortiManager(object):
         else:
             return None
 
-
 INSTALL_FLAGS = [
     "cp_all_objs",
     "generate_rev",
@@ -1448,7 +1489,7 @@ INSTALL_FLAGS = [
     "ifpolicy_only",
     "no_ifpolicy",
     "objs_only",
-    "copy_only",
+    "copy_only"
 ]
 
 
@@ -1469,6 +1510,7 @@ def main():
         check_install=dict(required=False, type="bool"),
         dst_file=dict(required=False, type="str"),
         fortigate_name=dict(required=False, type="str"),
+        fortigate_vdom_pairs=dict(required=False, type="list"),
         fortigate_revision_comments=dict(required=False, type="str"),
         install_flags=dict(required=False, type="list"),
         package=dict(required=False, type="str"),
@@ -1508,13 +1550,45 @@ def main():
     dst = module.params["dst_file"]
     fortigate = module.params["fortigate_name"]
     vdom = module.params["vdom"]
+    fortigate_vdom_pairs = module.params["fortigate_vdom_pairs"]
     package = module.params["package"]
 
     # validate required arguments are passed; not used in argument_spec to allow params to be called from provider
-    argument_check = dict(adom=adom, fortigate_name=fortigate, host=host, package=package)
+    argument_check = dict(adom=adom, host=host, package=package)
     for key, val in argument_check.items():
         if not val:
             module.fail_json(msg="{} is required".format(key))
+    # Validate that either fortigate_name or fottigate_vdom_pairs was passed to the module
+    if fortigate is None and fortigate_vdom_pairs is None:
+        module.fail_json(msg="Either \"fortgate_name\" or \"fortigate_vdom_pairs\" must be provided to the module.")
+    # Validate that either fortigate_name or fottigate_vdom_pairs was passed to the module
+    if fortigate is not None and fortigate_vdom_pairs is not None:
+        module.fail_json(msg="Only one of \"fortigate_name\" and \fortigate_vdom_pairs\" may be provided to the module")
+    # Validate object passed to fortigate_vdom_pairs when passed into module.
+    if fortigate_vdom_pairs is not None:
+        if not isinstance(fortigate_vdom_pairs, list):
+            module.fail_json(
+                msg="\"fortigate_vdom_pairs\" must be a list of dictionaries.\n"
+                    "Each dictionary must have a \"name\" key, and optionally provide a \"vdom\" key."
+            )
+        valid_fw_keys = {"name", "vdom"}
+        for fw in fortigate_vdom_pairs:
+            if fw.get("name") is None:
+                module.fail_json(
+                    msg="\"Each dictionary must have a \"name\" key, and optionally provide a \"vdom\" key."
+                )
+            for key in fw.keys():
+                if key not in valid_fw_keys:
+                    module.fail_json(
+                        msg="{} is not a valid key for fortigate_vdom_pairs.\n"
+                            "Only \"name\" and \"vdom\" are allowed.".format(key)
+                    )
+    # Create fortigate_vdom_pairs from fortigate_name and vdom module args when using that instead
+    else:
+        fortigate_vdom_pair = {"name": fortigate}
+        if vdom:
+            fortigate_vdom_pair["vdom"] = vdom
+        fortigate_vdom_pairs = [fortigate_vdom_pair]
 
     kwargs = dict()
     if port:
@@ -1531,14 +1605,20 @@ def main():
 
     # generate install preview if specified or module ran in check mode
     if state == "preview" or module.check_mode:
-        install = session.preview_install(package, fortigate, [vdom], lock)
-        if install["result"][0]["status"]["code"] == 0 and "message" in install["result"][0]["data"]:
+        install = session.preview_install(package=package, scope=fortigate_vdom_pairs, lock=lock)
+        if isinstance(install, list):
+            for result in install:
+                data = result["response"]["result"][0]
+                if data["status"]["code"] != 0 or "message" not in data["data"]:
+                    module.fail_json(msg="Module failed getting preview for a device", responses=install)
             # write preview to file if destination file specified
             if dst:
                 with open(dst, "w") as preview:
-                    preview.write("\n{}\n\n".format(time.asctime().upper()))
-                    for line in install["result"][0]["data"]["message"]:
-                        preview.write(line)
+                    preview.write("\n{}\n".format(time.asctime().upper()))
+                    for result in install:
+                        msg = result["response"]["result"][0]["data"]["message"]
+                        preview.write("\n{} {}\n\n".format(result["name"], result["vdom"]))
+                        preview.write(msg)
             results = dict(changed=True, install=install)
         else:
             # fail if install preview had issues
@@ -1578,7 +1658,7 @@ def main():
             dev_rev_comments=module.params["fortigate_revision_comments"],
             flags=module.params["install_flags"],
             pkg=package,
-            scope=[fortigate]
+            scope=fortigate_vdom_pairs,
         )
 
         # "if isinstance(v, bool) or v" should be used if a bool variable is added to args
@@ -1586,7 +1666,10 @@ def main():
 
         # let install handle locking and unlocking if lock is True
         if lock:
-            proposed["flags"].append("auto_lock_ws")
+            try:
+                proposed["flags"].append("auto_lock_ws")
+            except KeyError:
+                proposed["flags"] = ["auto_lock_ws"]
 
         install = session.install_package(proposed)
         if install["result"][0]["status"]["code"] == 0 and install["result"][0]["data"]["state"] == "done":
@@ -1606,4 +1689,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
