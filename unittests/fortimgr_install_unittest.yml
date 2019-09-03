@@ -74,6 +74,24 @@
         vdom: "root"
       ignore_errors: true
 
+    - name: "INSTAL POLICY PACKAGE - NO CHANGE"
+      fortimgr_install:
+        host: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        adom: "lab"
+        state: "preview"
+        adom_revision_comments: "Install Unit Test"
+        adom_revision_name: "InstallTest"
+        check_install: false
+        dst_file: "./preview.txt"
+        fortigate_name: "FortiGate-VM64-KVM"
+        fortigate_revision_comments: "Install Unit Test"
+        install_flags:
+          - "generate_rev"
+        package: "lab"
+        vdom: "root"
+      ignore_errors: true
 
 - name: "FORTIMANAGER CLEANUP INSTALL DATA"
   hosts: "fortimanager"

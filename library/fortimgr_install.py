@@ -1591,6 +1591,10 @@ def main():
         install = session.install_package(proposed)
         if install["result"][0]["status"]["code"] == 0 and install["result"][0]["data"]["state"] == "done":
             results = dict(install=install, changed=True)
+        elif install["result"][0]["status"]["code"] == 0 and \
+             install["result"][0]["data"]["state"] == "warning" and \
+             install["result"][0]["data"]["line"][0]["detail"] == "no installing devices/no changes on package":
+            results = dict(install=install, changed=False)
         else:
             module.fail_json(**dict(status=install, msg="Install was NOT Sucessful; Please Check FortiManager Logs"))
 
