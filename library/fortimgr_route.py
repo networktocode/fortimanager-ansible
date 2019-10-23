@@ -282,7 +282,7 @@ class FortiManager(object):
         self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
         self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
                                                                    self.api_endpoint)
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self._escape_params_url(self.package),
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self.package,
                                                                       self.api_endpoint)
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
