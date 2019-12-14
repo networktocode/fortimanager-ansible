@@ -294,6 +294,7 @@ from ansible import __version__ as ansible_version
 if float(ansible_version[:3]) < 2.4:
     raise ImportError("Ansible versions below 2.4 are not supported")
 from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.six import string_types
 
 
 requests.packages.urllib3.disable_warnings()
@@ -995,7 +996,7 @@ class FortiManager(object):
                         config[field] = list(proposed_field.union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, int) or isinstance(existing_field, string_types):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -1044,7 +1045,7 @@ class FortiManager(object):
                                     updated_map[field] = list(proposed_field.union(existing_field))
                             elif isinstance(existing_field, dict):
                                 updated_map[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                            elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                            elif isinstance(existing_field, int) or isinstance(existing_field, string_types):
                                 updated_map[field] = proposed_field
                         elif field not in mapping:
                             updated_map[field] = proposed_field
@@ -1575,7 +1576,7 @@ class FMAddress(FortiManager):
                         config[field] = list(proposed_field.union(existing_field))
                 elif isinstance(existing_field, dict):
                     config[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                elif isinstance(existing_field, int) or isinstance(existing_field, string_types):
                     config[field] = proposed_field
             elif field not in existing:
                 config[field] = proposed_field
@@ -1628,7 +1629,7 @@ class FMAddress(FortiManager):
                                     updated_map[field] = list(proposed_field.union(existing_field))
                             elif isinstance(existing_field, dict):
                                 updated_map[field] = dict(set(proposed_field.items()).union(existing_field.items()))
-                            elif isinstance(existing_field, (str,int)) or isinstance(existing_field, unicode):
+                            elif isinstance(existing_field, int) or isinstance(existing_field, string_types):
                                 updated_map[field] = proposed_field
                         elif field not in mapping:
                             updated_map[field] = proposed_field
