@@ -1668,6 +1668,12 @@ def main():
     # get existing configuration from fortimanager and make necessary changes
     existing = session.get_item_fields(proposed["name"], ["name", "dynamic_mapping"])
     if state == "present":
+        # If no pre-existing ip pool entry, we need to set _if_no_default to 1
+        # (GUI option "configure default value" = off)
+        # to be able to create a IP Pool with only dynamimc mappings and no default nat range.
+        # This behavior changed somewhere around FMG version 6.0.5.
+        if not existing:
+            proposed[ "_if_no_default"] = 1
         results = session.config_present(module, proposed, existing)
     elif state == "absent":
         results = session.config_absent(module, proposed, existing)
