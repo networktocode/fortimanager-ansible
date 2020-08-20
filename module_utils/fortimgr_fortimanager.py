@@ -60,11 +60,12 @@ class FortiManager(object):
         self.api_endpoint = api_endpoint
         self.adom = adom
         self.package = package
+        # self.dvmdb_adom_url = "/dvmdb/adom"
         self.dvmdb_url = "/dvmdb/adom/{}/".format(self._escape_params_url(self.adom))
         self.obj_url = "/pm/config/adom/{}/obj/firewall/{}".format(self._escape_params_url(self.adom),
-                                                                   self.api_endpoint)
-        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self.package,
-                                                                      self.api_endpoint)
+                                                                   self._escape_params_url(self.api_endpoint))
+        self.pkg_url = "/pm/config/adom/{}/pkg/{}/firewall/{}".format(self._escape_params_url(self.adom), self._escape_params_url(self.package),
+                                                                      self._escape_params_url(self.api_endpoint))
         self.wsp_url = "/dvmdb/adom/{}/workspace/".format(self._escape_params_url(self.adom))
         self.headers = {"Content-Type": "application/json"}
         if "port" not in kwargs:
@@ -95,69 +96,69 @@ class FortiManager(object):
     def cidr_to_network(network):
         """
         Method is used to convert a network address in CIDR notation to a list with address and mask.
-  
+
         :param network: Type str.
                         The network address in CIDR notation.
-  
+
         :return: A list with address and mask in that order.
         """
         cidr_mapping = {
-                "0": "0.0.0.0",
-                "1": "128.0.0.0",
-                "2": "192.0.0.0",
-                "3": "224.0.0.0",
-                "4": "240.0.0.0",
-                "5": "248.0.0.0",
-                "6": "252.0.0.0",
-                "7": "254.0.0.0",
-                "8": "255.0.0.0",
-                "9": "255.128.0.0",
-                "10": "255.192.0.0",
-                "11": "255.224.0.0",
-                "12": "255.240.0.0",
-                "13": "255.248.0.0",
-                "14": "255.252.0.0",
-                "15": "255.254.0.0",
-                "16": "255.255.0.0",
-                "17": "255.255.128.0",
-                "18": "255.255.192.0",
-                "19": "255.255.224.0",
-                "20": "255.255.240.0",
-                "21": "255.255.248.0",
-                "22": "255.255.252.0",
-                "23": "255.255.254.0",
-                "24": "255.255.255.0",
-                "25": "255.255.255.128",
-                "26": "255.255.255.192",
-                "27": "255.255.255.224",
-                "28": "255.255.255.240",
-                "29": "255.255.255.248",
-                "30": "255.255.255.252",
-                "31": "255.255.255.254",
-                "32": "255.255.255.255"
-            }
-  
+            "0": "0.0.0.0",
+            "1": "128.0.0.0",
+            "2": "192.0.0.0",
+            "3": "224.0.0.0",
+            "4": "240.0.0.0",
+            "5": "248.0.0.0",
+            "6": "252.0.0.0",
+            "7": "254.0.0.0",
+            "8": "255.0.0.0",
+            "9": "255.128.0.0",
+            "10": "255.192.0.0",
+            "11": "255.224.0.0",
+            "12": "255.240.0.0",
+            "13": "255.248.0.0",
+            "14": "255.252.0.0",
+            "15": "255.254.0.0",
+            "16": "255.255.0.0",
+            "17": "255.255.128.0",
+            "18": "255.255.192.0",
+            "19": "255.255.224.0",
+            "20": "255.255.240.0",
+            "21": "255.255.248.0",
+            "22": "255.255.252.0",
+            "23": "255.255.254.0",
+            "24": "255.255.255.0",
+            "25": "255.255.255.128",
+            "26": "255.255.255.192",
+            "27": "255.255.255.224",
+            "28": "255.255.255.240",
+            "29": "255.255.255.248",
+            "30": "255.255.255.252",
+            "31": "255.255.255.254",
+            "32": "255.255.255.255"
+        }
+
         if "/" in network:
             network_address = network.split("/")
             mask = network_address.pop()
-            
+
             if mask and int(mask) in range(0, 33):
                 network_address.append(cidr_mapping[mask])
             else:
                 network_address = []
         else:
             network_address = []
-  
+
         return network_address
 
     @staticmethod
     def cidr_to_wildcard(wildcard):
         """
         Method is used to convert a wildcard address in CIDR notation to a list with address and mask.
-  
+
         :param wildcard: Type str.
                         The wildcard address in CIDR notation.
-  
+
         :return: A list with address and mask in that order.
         """
         cidr_mapping = {
@@ -194,8 +195,8 @@ class FortiManager(object):
             "30": "0.0.0.3",
             "31": "0.0.0.1",
             "32": "0.0.0.0"
-            }
-  
+        }
+
         if "/" in wildcard:
             wildcard_address = wildcard.split("/")
             mask = wildcard_address.pop()
@@ -206,7 +207,7 @@ class FortiManager(object):
                 wildcard_address = []
         else:
             wildcard_address = []
-  
+
         return wildcard_address
 
     def config_absent(self, module, proposed, existing):
@@ -469,6 +470,20 @@ class FortiManager(object):
 
         return response
 
+    def create_adom(self, proposed):
+        """
+        This method is used to create an ADOM on the FortiManager. The make_request method is used to make the
+        API request to add the ADOM.
+
+        :param proposed: Type list.
+                         The data portion of the API Request.
+        :return: The json response data from the request to make a revision.
+        """
+        body = {"method": "add", "params": [{"url": self.dvmdb_adom_url, "data": proposed}], "session": self.session}
+        response = self.make_request(body).json()
+
+        return response
+
     def delete_config(self, name):
         """
         This method is used to submit a configuration request to delete an object from the FortiManager.
@@ -480,6 +495,21 @@ class FortiManager(object):
         item_url = self.obj_url + "/{}".format(self._escape_params_url(name))
         body = {"method": "delete", "params": [{"url": item_url}], "session": self.session}
         response = self.make_request(body)
+
+        return response
+
+    def delete_adom(self, name):
+        """
+        This method is used to delete an ADOM from the FortiManager. The make_request method is used to submit
+        the request to the FortiManager.
+
+        :param name: Type str.
+                        The name of the ADOM to delete.
+        :return: The json response data from the request to delete the ADOM.
+        """
+        adom_url = "{}/{}".format(self.dvmdb_adom_url, name)
+        body = {"method": "delete", "params": [{"url": adom_url}], "session": self.session}
+        response = self.make_request(body).json()
 
         return response
 
@@ -987,6 +1017,24 @@ class FortiManager(object):
         :return: The json response data from the request to retrieve the revision.
         """
         params = [{"url": "{}revision".format(self.dvmdb_url)}]
+        if name:
+            # noinspection PyTypeChecker
+            params[0].update({"filter": ["name", "==", name]})
+
+        body = {"method": "get", "params": params, "verbose": 1, "session": self.session}
+        response = self.make_request(body).json()
+
+        return response
+
+    def get_adom(self, name=""):
+        """
+        This method is used to retrieve ADOMs from the FortiManager. If name is not specified, all ADOMs.
+
+        :param name: Type str.
+                     The name of the adom to retrieve.
+        :return: The json response data from the request to retrieve the revision.
+        """
+        params = [{"url": self.dvmdb_adom_url}]
         if name:
             # noinspection PyTypeChecker
             params[0].update({"filter": ["name", "==", name]})
