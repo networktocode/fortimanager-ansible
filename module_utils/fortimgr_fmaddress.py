@@ -17,6 +17,7 @@
 """This is the class used for interacting with the "address" API Endpoint."""
 
 from ansible.module_utils.six import string_types
+from ansible.module_utils.fortimgr_fortimanager import FortiManager
 
 
 class FMAddress(FortiManager):
