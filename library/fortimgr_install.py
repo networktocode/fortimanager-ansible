@@ -1597,6 +1597,8 @@ def main():
              install["result"][0]["data"]["line"][0]["detail"] == "no installing devices/no changes on package":
             results = dict(install=install, changed=False)
         else:
+            # Log out of the session in case of failure to obtain lock
+            session_logout = session.logout()
             module.fail_json(**dict(status=install, msg="Install was NOT Sucessful; Please Check FortiManager Logs"))
 
     # logout, build in check for future logging capabilities
